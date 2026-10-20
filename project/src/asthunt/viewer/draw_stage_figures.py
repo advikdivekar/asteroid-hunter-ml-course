@@ -97,10 +97,11 @@ CROP_PIXELS = 360                                               # the zoomed vie
 
 
 def draw_detections(difference, detections, headline):
-    """Left: the whole difference image with the zoom box. Right: that box at full resolution with a ring on every blob.
+    """Left: the whole difference image, the zoom box, and a numbered ring on EVERY planted fake and known asteroid.
+    Right: the zoom box at full resolution with a ring on every blob.
 
-    Ring colours: teal = planted fake, blue = known asteroid, grey = unlabelled. The zoom is centred on a fake or known object if
-    there is one (so you see what a real object looks like), else on the brightest blob.
+    Ring colours: teal = planted fake (numbered), blue = known asteroid, grey = unlabelled. The zoom is centred on a fake or known
+    object if there is one (so you see what a real object looks like), else on the brightest blob.
     """
     factor = shrink_factor(difference.shape)
     height, width = difference.shape
@@ -118,7 +119,13 @@ def draw_detections(difference, detections, headline):
     figure, (whole, zoom) = plt.subplots(1, 2, figsize=(13, 6.2), gridspec_kw={"width_ratios": [1, 1]})
     whole.imshow(stretch(block_mean(difference.astype(float), factor), 5, 99.7), cmap="gray", origin="lower")
     whole.add_patch(plt.Rectangle((x0 / factor, y0 / factor), CROP_PIXELS / factor, CROP_PIXELS / factor, fill=False, edgecolor=AMBER, lw=1.6))
-    _style(whole, headline)
+    if len(detections):                                         # big rings, so a single fake is easy to spot on a 3,000-pixel chip
+        for mask, colour in [(known, BLUE), (fake, TEAL)]:
+            whole.scatter(detections["x"].to_numpy()[mask] / factor, detections["y"].to_numpy()[mask] / factor, s=420, facecolors="none", edgecolors=colour, linewidths=2)
+        for _, row in detections[fake].iterrows():
+            whole.annotate(f"fake #{int(row['injection_id'])}", (row["x"] / factor, row["y"] / factor), color=TEAL, fontsize=9, fontweight="bold",
+                           xytext=(14, 14), textcoords="offset points")
+    _style(whole, f"{headline}  |  yellow square = the zoom on the right")
     whole.set_xticks([])
     whole.set_yticks([])
 
@@ -129,7 +136,7 @@ def draw_detections(difference, detections, headline):
         for mask, colour, radius in [(~(fake | known), GREY, 6), (known, BLUE, 9), (fake, TEAL, 9)]:
             pick = inside & mask
             zoom.scatter(detections["x"].to_numpy()[pick], detections["y"].to_numpy()[pick], s=radius ** 2 * 2.2, facecolors="none", edgecolors=colour, linewidths=1.1)
-        _style(zoom, f"zoom: {int(inside.sum())} blobs in this {CROP_PIXELS} x {CROP_PIXELS} pixel box (teal fake, blue known, grey unlabelled)")
+        _style(zoom, f"zoom: {int(inside.sum())} blobs inside this {CROP_PIXELS} x {CROP_PIXELS} pixel square")
     else:
         _style(zoom, "zoom")
     zoom.set_xticks([])

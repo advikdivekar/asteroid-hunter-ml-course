@@ -47,7 +47,7 @@ class LiveState:
         self.reset([], None, False)
 
     def reset(self, stage_plan, unit, step_mode):
-        """Start a new run. stage_plan is a list of (id, title, narration): the whole route is shown from the start."""
+        """Start a new run. stage_plan is a list of (id, title, plain explanation, [(word, meaning), ...]): the whole route is shown from the start."""
         with self.lock:
             self.status = "idle" if unit is None else "running"
             self.message = ""
@@ -56,8 +56,8 @@ class LiveState:
             self.cancelled = False
             self.started = time.time()
             self.finished_at = None
-            self.stages = [{"id": i, "title": t, "narration": n, "status": "waiting", "seconds": None, "numbers": [], "notes": [],
-                            "images": [], "table": None, "skipped": None} for i, t, n in stage_plan]
+            self.stages = [{"id": item[0], "title": item[1], "narration": item[2], "terms": item[3] if len(item) > 3 else [], "status": "waiting",
+                            "seconds": None, "numbers": [], "notes": [], "images": [], "table": None, "skipped": None} for item in stage_plan]
             self._images.clear()
             self._gate.clear()
 

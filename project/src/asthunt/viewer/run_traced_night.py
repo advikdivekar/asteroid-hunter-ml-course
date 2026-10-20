@@ -36,29 +36,58 @@ from asthunt.viewer import draw_stage_figures as draw
 
 STAGE_PLAN = [
     ("pick", "1. Pick the night",
-     "The agent asks the archive's table which exposures of this patch of sky were taken that night and takes the first few, in time order."),
-    ("open", "2. Open the files of each exposure",
-     "For every exposure it reads four files: the science image, the mask of bad pixels, the difference image (science minus an old reference of the same sky) and the blur shape (PSF). Stars cancel in the difference; what is left is new."),
+     "The telescope takes a photo of the same patch of sky every few minutes all night. This step picks one night and takes the first 5 photos of one patch, in time order. An asteroid creeps across the sky, so we need several photos of the same patch to see anything move.",
+     [("exposure", "one photo; ZTF exposes each for 30 seconds"),
+      ("field / CCD / quadrant", "the patch of sky, and which piece of the camera took it (the camera has 16 chips, each read out in 4 quarters)"),
+      ("UT", "Universal Time, the clock astronomers use")]),
+    ("open", "2. Open the files of each photo",
+     "Each photo comes as 4 files. SCIENCE is tonight's photo. REFERENCE is an old, very deep photo of the same sky. DIFFERENCE is science minus reference: stars are the same in both, so they cancel and vanish. What is left is only what changed: moving things, new things, and mistakes of the subtraction. The MASK marks pixels we must not trust (broken or overexposed ones).",
+     [("pixel", "one tiny square of a picture; each photo here is about 3,000 x 3,000 of them"),
+      ("mask", "a map of broken or overexposed pixels that we ignore"),
+      ("seeing", "how blurry the sky was, in arcseconds (smaller = sharper)")]),
     ("noise", "3. Measure how noisy the picture is",
-     "To tell a real blob from random speckle it first needs to know what 'nothing' looks like. It measures the spread (sigma) of the pixel values with a method that bright blobs cannot fool."),
+     "Every pixel has a small random error called noise. To say 'this spot is too bright to be an accident' we must first know how big an accident can be. We count how many pixels have each brightness and draw the counts as a histogram. Pure noise makes a bell shape centred on zero. Pixels far out on the right are too bright to be noise.",
+     [("histogram", "bars that show how many pixels have each value; a tall bar means many pixels"),
+      ("bell curve", "the shape random noise makes: most values near the middle, very few far away. The yellow line is the bell that pure noise would make"),
+      ("sigma", "the width of the bell, i.e. the typical size of noise. '5 sigma' means 5 times that size: very unlikely to be an accident"),
+      ("log scale", "the vertical axis goes 1, 10, 100, 1000... in equal steps, so the rare bright pixels stay visible next to the huge pile near zero")]),
     ("plant", "4. Plant fake asteroids (test mode)",
-     "So we can check the pipeline against a known answer, it paints fake asteroids with known brightness and speed into every frame, exactly where the real telescope would have seen them."),
+     "A real night usually contains nothing new, so we could not tell whether the program works. So we secretly paint fake asteroids into the photos. We choose how bright each is and how fast it moves, and each creeps in a straight line across the 5 photos. Later we count how many the program finds. In the table, 'magnitude' is brightness and a BIGGER number means FAINTER.",
+     [("magnitude", "a brightness scale where bigger = fainter: about 17 is easy to see, 21.5 is very faint"),
+      ("arcsec/hour", "how fast it moves across the sky; 1 arcsecond is 1/3600 of a degree")]),
     ("detect", "5. Find blobs in every difference image",
-     "It smooths each difference image and marks every group of pixels that sticks out above the noise. Most blobs are junk: bad subtractions, cosmic rays, variable stars."),
+     "The program scans each difference image and circles every bright spot (a blob). Thousands appear and nearly all are junk: noise, leftovers of bright stars, cosmic-ray hits. LEFT = the whole camera chip, with every planted fake that was found ringed in teal and numbered (a fake with no ring was too faint to make a blob). RIGHT = a zoom into the yellow square.",
+     [("blob", "a spot brighter than the noise; a candidate object"),
+      ("teal / blue / grey ring", "teal = a fake we planted, blue = a real asteroid already in the catalogue, grey = not labelled (mostly junk)"),
+      ("2 sigma", "the brightness cut for calling something a blob: 2 times the typical noise. Low on purpose, so nothing real is missed")]),
     ("stamps", "6. Cut a small picture around every blob",
-     "Each blob gets a 31x31 pixel cut-out in three versions side by side: science, reference, difference. A real new object shows in science and difference, but not in the reference."),
+     "Each blob gets a small square picture (31 x 31 pixels) in three versions side by side: science, reference and difference. A real new object shows in science and difference but NOT in the reference. A badly subtracted star shows in science AND in the reference. These three pictures are what the neural network judges.",
+     [("stamp", "a small cut-out picture around one blob"),
+      ("SNR", "signal-to-noise ratio: how strong the blob is compared with the noise")]),
     ("cnn", "7. A neural network decides: real or bogus?",
-     "A small convolutional network (72,145 weights) looks at each three-picture stamp and outputs a probability. Only detections above the cut go on."),
+     "A neural network is a program that learned from thousands of labelled examples what real objects and junk look like. For each stamp it gives a score from 0 (certainly junk) to 1 (certainly a real moving object). The histogram counts blobs by score. Nearly all pile up near 0, which is right because most blobs are junk, while our fakes sit near 1. The yellow line is the cut: blobs above it continue, the rest are dropped.",
+     [("score / p(real)", "the network's probability that a blob is real, from 0 to 1"),
+      ("bogus", "junk: not a real moving object"),
+      ("histogram", "bars that count how many blobs have each score. The vertical axis is a log scale, so each step up means 10 times more blobs"),
+      ("cut / threshold", "the score above which a blob continues; chosen so about 95% of real objects survive")]),
     ("link", "8. Join blobs into straight-line tracks",
-     "An asteroid moves in a nearly straight line at a steady speed during a night. The agent looks for blobs in different frames that line up that way. This is a search, not a learned step."),
+     "An asteroid moves in a straight line at a steady speed. The program looks for blobs in the different photos that line up like that and joins them into a track. The big picture shows every track over the chip; each small picture is a close-up of one good track: one coloured dot per photo (the colour tells which photo) and a grey line fitted through them.",
+     [("track / tracklet", "blobs from different photos that line up as one moving object"),
+      ("common grid", "the telescope points slightly differently for each photo, so positions are first converted onto one shared sky map before joining")]),
     ("features", "9. Describe each track with numbers",
-     "Each track becomes a row of numbers: speed, straightness, brightness steadiness, how convinced the CNN was, what the sky shows where the object should be in the frames where it was missed."),
+     "To score a track the computer needs numbers. Each track gets 17: how fast, how straight, how steady the brightness, how sure the neural network was, and what the sky shows at the predicted spot in photos where the object was missed. The picture shows the same patch of sky along the best track, photo after photo.",
+     [("feature", "one number that describes something about a track"),
+      ("forced photometry", "measuring brightness at the predicted spot even where no blob was found")]),
     ("classify", "10. A second model scores each track",
-     "A gradient-boosted tree model (XGBoost) turns those numbers into a score for the whole track."),
+     "A second model (XGBoost, made of many small decision trees) reads each track's 17 numbers and gives the whole track a score from 0 to 1. The bar chart sorts all tracks by score. The yellow line is the cut. Teal bars are our planted fakes, which should score high.",
+     [("XGBoost", "a model made of many small decision trees, each asking yes/no questions about the numbers")]),
     ("known", "11. Is it already known?",
-     "Every track is compared with the catalogue of known asteroids (positions from JPL Horizons and SkyBoT). Almost everything found is already known."),
+     "Astronomers have catalogued hundreds of thousands of asteroids. Each track is compared with that list. Almost everything we find is already known, which is a good sign: it means the program finds real asteroids by itself. Blue bars = known asteroids, teal = our fakes, pink = nothing known.",
+     [("catalogue", "the official list of known asteroids and where each should be"),
+      ("candidate", "a track that scored high but matches nothing known; a person must examine it")]),
     ("result", "12. What is left for a human to look at",
-     "Tracks that scored high, match no known asteroid and are not one of our planted fakes become candidates."),
+     "The final count. 'Fakes recovered' shows how well the whole program works on a known answer. Faint fakes are missed because one 30-second photo simply does not hold enough light from them: that is the limit of this single-photo search. Candidates are high-scoring tracks that match nothing known and are not our fakes. Most nights there are none.",
+     [("recovered", "a planted fake that came out as a high-scoring track")]),
 ]
 
 
@@ -91,7 +120,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("pixels masked as bad", f"{100 * first['bad'].mean():.1f}%")
         s.number("seeing (blur) in frame 1", f"{first['header']['SEEING']:.2f} arcsec")
         s.number("brightness zero point", f"{first['magzp']:.2f}")
-        s.image("frame 1: the four files", draw.draw_four_panels(first["science"], first["reference"], first["difference"], first["bad"],
+        s.image("Left to right: tonight's photo, the old reference, their difference (the stars are gone), and the mask (bright = pixels we ignore)", draw.draw_four_panels(first["science"], first["reference"], first["difference"], first["bad"],
                                                                   f"{first['name']}  (shown at reduced size)"))
 
     with state.stage("noise") as s:
@@ -101,7 +130,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("noise sigma (plain std)", f"{values.std():.1f} counts")
         s.number("pixels above +5 sigma", f"{int((values > 5 * sigma_robust).sum()):,}")
         s.note("If the picture were pure noise only about 1 pixel in 3.5 million would exceed +5 sigma. The excess is real blobs and artifacts.")
-        s.image("pixel values vs pure noise", draw.draw_noise_histogram(values, sigma_robust, values.std()))
+        s.image("Horizontal: brightness of a pixel. Vertical: how many pixels (log scale). Teal = this photo, yellow curve = pure noise. Pink dashed lines = 3 and 5 sigma: bars to the right of them are too bright to be noise", draw.draw_noise_histogram(values, sigma_robust, values.std()))
 
     reference_wcs = WCS(first["header"])                   # frame 0's pixel grid is the common grid
     science_frames, difference_frames, injections, fakes_by_frame = [], [], None, []
@@ -128,7 +157,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
                     [[int(i), f"{r['mag']:.1f}", f"{r['rate_arcsec_per_hour']:.0f}"] for i, r in per_fake.sort_values("mag").iterrows()][:20])
             ring = pd.DataFrame({"x": fakes_by_frame[0]["x"], "y": fakes_by_frame[0]["y"], "injection_id": fakes_by_frame[0]["injection_id"],
                                  "known_asteroid": ""})
-            s.image("frame 1 with the planted fakes ringed", draw.draw_detections(difference_frames[0], ring, "planted fakes (teal rings)"))
+            s.image("Whole camera chip, photo 1: a numbered teal ring marks where each planted fake is (they are tiny on a chip this big)", draw.draw_detections(difference_frames[0], ring, "planted fakes (teal rings)"))
 
     detections_by_frame = []
     with state.stage("detect") as s:
@@ -149,7 +178,11 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
             s.note(f"frame {k + 1}/{len(exposures)}: {len(found):,} blobs found")
         s.table(["frame", "blobs found"], [[k + 1, f"{len(d):,}"] for k, d in enumerate(detections_by_frame)])
         s.number("blobs in all frames", f"{sum(len(d) for d in detections_by_frame):,}")
-        s.image("frame 1: blobs ringed (teal = planted fake, blue = known asteroid, grey = unlabelled)",
+        if n_fakes:
+            found_in_frame_1 = int(detections_by_frame[0].loc[detections_by_frame[0]["injection_id"] >= 0, "injection_id"].nunique())
+            s.number("planted fakes found as a blob in photo 1", f"{found_in_frame_1} of {n_fakes}")
+            s.note("A planted fake that is too faint to make a blob gets no ring: the rest of the pipeline never sees it.")
+        s.image("Left: whole chip; teal numbered rings = planted fakes that were found, blue = known asteroids, yellow square = the zoom. Right: the zoom with every blob ringed (grey = unlabelled, mostly junk)",
                 draw.draw_detections(difference_frames[0], detections_by_frame[0], f"{len(detections_by_frame[0]):,} blobs in frame 1"))
 
     detections = pd.concat(detections_by_frame, ignore_index=True)
@@ -168,7 +201,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
                     + (" - fake" if detections.loc[i, "injection_id"] >= 0 else " - known" if detections.loc[i, "known_asteroid"] else "") for i in pick]
         s.number("stamps cut", f"{len(stamps):,}")
         s.number("size of each", f"3 x {detect['stamp_size']} x {detect['stamp_size']} pixels")
-        s.image("science | reference | difference", draw.draw_stamp_mosaic(stamps[pick].astype(np.float32), captions, "A few of the stamps (planted fakes, known asteroids, then the brightest blobs)"))
+        s.image("Each group of three = science | reference | difference for one blob. Top: planted fakes. Middle: known asteroids. Bottom: the brightest blobs (mostly leftovers of stars)", draw.draw_stamp_mosaic(stamps[pick].astype(np.float32), captions, "A few of the stamps (planted fakes, known asteroids, then the brightest blobs)"))
         stamps = normalize_stamps(stamps)                  # each channel in units of its own noise, as the CNN was trained
 
     with state.stage("cnn") as s:
@@ -184,10 +217,10 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
             s.number("planted-fake detections kept", f"{int((kept_mask & fake_mask).sum())} of {int(fake_mask.sum())}")
         if known_mask.any():
             s.number("known-asteroid detections kept", f"{int((kept_mask & known_mask).sum())} of {int(known_mask.sum())}")
-        s.image("how the CNN scored everything", draw.draw_score_histogram(scores, cut, [("planted fakes", draw.TEAL, fake_mask), ("known asteroids", draw.BLUE, known_mask)]))
+        s.image("Horizontal: the network's score (0 = junk, 1 = real). Vertical: number of blobs, log scale. Grey = all blobs, teal = planted fakes, blue = known asteroids, yellow line = the cut", draw.draw_score_histogram(scores, cut, [("planted fakes", draw.TEAL, fake_mask), ("known asteroids", draw.BLUE, known_mask)]))
         best, worst = np.argsort(-scores)[:8], np.argsort(scores)[:8]
-        s.image("most convinced it is REAL", draw.draw_stamp_mosaic(stamps[best], [f"p(real) = {scores[i]:.3f}" for i in best], "Highest scores", columns=4))
-        s.image("most convinced it is BOGUS", draw.draw_stamp_mosaic(stamps[worst], [f"p(real) = {scores[i]:.4f}" for i in worst], "Lowest scores", columns=4))
+        s.image("The blobs the network is most sure are REAL (score near 1): round, sharp, new points", draw.draw_stamp_mosaic(stamps[best], [f"p(real) = {scores[i]:.3f}" for i in best], "Highest scores", columns=4))
+        s.image("The blobs the network is most sure are JUNK (score near 0): look how plain they are", draw.draw_stamp_mosaic(stamps[worst], [f"p(real) = {scores[i]:.4f}" for i in worst], "Lowest scores", columns=4))
 
     kept = detections[detections["score"] >= thresholds["realbogus"]]
     kept = kept.assign(x=kept["x_common"], y=kept["y_common"])
@@ -200,7 +233,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("tracks found", len(tracklets))
         s.number("rule", f"at least {thresholds.get('min_detections', link['min_detections'])} of {len(exposures)} frames, speed {link['min_rate_arcsec_per_hour']:.0f}-{link['max_rate_arcsec_per_hour']:.0f} arcsec/hour, within {link['max_residual_pixels']} px of a straight line")
         if len(tracklets):
-            s.image("tracks over the chip, and close-ups of the best", draw.draw_tracklets(kept, members, tracklets, len(exposures), "Linking on the common sky grid (colour = frame)"))
+            s.image("Left: all tracks over the chip (teal). Right: close-ups of the 8 best tracks, one dot per photo, joined by the fitted straight line", draw.draw_tracklets(kept, members, tracklets, len(exposures), "Linking on the common sky grid (colour = frame)"))
 
     result = {"detections": detections, "tracklets": tracklets, "members": members, "candidates": tracklets, "injections": injections}
     if len(tracklets) == 0:
@@ -222,7 +255,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("numbers per track", len(bundle["info"].get("feature_columns", FEATURE_COLUMNS)))
         s.table(["track"] + show, [[int(r["tracklet_id"])] + [f"{r[c]:.2f}" for c in show] for _, r in tracklets.head(12).iterrows()])
         best_track = tracklets["n_detections"].idxmax()
-        s.image("the best track as the model sees it: the same patch in every frame, detected or not",
+        s.image("The best track, photo after photo: the same patch of sky at the predicted spot, whether or not a blob was found there",
                 draw.draw_stamp_mosaic(path_stamps[best_track], [f"frame {k + 1}" for k in range(path_stamps.shape[1])],
                                        f"Track #{int(tracklets.loc[best_track, 'tracklet_id'])}: stamps along its predicted path", columns=path_stamps.shape[1]))
 
@@ -236,7 +269,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("tracks scored", len(tracklets))
         s.number("cut chosen on validation nights", f"{thresholds['tracklet']:.3f}")
         s.number("tracks above the cut", int((tracklets["tracklet_score"] >= thresholds["tracklet"]).sum()))
-        s.image("score of every track", draw.draw_tracklet_scores(tracklets, thresholds["tracklet"], "Score of every track (teal = planted fake; the rest not yet compared with the catalogue)"))
+        s.image("Each bar is one track, sorted by score (right = more likely real). Yellow line = the cut", draw.draw_tracklet_scores(tracklets, thresholds["tracklet"], "Score of every track (teal = planted fake; the rest not yet compared with the catalogue)"))
 
     with state.stage("known") as s:
         night_folder = paths["raw"] / "ztf" / night
@@ -253,7 +286,7 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.table(["track", "score", "matches"], [[int(r["tracklet_id"]), f"{r['tracklet_score']:.3f}",
                                                   "planted fake" if r["contains_fake"] else r["known_name"] or "nothing known"]
                                                  for _, r in tracklets.sort_values("tracklet_score", ascending=False).head(15).iterrows()])
-        s.image("scores again, now coloured by what each track is", draw.draw_tracklet_scores(tracklets, thresholds["tracklet"], "Score of every track (teal = planted fake, blue = known asteroid, pink = nothing known)"))
+        s.image("Same bars, now coloured: teal = our fake, blue = known asteroid, pink = nothing known", draw.draw_tracklet_scores(tracklets, thresholds["tracklet"], "Score of every track (teal = planted fake, blue = known asteroid, pink = nothing known)"))
         if len(names):
             s.note("known asteroids recovered: " + ", ".join(sorted(names)))
 

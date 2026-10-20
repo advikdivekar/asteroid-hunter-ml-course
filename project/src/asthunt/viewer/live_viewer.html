@@ -42,6 +42,10 @@
   .agent .who { font-size: 12px; text-transform: uppercase; letter-spacing: .8px; color: var(--teal); font-weight: 700; margin-bottom: 4px; }
   .now { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); color: var(--amber); font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
   h2 { font-size: 20px; margin: 0 0 12px; }
+  .terms { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; }
+  .terms .who { font-size: 12px; text-transform: uppercase; letter-spacing: .8px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+  .terms dt { font-weight: 650; margin-top: 6px; }
+  .terms dd { margin: 0 0 0 0; color: var(--muted); }
   .numbers { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-bottom: 18px; }
   .num { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
   .num .k { color: var(--muted); font-size: 12px; }
@@ -117,9 +121,10 @@ function renderNav(state) {
 
 function renderStage(stage) {
   const latest = stage.notes.length ? stage.notes[stage.notes.length - 1] : "";
-  let html = `<h2>${esc(stage.title)}</h2><div class="agent"><div class="who">What the agent is doing</div>${esc(stage.narration)}`;
+  let html = `<h2>${esc(stage.title)}</h2><div class="agent"><div class="who">In simple words</div>${esc(stage.narration)}`;
   if (stage.status === "running") html += `<div class="now">working... ${esc(latest)}</div>`;
   html += `</div>`;
+  if (stage.terms && stage.terms.length) html += `<div class="terms"><div class="who">Words used on this step</div><dl>${stage.terms.map(([w, m]) => `<dt>${esc(w)}</dt><dd>${esc(m)}</dd>`).join("")}</dl></div>`;
   if (stage.skipped) html += `<div class="skipped">Skipped: ${esc(stage.skipped)}</div>`;
   if (stage.numbers.length) html += `<div class="numbers">${stage.numbers.map(([k, v]) => `<div class="num"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("")}</div>`;
   html += stage.images.map(i => `<figure><img src="${i.url}" alt="${esc(i.label)}"><figcaption>${esc(i.label)}</figcaption></figure>`).join("");
