@@ -1,0 +1,45 @@
+{
+ "version": "v4",
+ "created": "2026-10-13",
+ "git_commit": "6ddfbb8",
+ "description": "v4: v2 + static-neighbour and forced-photometry features (17 features)",
+ "feature_columns": [
+  "n_detections",
+  "rate_arcsec_per_hour",
+  "max_residual",
+  "mag_mean",
+  "mag_std",
+  "snr_mean",
+  "snr_min",
+  "score_mean",
+  "score_min",
+  "npix_std",
+  "elongation_mean",
+  "static_neighbours_mean",
+  "static_neighbours_max",
+  "forced_snr_min",
+  "forced_snr_median",
+  "forced_snr_std",
+  "stack_snr"
+ ],
+ "train_nights": [
+  "2020-09-19",
+  "2020-09-21",
+  "2020-09-23",
+  "2021-09-11",
+  "2022-09-22",
+  "2022-09-24",
+  "2023-09-20",
+  "2023-09-25"
+ ],
+ "validation_nights": [
+  "2021-09-12",
+  "2023-09-15"
+ ],
+ "quadrants": [
+  [
+   3,
+   4
+  ]
+ ]
+}

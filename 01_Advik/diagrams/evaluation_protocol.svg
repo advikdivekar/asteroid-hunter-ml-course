@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 500" width="1180" height="500"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Advik: the evaluation protocol (what makes a number believable)</text>
+<rect x="40" y="70" width="205" height="140" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="142.5" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">1. Freeze</text>
+<text x="142.5" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">models, thresholds, configs</text>
+<text x="142.5" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">saved as a version bundle</text>
+<rect x="279" y="70" width="205" height="140" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="381.5" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">2. Choose on VALIDATION</text>
+<text x="381.5" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">thresholds are set here,</text>
+<text x="381.5" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">never on test</text>
+<line x1="247" y1="140.0" x2="277" y2="140.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="518" y="70" width="205" height="140" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="620.5" y="117.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">3. Plant fakes</text>
+<text x="620.5" y="135.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">known truth: 300 per night,</text>
+<text x="620.5" y="153.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">real PSF, real noise,</text>
+<text x="620.5" y="171.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">moving on the SKY</text>
+<line x1="486" y1="140.0" x2="516" y2="140.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="757" y="70" width="205" height="140" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="859.5" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">4. Run the DEPLOYED path</text>
+<text x="859.5" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">run_night_pipeline,</text>
+<text x="859.5" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">not a notebook copy</text>
+<line x1="725" y1="140.0" x2="755" y2="140.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="996" y="70" width="205" height="140" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="1098.5" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">5. One function</text>
+<text x="1098.5" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">build_scoreboard</text>
+<text x="1098.5" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">-&gt; reports/scoreboard.csv</text>
+<line x1="964" y1="140.0" x2="994" y2="140.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="40" y="250" width="540" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="310.0" y="279.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Comparing fairly</text>
+<text x="310.0" y="296.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">compare models at the SAME false-alarm level</text>
+<text x="310.0" y="313.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">(v5 looked 0.8 mag worse at its own threshold, but tied at equal alarms)</text>
+<text x="310.0" y="330.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">use metrics with headroom: tracklet AP 0.999 cannot show improvement; depth and</text>
+<text x="310.0" y="347.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">known-recovery can</text>
+<rect x="600" y="250" width="540" height="120" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="870.0" y="288.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Checking the simulation against reality</text>
+<text x="870.0" y="305.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">real asteroids and planted fakes both fade out between 20.5 and 21.5</text>
+<text x="870.0" y="322.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">-&gt; the simulation is realistic</text>
+<text x="870.0" y="339.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">fake-vs-real classifier: AUC 0.47 (0.5 = cannot tell apart)</text>
+<rect x="40" y="390" width="1100" height="90" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+<text x="590.0" y="413.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="middle">Limits we state openly</text>
+<text x="590.0" y="430.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Honesty note: we looked at the test night while fixing real bugs (pointing shift, units). Fixes were physics, not score-tuning, but strictly the test night is no longer</text>
+<text x="590.0" y="447.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">untouched.</text>
+<text x="590.0" y="464.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">That is why a separate HOLDOUT night (2022-06-17) is opened only by the scoreboard.</text>
+</svg>

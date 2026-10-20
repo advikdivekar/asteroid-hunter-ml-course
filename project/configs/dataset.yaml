@@ -1,0 +1,2 @@
+# Turning nights of images into a training set
+bogus_per_real: 5        # training: keep all real detections and at most this many bogus per real one

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 430" width="1180" height="430"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: CNN versus the simple baseline</text>
+<text x="590" y="62" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle">Average precision (AP): one number for rare positives; 1.0 is perfect. Same 67,041 validation detections (3.2% real).</text>
+<text x="40" y="124" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">logistic regression, 6 numbers (validation)</text>
+<rect x="430" y="90" width="468.0" height="52" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="910.0" y="124" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#4b5563" text-anchor="start">0.780</text>
+<text x="40" y="194" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on pixels (validation)</text>
+<rect x="430" y="160" width="539.4" height="52" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="981.4" y="194" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1d4ed8" text-anchor="start">0.899</text>
+<text x="40" y="264" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on the untouched test night</text>
+<rect x="430" y="230" width="562.8" height="52" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="1004.8" y="264" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#b45309" text-anchor="start">0.938</text>
+<rect x="40" y="320" width="540" height="90" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="310.0" y="351.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Same completeness, far fewer false alarms</text>
+<text x="310.0" y="369.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">at 90% recall: 813 -&gt; 176 false alarms per frame (4.6x fewer)</text>
+<text x="310.0" y="387.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">precision at 90% recall: 0.191 -&gt; 0.522</text>
+<rect x="600" y="320" width="540" height="90" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="870.0" y="351.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Why it matters for the next stage</text>
+<text x="870.0" y="369.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">the CNN's gain is PURITY: only ~24% of detections remain,</text>
+<text x="870.0" y="387.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so linking seed pairs fall from 52,000 to 3,500</text>
+</svg>

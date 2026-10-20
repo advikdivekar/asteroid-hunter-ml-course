@@ -1,0 +1,4 @@
+# Source detection on difference images
+threshold_sigma: 2.0     # a pixel counts if it is this many sigma above the noise (after smoothing)
+min_area_pixels: 5       # ...and at least this many connected pixels pass
+stamp_size: 31           # side of the square cutouts around each detection (pixels)

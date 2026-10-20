@@ -1,0 +1,16 @@
+# Settings shared by every stage. Paths are relative to the project root.
+seed: 42
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  models: models
+  reports: reports
+
+# The ZTF field we start with (from the existing test images).
+ztf:
+  field: 618
+  ccd: 3
+  quadrant: 4
+  filter: zg

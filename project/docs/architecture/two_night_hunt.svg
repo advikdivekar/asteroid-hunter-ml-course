@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5560"/></marker></defs>
+<rect width="1200" height="700" fill="#ffffff"/>
+<text x="600.0" y="34" font-size="22" fill="#1a202c" text-anchor="middle" font-weight="bold">Two-night hunt: why a candidate must be seen again days later</text>
+<rect x="40" y="80" width="260" height="100" rx="9" fill="#e3f0fb" stroke="#2b6cb0" stroke-width="1.8"/>
+<text x="170.0" y="116.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Night 1 (2019-01-28)</text>
+<text x="170.0" y="134.0" font-size="12" fill="#3d4852" text-anchor="middle">field 567, CCD 10, quadrant 1</text>
+<text x="170.0" y="152.0" font-size="12" fill="#3d4852" text-anchor="middle">39 frames</text>
+<rect x="350" y="80" width="260" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="480.0" y="116.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">run_full_search</text>
+<text x="480.0" y="134.0" font-size="12" fill="#3d4852" text-anchor="middle">point + fast + deep</text>
+<text x="480.0" y="152.0" font-size="12" fill="#3d4852" text-anchor="middle">known objects kept on purpose</text>
+<rect x="660" y="80" width="240" height="100" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="780.0" y="116.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">measure_sky_motion</text>
+<text x="780.0" y="134.0" font-size="12" fill="#3d4852" text-anchor="middle">position, velocity (RA, Dec)</text>
+<text x="780.0" y="152.0" font-size="12" fill="#3d4852" text-anchor="middle">per accepted object</text>
+<rect x="950" y="80" width="210" height="100" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="1055.0" y="116.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Night 1 table</text>
+<text x="1055.0" y="134.0" font-size="12" fill="#3d4852" text-anchor="middle">one row per object</text>
+<text x="1055.0" y="152.0" font-size="12" fill="#3d4852" text-anchor="middle">+ known_name, search</text>
+<line x1="300" y1="130" x2="350" y2="130" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="610" y1="130" x2="660" y2="130" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="900" y1="130" x2="950" y2="130" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="950" y="230" width="210" height="100" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="1055.0" y="266.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Predict night 2</text>
+<text x="1055.0" y="284.0" font-size="12" fill="#3d4852" text-anchor="middle">position + velocity x</text>
+<text x="1055.0" y="302.0" font-size="12" fill="#3d4852" text-anchor="middle">hours elapsed (3 days)</text>
+<rect x="660" y="230" width="240" height="100" rx="9" fill="#e3f0fb" stroke="#2b6cb0" stroke-width="1.8"/>
+<text x="780.0" y="266.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Which quadrants?</text>
+<text x="780.0" y="284.0" font-size="12" fill="#3d4852" text-anchor="middle">ask the archive which of the</text>
+<text x="780.0" y="302.0" font-size="12" fill="#3d4852" text-anchor="middle">field&#x27;s quadrants saw it</text>
+<rect x="350" y="230" width="260" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="480.0" y="266.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Night 2 (2019-01-31)</text>
+<text x="480.0" y="284.0" font-size="12" fill="#3d4852" text-anchor="middle">download + full search of</text>
+<text x="480.0" y="302.0" font-size="12" fill="#3d4852" text-anchor="middle">each needed quadrant</text>
+<rect x="40" y="230" width="260" height="100" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="170.0" y="275.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Night 2 table</text>
+<text x="170.0" y="293.0" font-size="12" fill="#3d4852" text-anchor="middle">same columns as night 1</text>
+<line x1="1055" y1="180" x2="1055" y2="230" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="950" y1="280" x2="900" y2="280" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="660" y1="280" x2="610" y2="280" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="350" y1="280" x2="300" y2="280" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="40" y="440" width="300" height="110" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="190.0" y="472.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">link_tracklets_across_nights</text>
+<text x="190.0" y="490.0" font-size="12" fill="#3d4852" text-anchor="middle">carry night 1 forward; accept night 2</text>
+<text x="190.0" y="508.0" font-size="12" fill="#3d4852" text-anchor="middle">within max(20 arcsec, 15% of travel)</text>
+<text x="190.0" y="526.0" font-size="12" fill="#3d4852" text-anchor="middle">velocity within 10%; one pair each</text>
+<line x1="170" y1="330" x2="170" y2="440" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<polyline points="1055,330 1055,385 260,385 260,440" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="700" y="378" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">night 1 table</text>
+<rect x="420" y="410" width="330" height="70" rx="9" fill="#e6f6ea" stroke="#2f855a" stroke-width="1.8"/>
+<text x="585.0" y="440.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">known &lt;-&gt; same known</text>
+<text x="585.0" y="458.0" font-size="12" fill="#3d4852" text-anchor="middle">proves the hunt works on this data</text>
+<rect x="420" y="500" width="330" height="70" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="585.0" y="530.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">unknown &lt;-&gt; unknown</text>
+<text x="585.0" y="548.0" font-size="12" fill="#3d4852" text-anchor="middle">THE CANDIDATES</text>
+<rect x="420" y="590" width="330" height="70" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="585.0" y="620.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">mixed / mismatched</text>
+<text x="585.0" y="638.0" font-size="12" fill="#3d4852" text-anchor="middle">chance links, dropped</text>
+<line x1="340" y1="495" x2="420" y2="445" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="340" y1="495" x2="420" y2="535" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="340" y1="495" x2="420" y2="625" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="830" y="460" width="330" height="150" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="995.0" y="503.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Vetting before any claim</text>
+<text x="995.0" y="521.0" font-size="12" fill="#3d4852" text-anchor="middle">Horizons / SkyBoT recheck at both epochs;</text>
+<text x="995.0" y="539.0" font-size="12" fill="#3d4852" text-anchor="middle">look at every stamp (ghosts, cosmic rays,</text>
+<text x="995.0" y="557.0" font-size="12" fill="#3d4852" text-anchor="middle">satellites, edge peaks); one smooth orbit</text>
+<text x="995.0" y="575.0" font-size="12" fill="#3d4852" text-anchor="middle">through both nights; then maybe MPC</text>
+<line x1="750" y1="535" x2="830" y2="535" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+</svg>

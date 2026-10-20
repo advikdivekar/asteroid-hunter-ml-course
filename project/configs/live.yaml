@@ -1,0 +1,10 @@
+# Live monitoring: which sky to watch and how
+bundle: v4                   # model bundle for the point-source search (models/<bundle>/)
+watch:                       # units to watch (field, CCD, quadrant)
+  - {field: 618, ccd: 3, quadrant: 4}
+min_frames_for_point_search: 4
+min_frames_for_deep_search: 20       # 8 + 8 + 4: the deep linker needs 3 stacks (deep.yaml); with 16-19 frames it can never find anything
+night_is_complete_after_hours: 12    # don't search a night until no new frame arrived for this long
+poll_minutes: 60
+start_after_night: "2026-10-13"     # deployment date: older nights are history, not news
+stop_before_night: "9999-12-31"     # set both to replay a past period through the live system (testing)

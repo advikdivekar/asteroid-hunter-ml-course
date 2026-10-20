@@ -1,0 +1,695 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Paras: handbook</title><style>
+@page { size: A4; margin: 16mm 14mm; }
+body { font: 11pt/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2937; max-width: 190mm; margin: 0 auto; }
+h1 { font-size: 21pt; border-bottom: 3px solid #6d28d9; padding-bottom: 4px; margin-top: 0; }
+h2 { font-size: 15pt; margin-top: 22px; color: #111827; border-bottom: 1px solid #d1d5db; padding-bottom: 2px; }
+h3 { font-size: 12.5pt; margin-top: 16px; color: #374151; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #d1d5db; padding: 4px 7px; vertical-align: top; text-align: left; }
+th { background: #f3f4f6; }
+code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+pre { background: #f3f4f6; padding: 8px; border-radius: 6px; overflow-x: auto; font-size: 9pt; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #6d28d9; margin: 10px 0; padding: 2px 12px; background: #faf5ff; }
+.doc { page-break-before: always; }
+.doc:first-of-type { page-break-before: auto; }
+figure { margin: 14px 0; page-break-inside: avoid; text-align: center; }
+figure svg { max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+figcaption { font-size: 9pt; color: #6b7280; }
+.cover { text-align: center; padding: 45mm 0 20mm; page-break-after: always; }
+.cover h1 { border: 0; font-size: 28pt; }
+.cover p { font-size: 13pt; color: #4b5563; }
+.toc li { margin: 4px 0; }
+</style></head><body><div class="cover"><h1>Paras: handbook</h1><p>Labels, dataset and the neural network (CNN)</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Paras: labels, dataset building and the neural network (CNN)</h1>
+<p><strong>Marks this part carries:</strong> Model Development (4, shared with Satvik) and the model-ready data part of Data Preprocessing (3, shared with Aaryan).
+<strong>Why it matters:</strong> this is the deep-learning part of the project, and the part where &quot;garbage labels in, garbage model out&quot; is most visible. It also contains the best data-centric story: the model found a labelling error.</p>
+<h2>Your four jobs</h2>
+<ol>
+<li><strong>Where labels come from:</strong> injection-recovery (planted fakes), known asteroids from catalogues, and &quot;everything else is bogus&quot;, with the label-noise caveats and the quality checks.</li>
+<li><strong>Building the dataset:</strong> cutting 3 x 31 x 31 stamps, normalising, augmenting, balancing classes, assembling train/validation sets without leakage.</li>
+<li><strong>The neural network:</strong> from &quot;a neuron&quot; to backpropagation (the from-scratch notebook), then the real CNN: architecture, training loop, regularisation, results versus the baseline.</li>
+<li><strong>Error analysis and cross-fitting:</strong> what the model's most confident mistakes revealed, and how its scores are produced without leakage for the next stage.</li>
+</ol>
+<h2>What is NOT yours</h2>
+<p>Downloads and the first detection step: Aaryan. Linking, tracklet features, trees and the metric definitions: Satvik. Scoreboard, deep search and viewer: Advik. You hand Satvik a <code>detections</code> table with a <code>score</code> column and a threshold.</p>
+<h2>Where your code is (in <code>project/</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Files</th>
+<th>What they do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simulate</td>
+<td><code>src/asthunt/simulate/render_point_source.py</code>, <code>plan_injections.py</code>, <code>inject_point_source.py</code>, <code>plant_fakes_in_exposure.py</code> (+ trailed versions)</td>
+<td>draw a fake from ZTF's own PSF, choose brightness/speed/position, add it to science and difference</td>
+</tr>
+<tr>
+<td>Label</td>
+<td><code>src/asthunt/label/match_detections_to_positions.py</code> (KD-tree), <code>query_known_asteroids.py</code>, <code>query_horizons_positions.py</code>, <code>refine_known_positions.py</code>, <code>load_known_asteroids.py</code>, <code>label_detections.py</code></td>
+<td>decide real or bogus for each blob</td>
+</tr>
+<tr>
+<td>Dataset</td>
+<td><code>src/asthunt/dataset/build_night_detections.py</code>, <code>normalize_stamps.py</code>, <code>augment_stamps.py</code>, <code>balance_classes.py</code>, <code>assemble_stamp_dataset.py</code>, <code>relabel_night_detections.py</code>, <code>make_unit_tag.py</code>, <code>make_unit_rng.py</code></td>
+<td>one night -&gt; detections + stamps; model-ready arrays</td>
+</tr>
+<tr>
+<td>Stamps</td>
+<td><code>src/asthunt/detect/cut_triplet_stamps.py</code></td>
+<td>31x31 science / reference / difference cut-outs</td>
+</tr>
+<tr>
+<td>Models</td>
+<td><code>src/asthunt/models/define_realbogus_cnn.py</code>, <code>train_realbogus_cnn.py</code>, <code>predict_realbogus.py</code>, <code>cross_fit_realbogus_scores.py</code></td>
+<td>the CNN: define, train, score, cross-fit</td>
+</tr>
+<tr>
+<td>Realism check</td>
+<td><code>src/asthunt/evaluate/measure_injection_realism.py</code></td>
+<td>adversarial validation of fakes vs real asteroids</td>
+</tr>
+<tr>
+<td>Config</td>
+<td><code>configs/inject.yaml</code>, <code>dataset.yaml</code>, <code>train.yaml</code></td>
+<td>all the settings</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td><code>tests/simulate</code>, <code>tests/label</code>, <code>tests/dataset</code>, <code>tests/models</code></td>
+<td>includes a tiny CNN that must learn &quot;blob in the centre = real&quot;</td>
+</tr>
+<tr>
+<td>Lessons and notebooks</td>
+<td><code>docs/injection_labelling.md</code>, <code>label_quality.md</code>, <code>dataset_building.md</code>, <code>neural_networks.md</code>, <code>realbogus_cnn.md</code>; notebooks with the same names</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>What you hand over</h2>
+<ul>
+<li>The model and its numbers for the report: architecture, training recipe, results versus baseline, error analysis, cross-fitting.</li>
+<li>Figures: the triplet picture, the CNN architecture, the training/validation curves, a few correct and wrong predictions (from the notebook).</li>
+<li>A clear statement of label sources and their weaknesses (this is critical for the evaluation chapter).</li>
+</ul>
+<h2>Your seven key messages</h2>
+<ol>
+<li><strong>The sky is not labelled, so we make labels</strong> (planted fakes + known asteroids + &quot;the rest&quot;), and we say honestly where each one is weak.</li>
+<li><strong>A real asteroid shows in science and difference but not in the reference</strong>, which is why the CNN gets all three pictures at once.</li>
+<li><strong>A small CNN is enough:</strong> 31x31 stamps, local patterns, 72,145 weights; fast on a laptop GPU and hard to overfit.</li>
+<li><strong>We judge by validation average precision on realistic (imbalanced) data, not by training loss.</strong> Training is balanced and augmented; validation keeps the true 1:33.</li>
+<li><strong>CNN vs baseline:</strong> AP 0.899 vs 0.780; at 90% recall false alarms fall from 813 to 176 per frame (4.6x); on the untouched test night AP 0.938.</li>
+<li><strong>The CNN found a labelling bug:</strong> its most confident &quot;bogus&quot; detections were known asteroids; the catalogue positions (SkyBoT) were about 2.9 arcsec off. Fixed by using JPL Horizons.</li>
+<li><strong>Cross-fitting</strong> stops the next model from learning over-confident scores.</li>
+</ol>
+<h2>Numbers you must know by heart</h2>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Meaning</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>31 x 31 x 3</td>
+<td>stamp size and channels</td>
+<td><code>configs/detect.yaml</code></td>
+</tr>
+<tr>
+<td>72,145</td>
+<td>learnable weights in the CNN</td>
+<td><code>docs/realbogus_cnn.md</code> (derivation in your knowledge pack)</td>
+</tr>
+<tr>
+<td>31 -&gt; 15 -&gt; 7 -&gt; 3</td>
+<td>spatial size after the three max-pools</td>
+<td><code>define_realbogus_cnn.py</code></td>
+</tr>
+<tr>
+<td>0.001 / 256 / 25 / 4</td>
+<td>learning rate / batch / max epochs / patience</td>
+<td><code>configs/train.yaml</code></td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>dropout</td>
+<td><code>define_realbogus_cnn.py</code></td>
+</tr>
+<tr>
+<td>0.780 -&gt; 0.899 -&gt; 0.938</td>
+<td>AP: baseline (val), CNN (val), CNN (test night)</td>
+<td><code>docs/realbogus_cnn.md</code></td>
+</tr>
+<tr>
+<td>813 -&gt; 176</td>
+<td>false positives per frame at 90% recall</td>
+<td>same</td>
+</tr>
+<tr>
+<td>1,059 : 36,161</td>
+<td>real : bogus detections on one training night (1 : 34)</td>
+<td><code>docs/injection_labelling.md</code></td>
+</tr>
+<tr>
+<td>8,863 real + 5 bogus per real = 53,178; 16.7% real</td>
+<td>the balanced training set</td>
+<td><code>docs/dataset_building.md</code></td>
+</tr>
+<tr>
+<td>67,041; 3.2% real</td>
+<td>the realistic validation set</td>
+<td>same</td>
+</tr>
+<tr>
+<td>2.72 px -&gt; 0.26 px</td>
+<td>SkyBoT vs Horizons median position error</td>
+<td><code>docs/label_quality.md</code></td>
+</tr>
+<tr>
+<td>0.46-0.48</td>
+<td>AUC of &quot;fake vs real&quot; classifier (0.5 = indistinguishable)</td>
+<td>same</td>
+</tr>
+<tr>
+<td>1.15% and 1.3</td>
+<td>chance of a random point landing within 2 px of a detection; expected chance matches per frame</td>
+<td><code>docs/injection_labelling.md</code></td>
+</tr>
+</tbody>
+</table>
+<h2>Hands-on tasks (do these yourself)</h2>
+<ol>
+<li><code>cd project &amp;&amp; pytest tests/simulate tests/label tests/dataset tests/models -q</code>.</li>
+<li>Re-run <code>notebooks/neural_networks.ipynb</code> end to end; reproduce the gradient check; change the learning rate to 5.0 and describe what you see.</li>
+<li>Re-run <code>notebooks/realbogus_cnn.ipynb</code> (about 7 minutes on an M3); look at the 12 most confident mistakes yourself and say what each one is.</li>
+<li>Do the parameter-count derivation by hand (knowledge pack, section 4.2) and check it equals 72,145.</li>
+<li>Change <code>dropout</code> from 0.3 to 0.0 in a copy and predict (then observe) the effect on the gap between training and validation.</li>
+</ol>
+<h2>Pitfalls</h2>
+<ul>
+<li>Saying &quot;the CNN is 99% accurate&quot;: accuracy is meaningless at 3% positives; use AP and false alarms at fixed recall.</li>
+<li>Forgetting that training is balanced (16.7% real) while the real sky is about 3%: raw probabilities are inflated.</li>
+<li>Calling labels &quot;ground truth&quot;: they are &quot;best available&quot;, with known noise.</li>
+<li>Calling <code>.numpy()</code> on a tensor with gradients, or forgetting <code>model.eval()</code> when scoring (dropout must be off).</li>
+<li>Comparing models at different thresholds instead of at fixed recall.</li>
+</ul>
+</div><div class="doc"><h1>Paras: knowledge pack</h1>
+<h2>0. Read first (in this order)</h2>
+<p><code>00_Start_Here/01_Project_Overview</code> -&gt; <code>02_Domain_Primer</code> (sections 3-6, 11) -&gt; <code>03_ML_Primer</code> (sections A, B, C) -&gt; then <code>project/docs/ml_basics.md</code> (logistic regression, features, labels), <code>injection_labelling.md</code>, <code>label_quality.md</code>, <code>dataset_building.md</code>, <code>neural_networks.md</code>, <code>realbogus_cnn.md</code>.</p>
+<hr />
+<h2>1. Labels: where they come from and how good they are</h2>
+<p>There is no list of &quot;all asteroids in this image&quot;. There is a list of things we put there ourselves, and a catalogue of things others found.</p>
+<h3>1.1 Injection-recovery (planted fakes) -&gt; perfect labels</h3>
+<ul>
+<li><code>plan_injections</code>: for each of 300 fakes per night: magnitude uniform 17-22, speed uniform 5-100 arcsec/hour, random direction, random start; positions follow the <strong>real frame times</strong> on <strong>frame 1's sky grid</strong>, then are converted through the sky to each frame's own pixels (after we found pointing shifts ignored the old way).</li>
+<li><code>render_point_source</code>: the fake is drawn from ZTF's <strong>own PSF</strong> of that frame (not a textbook Moffat), shifted by a sub-pixel amount with cubic interpolation and rescaled so the total flux is exact (otherwise every fake would sit on a pixel centre and a model could learn &quot;perfectly centred = fake&quot;).</li>
+<li><code>inject_point_source</code>: Poisson noise (<code>Poisson(stamp x gain) / gain</code>), added to <strong>both science and difference</strong>, so <code>reference = science - difference</code> is unchanged: exactly the situation of a new object.</li>
+<li><strong>Weakness:</strong> fakes are only as realistic as the simulation. Any difference is a distribution shift the model may exploit. So: real PSF, real noise, real times, correct sky motion, and a realism test (1.5).</li>
+<li>Magnitudes are drawn <strong>uniformly</strong>, not like real asteroids (which are mostly faint), so every brightness bin has enough fakes to measure completeness. Remember this when quoting rates.</li>
+</ul>
+<h3>1.2 Known asteroids -&gt; real labels</h3>
+<p>Positions of catalogued asteroids at each frame time. We match detections to positions within 2 px with a <strong>KD-tree</strong> (the nearest neighbour in about log n steps instead of comparing 7,700 x 300 pairs per frame). We use only known asteroids brighter than V = 20.5: fainter ones are mostly <strong>chance matches</strong>. The check: P(random point lands within 2 px of some detection) = detections x pi x 2^2 / good-pixel area = 1.15%; 114 known asteroids x 1.15% = 1.3 expected chance matches per frame, which is what we saw, so the early faint &quot;matches&quot; were mostly wrong.
+<strong>Observer location matters:</strong> SkyBoT defaults to the centre of the Earth; ZTF is about 6,400 km away, shifting an asteroid 1 AU away by up to about 9 arcsec (4 pixels). We pass <code>location=&quot;I41&quot;</code> (ZTF's observatory code).</p>
+<h3>1.3 Everything else = bogus</h3>
+<p>Includes variable stars, artifacts, and the rare real object nobody has catalogued: <strong>label noise</strong> we accept. Consequence: a &quot;false positive&quot; on real data may be a real discovery, which is exactly what the project hunts.
+<strong>Class imbalance:</strong> one training night: 1,059 real vs 36,161 bogus (1 : 34).</p>
+<h3>1.4 The label-quality story (two bugs, both found by looking at where the model disagreed with the labels)</h3>
+<ol>
+<li><strong>SkyBoT offset.</strong> The CNN's most confident &quot;bogus&quot; detections were clean new point sources and <strong>every one was a known asteroid</strong> (V 17-20). SkyBoT's predictions sat about 2.9 arcsec from our detections <em>in a constant direction</em> (-2.4, +1.5 px) on every night, with scatter of only 0.1-0.5 px. Our WCS matches Gaia stars to 0.04 px and JPL Horizons matches our detections to 0.1-0.3 arcsec, so the error is in SkyBoT. First fix: a 4-px match radius (AP 0.877 -&gt; 0.894). Better fix (label-quality phase): use <strong>JPL Horizons</strong> positions where available (median error 0.26 px vs 2.72 px, 314 matches over 12 nights) and a 2-px radius (4x less area, 4x fewer chance matches); SkyBoT only as fallback, tagged by source so a detected faint known asteroid is never mistaken for a discovery.</li>
+<li><strong>Fakes moved straight in pixel coordinates</strong>, ignoring the telescope's pointing shifts, so real asteroids failed to link while fakes did. Fix: plan fakes on frame 1's sky grid and convert.
+<strong>Lessons:</strong> check the <em>direction</em> of offsets, not only the size (a systematic error hid behind chance coincidences); a model's most confident &quot;mistakes&quot; are the cheapest way to find label errors; test your simulation against real objects, not only against itself.</li>
+</ol>
+<h3>1.5 Do the fakes look real? (adversarial validation)</h3>
+<p>Train a classifier to separate fakes from real known asteroids. AUC 0.5 = cannot. Rules: match the confounders (sample fakes with the same magnitude distribution as the real asteroids) and cross-validate by night. Result: AUC 0.46-0.48 (two seeds: 0.481 and 0.463; report 0.47 +/- 0.02, not three decimals of false precision). The same trick detects train/test distribution shift in general.</p>
+<hr />
+<h2>2. Building the dataset</h2>
+<p><code>build_night_detections</code> per unit: load frames -&gt; plant fakes -&gt; detect -&gt; label -&gt; describe (RA/Dec, common-grid x/y, magnitude, seeing) -&gt; cut stamps -&gt; save <code>detections__&lt;unit&gt;.parquet</code>, <code>stamps__&lt;unit&gt;.npy</code> (float16), <code>injections__&lt;unit&gt;.parquet</code>. Built once, re-used many times (about 40 s per night).</p>
+<ul>
+<li><strong>Save everything, choose later:</strong> every detection's stamp is kept (about 230 MB per night as float16); balancing happens when assembling, so the same files serve training (balanced), validation (realistic) and the real search (all).</li>
+<li><strong>Seeds:</strong> each night's generator is seeded with <code>[project seed, night]</code>: repeatable (an early draft used Python's <code>hash</code>, which changes every run).</li>
+<li><strong>A float16 bug:</strong> saturated star cores exceed 65,504 (float16's maximum) and became <code>inf</code>; fix: clip before converting.</li>
+<li><strong>Sizes:</strong> 11 nights; per night 32-41k detections, 1,053-1,199 real, 27-37 bogus per real.</li>
+</ul>
+<h3>2.1 Stamps (the CNN's input)</h3>
+<p>Three channels of 31 x 31 pixels around the blob: science, reference, difference. Why three? A real new object: blob in science and difference, nothing in reference. Bad subtraction: bright star in both science and reference, dipole in difference. Cosmic ray: sharp spike in science and difference, narrower than a star. Noise: faint speck. Masked edge: step in all. A person compares panels; the CNN learns to. 31 px because the blur is about 2 px wide and 15 px of surroundings is enough to see a neighbouring star or an edge (ZTF's own classifier uses 63 x 63).</p>
+<h3>2.2 Normalisation, augmentation, balancing</h3>
+<ul>
+<li><strong>Normalise</strong> per stamp and channel: <code>(value - median) / (1.4826 x MAD)</code>, clipped to [-10, 50]. Median (not mean) so a star barely moves it; MAD x 1.4826 equals the standard deviation for Gaussian noise but ignores outliers; &quot;5&quot; now means 5 sigma on <em>any</em> night; clipping stops a saturated star dominating. Nothing is fitted on training data, so there is no leakage here (contrast <code>StandardScaler</code>).</li>
+<li><strong>Augment</strong> (training only): rotations by 0/90/180/270 degrees and optional mirror = 8 versions of every stamp; the sky has no &quot;up&quot;. Acts like more data, teaches orientation does not matter. <em>Never augment validation or test.</em></li>
+<li><strong>Balance</strong> training: all real rows + 5 bogus per real (8,863 real -&gt; 53,178 stamps, 16.7% real) because with 3% positives the gradient is dominated by easy bogus examples and &quot;always bogus&quot; is a comfortable optimum. Cost: inflated probabilities (the model believes real is 16.7% common). Validation stays realistic (67,041 detections, 3.2% real) so precision and false-alarm numbers are honest.</li>
+</ul>
+<hr />
+<h2>3. Neural-network theory (the from-scratch notebook)</h2>
+<ul>
+<li><strong>Neuron:</strong> <code>output = activation(w.x + b)</code>; with a sigmoid it is logistic regression.</li>
+<li><strong>Why stack:</strong> with ReLU (<code>max(0,z)</code>) each hidden neuron contributes a &quot;bent line&quot;; 16 bent lines make a curved boundary (the half-moons: logistic regression 0.88, network 0.94). Without a non-linear activation, stacked layers collapse to one linear function.</li>
+<li><strong>Forward pass:</strong> <code>z1 = X W1 + b1; h = ReLU(z1); z2 = h W2 + b2; p = sigmoid(z2)</code>.</li>
+<li><strong>Loss:</strong> binary cross-entropy <code>L = -mean(y log p + (1-y) log(1-p))</code>. Confident and wrong costs a lot (-log 0.01 = 4.6); confident and right costs almost nothing (-log 0.99 = 0.01).</li>
+<li><strong>Backpropagation</strong> = chain rule from the output back. Output: for sigmoid + cross-entropy, <code>dL/dz2 = p - y</code> (the sigmoid's slope cancels the log's slope). Output weights: <code>dL/dW2 = h^T (p - y) / n</code>. Back into the hidden layer: <code>error_hidden = (p - y) W2^T x ReLU'(z1)</code> where ReLU' is 1 if z1 &gt; 0 else 0. Hidden weights: <code>dL/dW1 = X^T error_hidden / n</code>. Each layer reuses the one after it: one backward sweep gives every gradient.</li>
+<li><strong>Gradient check:</strong> nudge one weight by epsilon = 1e-5 on both sides: <code>(L(w+e) - L(w-e)) / 2e</code> must equal the backprop gradient (ours: -0.02896520 both).</li>
+<li><strong>Gradient descent:</strong> <code>w &lt;- w - lr x gradient</code>. Too small: slow; too large (try 5.0): overshoots and diverges. <strong>Adam</strong> adapts each weight's step using its recent gradients.</li>
+<li><strong>Initialisation:</strong> small and random; if all weights started equal every neuron would stay identical.</li>
+<li><strong>PyTorch's four steps:</strong> <code>optimizer.zero_grad()</code>, <code>loss = loss_fn(model(X), y)</code>, <code>loss.backward()</code>, <code>optimizer.step()</code>. <code>BCEWithLogitsLoss</code> fuses sigmoid and cross-entropy (stable), so the model outputs raw <strong>logits</strong>; <code>torch.no_grad()</code> and <code>model.eval()</code> when scoring.</li>
+<li><strong>Overfitting demo:</strong> a 256 x 256 network on 40 points: training loss falls toward 1e-5 (memorising noise) while validation loss is lowest at step 22 then climbs: hence <strong>early stopping</strong>.</li>
+</ul>
+<hr />
+<h2>4. The CNN in detail</h2>
+<h3>4.1 Architecture (<code>define_realbogus_cnn.py</code>; see <code>diagrams/cnn_architecture.svg</code>)</h3>
+<p>Input (3, 31, 31) -&gt; [Conv3x3 16 + ReLU] -&gt; [Conv3x3 16 + ReLU] -&gt; MaxPool (31-&gt;15) -&gt; [Conv3x3 32 + ReLU] -&gt; [Conv3x3 32 + ReLU] -&gt; MaxPool (15-&gt;7) -&gt; [Conv3x3 64 + ReLU] -&gt; MaxPool (7-&gt;3) -&gt; Flatten (64 x 3 x 3 = 576) -&gt; Dropout 0.3 -&gt; Dense 64 + ReLU -&gt; Dense 1 -&gt; (sigmoid at scoring time).</p>
+<ul>
+<li><strong>Convolution:</strong> a 3x3 filter slides over the stamp; at each position it multiplies 9 pixels by 9 learned weights and sums. With 3 input channels each filter has 3x3x3 weights and sees science, reference and difference together, which is how it learns &quot;bright in science and difference, nothing in reference&quot;. Padding 1 keeps the size.</li>
+<li><strong>Pooling:</strong> max-pool halves the size, so deeper filters see larger areas (edges and blobs first, then &quot;point source&quot;, &quot;dipole&quot;, &quot;streak&quot;).</li>
+<li><strong>Dropout 0.3:</strong> randomly switches off 30% of neurons while training so no neuron is relied on.</li>
+</ul>
+<h3>4.2 Counting the 72,145 weights (do this yourself)</h3>
+<p><code>params = (in_channels x 3 x 3 + 1) x out_channels</code> for a conv layer: conv1 (3-&gt;16) = 448; conv2 (16-&gt;16) = 2,320; conv3 (16-&gt;32) = 4,640; conv4 (32-&gt;32) = 9,248; conv5 (32-&gt;64) = 18,496; dense (576 -&gt; 64) = 576 x 64 + 64 = 36,928; output (64 -&gt; 1) = 65. Sum = 72,145.</p>
+<h3>4.3 Training recipe (<code>train_realbogus_cnn.py</code>, <code>configs/train.yaml</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>setting</th>
+<th>value</th>
+<th>why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>loss</td>
+<td><code>BCEWithLogitsLoss</code></td>
+<td>stable cross-entropy</td>
+</tr>
+<tr>
+<td>optimiser</td>
+<td>Adam, lr 0.001</td>
+<td>robust default</td>
+</tr>
+<tr>
+<td>batch</td>
+<td>256</td>
+<td>stable gradients, fits easily</td>
+</tr>
+<tr>
+<td>augmentation</td>
+<td>random 90-degree rotations + mirror</td>
+<td>sky has no up</td>
+</tr>
+<tr>
+<td>early stopping</td>
+<td>patience 4 on validation AP</td>
+<td>keep the best epoch</td>
+</tr>
+<tr>
+<td>Judged by <strong>validation AP on realistic data</strong>, not training loss (training loss 0.08 vs validation 0.035 can both be right: training is balanced and augmented, validation is easier). The final run used all 25 epochs; best validation AP (0.899) at epoch 21.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>4.4 Results (validation, 67,041 detections, 3.2% real)</h3>
+<table>
+<thead>
+<tr>
+<th>model</th>
+<th>AP</th>
+<th>precision at 90% recall</th>
+<th>false positives per frame</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logistic regression, 6 features</td>
+<td>0.780</td>
+<td>0.191</td>
+<td>813</td>
+</tr>
+<tr>
+<td><strong>CNN</strong></td>
+<td><strong>0.899</strong></td>
+<td><strong>0.522</strong></td>
+<td><strong>176</strong></td>
+</tr>
+<tr>
+<td>At the same completeness the CNN cuts false alarms <strong>4.6x</strong>; on the untouched test night AP <strong>0.938</strong>. The completeness-vs-magnitude curves look alike at 90% recall because we fixed recall: the CNN's gain is <strong>purity</strong>, which makes linking cheap: after the CNN filter only about 24% of detections remain, and seed pairs drop from 52k to 3.5k.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>4.5 Cross-fitting (stacking without leakage; <code>diagrams/cross_fitting.svg</code>)</h3>
+<p>8 training nights -&gt; 4 folds of 2 nights. For each fold train a CNN on the other 6 nights and score the 2 held-out nights; validation and test nights are scored by the final CNN. Without it, the tracklet model would see over-confident CNN scores on training nights and learn &quot;score_min is always high for real things&quot;, which would not hold on new nights.</p>
+<hr />
+<h2>5. Cross-part cheat sheet</h2>
+<ul>
+<li><strong>Aaryan:</strong> ZTF difference images; split by night; masks; noise via MAD; blobs by SEP at 2 sigma (7,800 per frame, 173 with SNR &gt; 5); leakage audit (100% -&gt; 50% -&gt; 99%).</li>
+<li><strong>Satvik:</strong> linking by seed-and-predict with KD-trees on the common sky grid; 17 features (11 + 2 static-neighbour + 4 forced-photometry); XGBoost (300 trees, depth 3, lr 0.05); metrics and thresholds; models tie in cross-validation.</li>
+<li><strong>Advik:</strong> one deployed path; scoreboard on planted fakes and held-out nights; depth 20.5 -&gt; 21.4 -&gt; 22.1; deep search; live viewer; more data did not help.</li>
+</ul>
+<h2>6. Self-quiz (answers in <code>VIVA_QA.md</code>)</h2>
+<ol>
+<li>Why does a 3-channel filter help? 2. Training loss is 0.08 and validation 0.035: why can validation be lower? 3. Why do the CNN and baseline completeness curves look alike at 90% recall? 4. Explain cross-fitting in two sentences.</li>
+<li>How did the CNN reveal the SkyBoT offset? 6. Count the parameters of the first conv layer.</li>
+<li>Why <code>BCEWithLogitsLoss</code>? 8. Why not augment validation data? 9. Why do we add the fake to both science and difference images? 10. Why are fake magnitudes drawn uniformly?</li>
+</ol>
+</div><div class="doc"><h1>Paras: presentation guide</h1>
+<p><strong>Your slot: 5 minutes, 5 slides.</strong> (In the 12-minute plan: 3 minutes, slides 2, 3 and 5.) Pictures are in <code>diagrams/</code>.</p>
+<hr />
+<h3>Slide 1: &quot;Where do the labels come from?&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>label_sources.svg</code>.
+<strong>Say:</strong> &quot;The sky does not come labelled, so we make labels. First, we plant fake asteroids into the real images with known brightness and speed, using the real blur shape of each frame, so we have perfect labels. Second, we look up known asteroids in the catalogue, which gives us real labels, using positions from NASA's JPL Horizons because they are ten times more accurate than the other service we tried. Third, everything else is called bogus, which means a little label noise, since it includes the rare real object nobody has catalogued. On one training night that gives 1,059 real detections and 36,161 bogus: one to thirty-four.&quot;</p>
+<h3>Slide 2: &quot;Three pictures per blob&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>triplet_stamp.svg</code>.
+<strong>Say:</strong> &quot;For every blob we cut a 31 by 31 pixel stamp from three images: science, reference and difference. A real new object shows up in science and difference but not in the reference. A badly subtracted bright star is bright in science and reference and leaves a dipole in the difference. A cosmic ray is a spike narrower than a star. Giving the network all three at once is what lets it tell these apart. Each channel is normalised by its own noise, so a '5' means five sigma on any night. We augment training stamps with rotations and mirror images, because the sky has no 'up', and we balance training to five bogus per real, but keep validation realistic.&quot;</p>
+<h3>Slide 3: &quot;The neural network&quot; (1 min 30 s)</h3>
+<p><strong>On the slide:</strong> <code>cnn_architecture.svg</code>.
+<strong>Say:</strong> &quot;This is the network: three blocks of convolutions with 3 by 3 filters, each followed by pooling that halves the size, then a small dense head. Convolutions look for local patterns like a round blob or a sharp spike; pooling lets deeper layers see larger areas; dropout switches off 30% of neurons while training so none is relied on. It has only 72,145 weights, which is small on purpose: the stamps are small, the patterns are local, and a small model is fast on a laptop GPU and harder to overfit. We trained it with binary cross-entropy and the Adam optimiser, and we stop when validation average precision has not improved for four epochs.&quot;</p>
+<h3>Slide 4: &quot;Results&quot; (45 s)</h3>
+<p><strong>On the slide:</strong> <code>cnn_results.svg</code>.
+<strong>Say:</strong> &quot;We always compare against a simple baseline: logistic regression on six numbers. On validation nights the CNN reaches average precision 0.899 against 0.780. At the same completeness of 90%, false alarms fall from 813 per frame to 176, four and a half times fewer, and on the untouched test night the average precision is 0.938. That purity matters because it makes the next step, linking, cheap.&quot;</p>
+<h3>Slide 5: &quot;The model found a bug in our labels&quot; (45 s)</h3>
+<p><strong>On the slide:</strong> <code>cross_fitting.svg</code> small, and one sentence in large type: &quot;The most confident 'mistakes' were known asteroids.&quot;
+<strong>Say:</strong> &quot;When we looked at the network's most confident disagreements with our labels, they were clean new point sources, and every one was a known asteroid. Our labels had missed them because the catalogue's predicted positions were about 2.9 arcseconds off, always in the same direction. We confirmed with the stars and with JPL Horizons that the error was in the catalogue, not in our images, and fixed the labels. That is data-centric ML: the model's most confident mistakes are the cheapest way to find label errors. One more design point: the next model uses this network's scores as features, so we score each training night with a network trained on the other nights, called cross-fitting, to avoid over-confident scores. Over to Satvik.&quot;</p>
+<hr />
+<h2>Optional whiteboard (if asked &quot;explain backpropagation&quot;)</h2>
+<p>Draw: x -&gt; [W1, ReLU] -&gt; h -&gt; [W2, sigmoid] -&gt; p -&gt; loss. Say: &quot;Forward pass computes p. The loss compares p with the label y. Going backwards, the error at the output is simply p minus y for sigmoid with cross-entropy. That error times the transpose of W2, times 1 where the hidden neuron was active and 0 where it was not, gives the error at the hidden layer. Each weight's gradient is its input times the error arriving at it. Then gradient descent moves each weight a small step against its gradient. We wrote this by hand in numpy and checked it against a numerical gradient to eight decimals.&quot;</p>
+<h2>Delivery tips</h2>
+<ul>
+<li>Point at the picture on slide 2: the three panels are the heart of your part.</li>
+<li>Say &quot;average precision&quot; with one sentence of meaning the first time: &quot;a single number that summarises precision and recall for rare positives&quot;.</li>
+<li>Do not claim the network discovers asteroids; it removes junk blobs.</li>
+</ul>
+<h2>Anticipated first questions</h2>
+<ol>
+<li>&quot;Why a CNN and not just the six numbers?&quot; -&gt; pixels carry shape information numbers do not; AP 0.899 vs 0.780. 2. &quot;Why 31 x 31?&quot; -&gt; blur is about 2 px; 15 px of context shows edges and neighbours; small = fast. 3. &quot;How did you avoid overfitting?&quot; -&gt; dropout, augmentation, early stopping, validation on other nights. 4. &quot;Are your labels correct?&quot; -&gt; best available; noise sources named; two bugs found and fixed. 5. &quot;What is cross-fitting?&quot; -&gt; see slide 5.</li>
+</ol>
+</div><div class="doc"><h1>Paras: viva questions and model answers</h1>
+<h2>A. Labels and data preparation</h2>
+<p><strong>1. Where do your labels come from?</strong>
+Three sources: planted fake asteroids (perfect labels), known asteroids from catalogues (real labels, positions from JPL Horizons), and everything else called bogus (some label noise). The sky itself is not labelled.</p>
+<p><strong>2. What is injection-recovery and why do you add the fake to both science and difference images?</strong>
+Plant objects with known properties, run the normal pipeline, count what comes out. A real asteroid is in tonight's science image but not in the reference; adding the same stamp to science and difference keeps <code>reference = science - difference</code> unchanged, which is exactly that situation.</p>
+<p><strong>3. Why draw fake magnitudes uniformly instead of like real asteroids?</strong>
+So every brightness bin has enough fakes to measure completeness. Real asteroids are mostly faint; remember this when quoting rates, since our training mix is not the sky's mix.</p>
+<p><strong>4. How do you make the fakes realistic?</strong>
+Use ZTF's own PSF for each frame, sub-pixel rendering with exact flux, Poisson noise, the real frame times, and motion straight on the sky (converted to each frame's pixels). Then test realism with adversarial validation.</p>
+<p><strong>5. What is adversarial validation and what did it show?</strong>
+Train a classifier to separate two datasets that should look the same (fakes vs real known asteroids, magnitude-matched, cross-validated by night). AUC about 0.5 means indistinguishable; we got 0.46-0.48 (about 0.47 +/- 0.02).</p>
+<p><strong>6. How many chance matches do you expect when matching detections to catalogue positions?</strong>
+P(random point within 2 px of a detection) = detections x pi x 4 / good area = 1.15%. With 114 known asteroids in the field that is about 1.3 chance matches per frame, which is what we saw, so faint &quot;known&quot; matches are mostly wrong. Hence only V &lt;= 20.5 is used.</p>
+<p><strong>7. What was wrong with SkyBoT positions and how did you find out?</strong>
+The CNN's most confident &quot;bogus&quot; detections were known asteroids. SkyBoT's predictions sat about 2.9 arcsec (2.7 px) from detections in a constant direction on every night. Our WCS matches Gaia to 0.04 px and JPL Horizons to 0.1-0.3 arcsec, so SkyBoT was off. We switched to Horizons positions (median error 0.26 px vs 2.72 px) with a 2-px radius.</p>
+<p><strong>8. Why did you pass the observatory code I41 to the catalogue query?</strong>
+By default positions are for the centre of the Earth; ZTF is about 6,400 km away, which shifts a 1 AU asteroid by up to about 9 arcsec, more than 4 pixels.</p>
+<p><strong>9. What is label noise in your &quot;bogus&quot; class?</strong>
+Variable stars, other real transients, and undiscovered asteroids are all labelled bogus. So a &quot;false positive&quot; on real data may be a real object, which is the thing we hunt. On a training night it is a tiny fraction of 36,000 detections, so the model barely notices.</p>
+<p><strong>10. Describe the stamp and why three channels.</strong>
+3 x 31 x 31: science, reference, difference. A real new object shows in science and difference but not reference; a bad subtraction shows a star in both and a dipole in difference; a cosmic ray is a spike narrower than a star. The CNN compares the three panels like a person does.</p>
+<p><strong>11. How do you normalise stamps and why?</strong>
+<code>(value - median) / (1.4826 x MAD)</code> per stamp and channel, clipped to [-10, 50]. Median and MAD are robust to a bright star; &quot;5&quot; then means 5 sigma on any night; clipping stops a saturated star dominating. Nothing is fitted on training data, so there is no leakage.</p>
+<p><strong>12. Why augment, and why only the training data?</strong>
+Rotations by 0/90/180/270 plus mirror give 8 versions per stamp: the sky has no up, and it acts like more data. Validation and test must measure performance on data as it really is, so they are never augmented.</p>
+<p><strong>13. Why balance the training set and what is the cost?</strong>
+With 3% positives the gradient is dominated by easy bogus examples. We use all real + 5 bogus per real (16.7% real). The cost is inflated probabilities (the model thinks real is 16.7% common), fixed afterwards by base-rate adjustment or calibration. Validation is not balanced, so precision and false-alarm numbers stay honest.</p>
+<p><strong>14. What went wrong with the first float16 stamps?</strong>
+Saturated star cores exceed 65,504, the largest float16 value, and became <code>inf</code>. Fix: clip before converting. Found by scanning every stamp file after the build, not just trusting the code.</p>
+<h2>B. Neural network theory</h2>
+<p><strong>15. Why do you need a non-linear activation?</strong>
+Without it, stacked linear layers collapse into one linear function and depth adds nothing. ReLU makes each hidden neuron a &quot;bent line&quot;; many bent lines give a curved boundary (half-moons: logistic regression 0.88, network 0.94).</p>
+<p><strong>16. Explain the forward pass of a one-hidden-layer network.</strong>
+<code>z1 = X W1 + b1</code>, <code>h = ReLU(z1)</code>, <code>z2 = h W2 + b2</code>, <code>p = sigmoid(z2)</code>.</p>
+<p><strong>17. What is the loss and why does a confident wrong answer cost so much?</strong>
+Binary cross-entropy <code>-mean(y log p + (1-y) log(1-p))</code>. At p = 0.01 for a true positive the loss is -log 0.01 = 4.6, while a confident right answer (p = 0.99) costs 0.01.</p>
+<p><strong>18. Derive why dL/dz = p - y for sigmoid with cross-entropy.</strong>
+sigma'(z) = sigma(z)(1 - sigma(z)); the derivative of the loss with respect to p is (p - y) / (p(1 - p)); multiplying gives p - y: the sigmoid's slope cancels the log's slope.</p>
+<p><strong>19. What is backpropagation?</strong>
+The chain rule applied from the output backwards. Output weights: h^T (p - y) / n. Hidden error: (p - y) W2^T x ReLU'(z1). Hidden weights: X^T (hidden error) / n. Each layer reuses the next layer's result, so one backward sweep gives every gradient.</p>
+<p><strong>20. How did you check your hand-written gradients?</strong>
+Numerical gradient: nudge one weight by epsilon = 1e-5 on both sides, <code>(L(w+e) - L(w-e)) / 2e</code>. It matched backprop to 8 decimals (-0.02896520). Removing the ReLU' term makes the check fail at once.</p>
+<p><strong>21. What happens with a learning rate of 5.0, and what does Adam do?</strong>
+Gradient descent overshoots and diverges. Adam adapts each weight's step size using its recent gradients; a robust default.</p>
+<p><strong>22. Why must initial weights be random?</strong>
+If all weights start equal, every neuron gets the same gradient and stays identical forever.</p>
+<h2>C. The CNN</h2>
+<p><strong>23. How many parameters does the first conv layer have?</strong>
+(3 x 3 x 3 + 1) x 16 = 448. In total the network has 72,145.</p>
+<p><strong>24. Why do spatial sizes go 31 -&gt; 15 -&gt; 7 -&gt; 3?</strong>
+Padded 3x3 convolutions keep the size; each max-pool halves it (integer division). 64 channels x 3 x 3 = 576 numbers feed the dense layer.</p>
+<p><strong>25. What does dropout do?</strong>
+It randomly switches off 30% of the neurons in the head during training so the network cannot rely on any single neuron; it is turned off when scoring (<code>model.eval()</code>).</p>
+<p><strong>26. How do you know when to stop training?</strong>
+Validation average precision is checked every epoch; we keep the best epoch and stop after 4 epochs without improvement (the best was epoch 21, AP 0.899).</p>
+<p><strong>27. Why judge by validation AP and not training loss?</strong>
+Training loss measures memorising; only held-out nights show generalisation. Training is balanced and augmented, validation is realistic, so their losses are not even comparable (training 0.08 vs validation 0.035 can both be right).</p>
+<p><strong>28. Why is the CNN &quot;better&quot; if the completeness curves look alike at 90% recall?</strong>
+Because we fixed recall; the gain is purity: 176 instead of 813 false alarms per frame at the same recall. Purity makes linking cheap: only about 24% of detections remain and seed pairs drop from 52,000 to 3,500.</p>
+<p><strong>29. What is cross-fitting?</strong>
+Score each training night with a CNN trained on other nights (4 folds of 2 nights). The tracklet model uses CNN scores as features; scoring nights a CNN trained on gives over-confident scores that would not hold on new nights. Folds are by night, never by detection.</p>
+<p><strong>30. What mistakes did the CNN make that taught you something?</strong>
+Its top-scoring &quot;bogus&quot; detections were known asteroids our labels had missed: a label error, not a model error. On the test night, 9 tracklets counted as false positives by the tracklet model were also real known asteroids, so the effective false-positive count was 0.</p>
+<h2>D. Judgement</h2>
+<p><strong>31. Is 0.938 AP on the test night impressive?</strong>
+It beats the baseline everywhere, but AP on a set rich in planted fakes flatters; the evaluation chapter uses depth, known asteroids recovered and unexplained alarms per night.</p>
+<p><strong>32. What would you change with more time?</strong>
+Human-labelled real/bogus examples to complement injections (as ZTF's own classifier uses), a bigger stamp (63 x 63), a calibration step so scores read as probabilities, and an ablation of the three channels.</p>
+<p><strong>33. &quot;Did you write the model yourself?&quot;</strong> Answer truthfully (see <code>00_Start_Here/07_AI_Use_and_Integrity.md</code>): the project was built with an AI coding assistant under Advik's direction; say what you re-ran or changed (for example the from-scratch notebook, the parameter count) and explain the network on the whiteboard without notes.</p>
+</div><div class="doc"><h1>Diagrams</h1><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 520" width="1240" height="520"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="620.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: the real/bogus CNN (72,145 learnable numbers)</text>
+<rect x="30" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="95.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">Input</text>
+<text x="95.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">3 x 31 x 31</text>
+<rect x="178" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="243.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="243.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">16 filters</text>
+<text x="243.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="243.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">448 params</text>
+<line x1="160" y1="130" x2="176" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="326" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="391.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="391.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">16 filters</text>
+<text x="391.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="391.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">2,320</text>
+<line x1="308" y1="130" x2="324" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="474" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="539.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="539.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">31 -&gt; 15</text>
+<line x1="456" y1="130" x2="472" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="622" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="687.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3 x2</text>
+<text x="687.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">32 filters</text>
+<text x="687.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="687.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">4,640 + 9,248</text>
+<line x1="604" y1="130" x2="620" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="770" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="835.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="835.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">15 -&gt; 7</text>
+<line x1="752" y1="130" x2="768" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="918" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="983.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="983.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">64 filters</text>
+<text x="983.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="983.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">18,496</text>
+<line x1="900" y1="130" x2="916" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="1066" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="1131.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="1131.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">7 -&gt; 3</text>
+<line x1="1048" y1="130" x2="1064" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="1190" y1="190" x2="1190" y2="250" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="1190" y1="250" x2="185" y2="250" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="185" y1="250" x2="185" y2="288" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="90" y="290" width="190" height="110" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="185.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Flatten</text>
+<text x="185.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">64 x 3 x 3</text>
+<text x="185.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">= 576</text>
+<rect x="300" y="290" width="190" height="110" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="395.0" y="322.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Dropout 0.3</text>
+<text x="395.0" y="340.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">switch off 30%</text>
+<text x="395.0" y="358.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">of neurons while</text>
+<text x="395.0" y="376.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">training</text>
+<line x1="282" y1="345" x2="298" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="510" y="290" width="190" height="110" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="605.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Dense 64</text>
+<text x="605.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="605.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">36,928 params</text>
+<line x1="492" y1="345" x2="508" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="720" y="290" width="190" height="110" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="815.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Dense 1</text>
+<text x="815.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">65 params</text>
+<text x="815.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">-&gt; one logit</text>
+<line x1="702" y1="345" x2="718" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="930" y="290" width="190" height="110" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="1025.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Sigmoid</text>
+<text x="1025.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">logit -&gt; p(real)</text>
+<text x="1025.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">0 to 1</text>
+<line x1="912" y1="345" x2="928" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="90" y="430" width="1050" height="70" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="615.0" y="451.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Training recipe</text>
+<text x="615.0" y="468.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Loss: binary cross-entropy (BCEWithLogits)   |   Optimiser: Adam, learning rate 0.001, batch 256   |   Augmentation: random 90-degree rotations + mirror</text>
+<text x="615.0" y="485.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Early stopping: stop when validation average precision has not improved for 4 epochs; keep the best epoch (best: AP 0.899)</text>
+</svg><figcaption>cnn architecture</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 430" width="1180" height="430"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: CNN versus the simple baseline</text>
+<text x="590" y="62" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle">Average precision (AP): one number for rare positives; 1.0 is perfect. Same 67,041 validation detections (3.2% real).</text>
+<text x="40" y="124" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">logistic regression, 6 numbers (validation)</text>
+<rect x="430" y="90" width="468.0" height="52" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="910.0" y="124" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#4b5563" text-anchor="start">0.780</text>
+<text x="40" y="194" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on pixels (validation)</text>
+<rect x="430" y="160" width="539.4" height="52" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="981.4" y="194" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1d4ed8" text-anchor="start">0.899</text>
+<text x="40" y="264" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on the untouched test night</text>
+<rect x="430" y="230" width="562.8" height="52" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="1004.8" y="264" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#b45309" text-anchor="start">0.938</text>
+<rect x="40" y="320" width="540" height="90" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="310.0" y="351.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Same completeness, far fewer false alarms</text>
+<text x="310.0" y="369.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">at 90% recall: 813 -&gt; 176 false alarms per frame (4.6x fewer)</text>
+<text x="310.0" y="387.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">precision at 90% recall: 0.191 -&gt; 0.522</text>
+<rect x="600" y="320" width="540" height="90" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="870.0" y="351.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Why it matters for the next stage</text>
+<text x="870.0" y="369.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">the CNN's gain is PURITY: only ~24% of detections remain,</text>
+<text x="870.0" y="387.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so linking seed pairs fall from 52,000 to 3,500</text>
+</svg><figcaption>cnn results</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 500" width="1180" height="500"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: cross-fitting, so the second model never sees over-confident scores</text>
+<text x="590" y="62" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle">Problem: the tracklet model uses the CNN's scores as features. A CNN scoring its OWN training nights is over-confident.</text>
+<text x="30" y="120" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">fold 1</text>
+<rect x="110" y="90" width="175" height="46" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="197.5" y="117.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: SCORED</text>
+<rect x="300" y="90" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="387.5" y="117.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="490" y="90" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="577.5" y="117.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="680" y="90" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="767.5" y="117.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<text x="900" y="120" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start">train CNN on the other 6 nights,</text>
+<text x="900" y="138" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start">score the 2 held-out nights</text>
+<text x="30" y="182" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">fold 2</text>
+<rect x="110" y="152" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="197.5" y="179.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="300" y="152" width="175" height="46" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="387.5" y="179.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: SCORED</text>
+<rect x="490" y="152" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="577.5" y="179.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="680" y="152" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="767.5" y="179.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<text x="900" y="182" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<text x="900" y="200" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<text x="30" y="244" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">fold 3</text>
+<rect x="110" y="214" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="197.5" y="241.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="300" y="214" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="387.5" y="241.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="490" y="214" width="175" height="46" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="577.5" y="241.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: SCORED</text>
+<rect x="680" y="214" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="767.5" y="241.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<text x="900" y="244" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<text x="900" y="262" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<text x="30" y="306" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1f2937" text-anchor="start">fold 4</text>
+<rect x="110" y="276" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="197.5" y="303.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="300" y="276" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="387.5" y="303.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="490" y="276" width="175" height="46" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="577.5" y="303.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: train</text>
+<rect x="680" y="276" width="175" height="46" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="767.5" y="303.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2 nights: SCORED</text>
+<text x="900" y="306" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<text x="900" y="324" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start"></text>
+<rect x="110" y="350" width="760" height="56" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="490.0" y="382.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">validation and test nights are scored by the FINAL CNN (it never trained on them)</text>
+<rect x="110" y="425" width="760" height="56" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="490.0" y="457.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">result: every night's scores come from a model that never saw that night -&gt; honest features for stage 3</text>
+<text x="1010" y="400" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Folds split by NIGHT, never by detection.</text>
+</svg><figcaption>cross fitting</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" width="1180" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: where the labels come from (the sky is not labelled)</text>
+<rect x="40" y="70" width="340" height="190" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="210.0" y="106.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">1. Injection-recovery</text>
+<text x="210.0" y="124.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">plant fake asteroids with known</text>
+<text x="210.0" y="142.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">brightness, speed and direction,</text>
+<text x="210.0" y="160.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">using ZTF's own blur shape (PSF)</text>
+<text x="210.0" y="178.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">added to science AND difference</text>
+<text x="210.0" y="196.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="210.0" y="214.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">PERFECT labels; but only as real as the</text>
+<text x="210.0" y="232.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">simulation</text>
+<rect x="420" y="70" width="340" height="190" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="590.0" y="115.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">2. Known asteroids</text>
+<text x="590.0" y="133.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">look up catalogued asteroids</text>
+<text x="590.0" y="151.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(JPL Horizons positions,</text>
+<text x="590.0" y="169.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">SkyBoT as fallback)</text>
+<text x="590.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">match to detections within 2 px</text>
+<text x="590.0" y="205.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="590.0" y="223.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">REAL labels; fewer; catalogues miss faint ones</text>
+<rect x="800" y="70" width="340" height="190" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="970.0" y="106.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">3. Bogus = the rest</text>
+<text x="970.0" y="124.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">everything not matched</text>
+<text x="970.0" y="142.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="970.0" y="160.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">includes variable stars, artifacts,</text>
+<text x="970.0" y="178.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">and the rare real object nobody</text>
+<text x="970.0" y="196.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">has catalogued yet</text>
+<text x="970.0" y="214.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="970.0" y="232.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a little LABEL NOISE we accept</text>
+<line x1="210" y1="262" x2="210" y2="300" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="590" y1="262" x2="590" y2="300" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="970" y1="262" x2="970" y2="300" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="40" y="300" width="1100" height="70" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="590.0" y="329.8333333333333" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Result</text>
+<text x="590.0" y="348.8333333333333" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">one training night: 1,059 real vs 36,161 bogus   (1 : 34)   -&gt; a strongly imbalanced problem</text>
+<rect x="40" y="385" width="1100" height="70" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="590.0" y="415.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Quality checks</text>
+<text x="590.0" y="433.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">Checks: chance-match rate estimated (1.15% per point -&gt; 1.3 false matches per frame);  fakes vs real asteroids cannot be told apart (AUC 0.46-0.48)</text>
+</svg><figcaption>label sources</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 430" width="1180" height="430"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: the CNN's input is three pictures of the same 31 x 31 pixels</text>
+<text x="430" y="70" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">science</text>
+<text x="560" y="70" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">reference</text>
+<text x="690" y="70" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">difference</text>
+<text x="40" y="113" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#15803d" text-anchor="start">Real new object (asteroid)</text>
+<rect x="375" y="85" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="430.0" y="109.66666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">blob</text>
+<rect x="505" y="85" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="560.0" y="109.66666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">nothing</text>
+<rect x="635" y="85" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="690.0" y="109.66666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">blob</text>
+<text x="40" y="165" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#b91c1c" text-anchor="start">Bad subtraction of a bright star</text>
+<rect x="375" y="137" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="430.0" y="161.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">bright star</text>
+<rect x="505" y="137" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="560.0" y="161.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">bright star</text>
+<rect x="635" y="137" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="690.0" y="161.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">dipole / ring</text>
+<text x="40" y="217" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#b91c1c" text-anchor="start">Cosmic ray</text>
+<rect x="375" y="189" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="430.0" y="213.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">sharp spike</text>
+<rect x="505" y="189" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="560.0" y="213.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">nothing</text>
+<rect x="635" y="189" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="690.0" y="213.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">sharp spike</text>
+<text x="40" y="269" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#b91c1c" text-anchor="start">Noise</text>
+<rect x="375" y="241" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="430.0" y="265.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">nothing</text>
+<rect x="505" y="241" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="560.0" y="265.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">nothing</text>
+<rect x="635" y="241" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="690.0" y="265.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">faint speck</text>
+<text x="40" y="321" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#b91c1c" text-anchor="start">Edge of a masked area</text>
+<rect x="375" y="293" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="430.0" y="317.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">step / stripe</text>
+<rect x="505" y="293" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="560.0" y="317.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">step / stripe</text>
+<rect x="635" y="293" width="110" height="42" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="690.0" y="317.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">sharp edge</text>
+<rect x="850" y="85" width="300" height="260" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="1000.0" y="138.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Input to the CNN</text>
+<text x="1000.0" y="156.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">3 channels x 31 x 31 pixels</text>
+<text x="1000.0" y="174.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1000.0" y="192.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">each channel normalised:</text>
+<text x="1000.0" y="210.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(value - median)</text>
+<text x="1000.0" y="228.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">/ (1.4826 x MAD)</text>
+<text x="1000.0" y="246.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">then clipped to [-10, 50]</text>
+<text x="1000.0" y="264.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1000.0" y="282.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so '5' means 5 sigma</text>
+<text x="1000.0" y="300.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">on ANY night</text>
+<text x="590" y="395" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">A person tells these apart by comparing the three panels. The CNN learns to do the same from examples.</text>
+</svg><figcaption>triplet stamp</figcaption></figure></div></body></html>

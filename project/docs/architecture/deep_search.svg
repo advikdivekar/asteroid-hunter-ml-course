@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5560"/></marker></defs>
+<rect width="1200" height="760" fill="#ffffff"/>
+<text x="600.0" y="34" font-size="22" fill="#1a202c" text-anchor="middle" font-weight="bold">Deep search: shift-and-stack, then link the stacks across the night</text>
+<rect x="40" y="80" width="250" height="90" rx="9" fill="#e3f0fb" stroke="#2b6cb0" stroke-width="1.8"/>
+<text x="165.0" y="111.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Night&#x27;s frames (e.g. 39)</text>
+<text x="165.0" y="129.0" font-size="12" fill="#3d4852" text-anchor="middle">ordered in time, gap &lt;= 15 min</text>
+<text x="165.0" y="147.0" font-size="12" fill="#3d4852" text-anchor="middle">-&gt; stacks of 8 consecutive</text>
+<rect x="340" y="80" width="250" height="90" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="465.0" y="111.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Per-frame SNR map</text>
+<text x="465.0" y="129.0" font-size="12" fill="#3d4852" text-anchor="middle">PSF matched filter on the</text>
+<text x="465.0" y="147.0" font-size="12" fill="#3d4852" text-anchor="middle">difference image</text>
+<rect x="640" y="80" width="250" height="90" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="765.0" y="111.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Standardise over night</text>
+<text x="765.0" y="129.0" font-size="12" fill="#3d4852" text-anchor="middle">(value - median) / scatter</text>
+<text x="765.0" y="147.0" font-size="12" fill="#3d4852" text-anchor="middle">per pixel: static residuals vanish</text>
+<rect x="940" y="80" width="220" height="90" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="1050.0" y="111.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Mask bright pixels</text>
+<text x="1050.0" y="129.0" font-size="12" fill="#3d4852" text-anchor="middle">&gt; 5 sigma in single frames</text>
+<text x="1050.0" y="147.0" font-size="12" fill="#3d4852" text-anchor="middle">(no echoes of bright ones)</text>
+<line x1="290" y1="125" x2="340" y2="125" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="590" y1="125" x2="640" y2="125" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="890" y1="125" x2="940" y2="125" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="40" y="220" width="1120" height="230" rx="14" fill="none" stroke="#a0aab4" stroke-width="1.4" stroke-dasharray="7 5"/>
+<text x="54" y="240" font-size="13" fill="#5c6770" text-anchor="start" font-weight="bold">Per stack of 8 frames</text>
+<rect x="70" y="260" width="320" height="150" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="230.0" y="312.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Trial motions</text>
+<text x="230.0" y="330.0" font-size="12" fill="#3d4852" text-anchor="middle">~1,200 velocities, every direction,</text>
+<text x="230.0" y="348.0" font-size="12" fill="#3d4852" text-anchor="middle">up to 120 arcsec/hr (step 3 px/hr)</text>
+<text x="230.0" y="366.0" font-size="12" fill="#3d4852" text-anchor="middle">frames shifted so a mover lines up</text>
+<rect x="440" y="260" width="320" height="150" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="600.0" y="303.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Clipped stacking</text>
+<text x="600.0" y="321.0" font-size="12" fill="#3d4852" text-anchor="middle">each frame clipped at 5 sigma</text>
+<text x="600.0" y="339.0" font-size="12" fill="#3d4852" text-anchor="middle">sum / sqrt(8) -&gt; ~ +1.1 mag</text>
+<text x="600.0" y="357.0" font-size="12" fill="#3d4852" text-anchor="middle">keep peaks &gt;= 6 sigma</text>
+<text x="600.0" y="375.0" font-size="12" fill="#3d4852" text-anchor="middle">(measured on pure noise)</text>
+<rect x="810" y="260" width="320" height="150" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="970.0" y="303.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Merge peaks</text>
+<text x="970.0" y="321.0" font-size="12" fill="#3d4852" text-anchor="middle">peaks of one object across</text>
+<text x="970.0" y="339.0" font-size="12" fill="#3d4852" text-anchor="middle">neighbouring velocities</text>
+<text x="970.0" y="357.0" font-size="12" fill="#3d4852" text-anchor="middle">-&gt; one stack detection with</text>
+<text x="970.0" y="375.0" font-size="12" fill="#3d4852" text-anchor="middle">position + own best velocity</text>
+<line x1="390" y1="335" x2="440" y2="335" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="760" y1="335" x2="810" y2="335" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<polyline points="1050,170 1050,220" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="40" y="500" width="330" height="120" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="205.0" y="537.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Link stack detections</text>
+<text x="205.0" y="555.0" font-size="12" fill="#3d4852" text-anchor="middle">same object in &gt;= 3 independent</text>
+<text x="205.0" y="573.0" font-size="12" fill="#3d4852" text-anchor="middle">stacks along one straight line</text>
+<text x="205.0" y="591.0" font-size="12" fill="#3d4852" text-anchor="middle">1-120 arcsec/hr, residual &lt;= 2.5 px</text>
+<rect x="430" y="500" width="330" height="120" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="595.0" y="537.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Velocity-consistency cut</text>
+<text x="595.0" y="555.0" font-size="12" fill="#3d4852" text-anchor="middle">each stack&#x27;s own best velocity must</text>
+<text x="595.0" y="573.0" font-size="12" fill="#3d4852" text-anchor="middle">match the night-long motion</text>
+<text x="595.0" y="591.0" font-size="12" fill="#3d4852" text-anchor="middle">(mismatch &lt;= 6 px/hr)</text>
+<rect x="820" y="500" width="340" height="120" rx="9" fill="#efe9fb" stroke="#6b46c1" stroke-width="1.8"/>
+<text x="990.0" y="546.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Cross-match known objects</text>
+<text x="990.0" y="564.0" font-size="12" fill="#3d4852" text-anchor="middle">unknown + consistent tracklets</text>
+<text x="990.0" y="582.0" font-size="12" fill="#3d4852" text-anchor="middle">become deep candidates</text>
+<line x1="370" y1="560" x2="430" y2="560" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="760" y1="560" x2="820" y2="560" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<polyline points="970,410 970,455 205,455 205,500" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="590" y="478" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">stack detections</text>
+<rect x="40" y="670" width="1120" height="70" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="600.0" y="700.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Trust test: the NULL run</text>
+<text x="600.0" y="718.0" font-size="12" fill="#3d4852" text-anchor="middle">Shuffle frame times and re-search: real movers stop lining up, noise and artifacts do not. Result: 0 tracklets; known asteroids kept 20 of 20.</text>
+</svg>

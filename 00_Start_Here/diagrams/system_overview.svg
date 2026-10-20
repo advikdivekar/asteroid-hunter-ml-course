@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 700" width="1240" height="700"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="620.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">The whole system: from telescope images to candidate asteroids</text>
+<rect x="30" y="60" width="150" height="230" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="105.0" y="112.83333333333333" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Data source</text>
+<text x="105.0" y="131.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">ZTF archive</text>
+<text x="105.0" y="150.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">(IRSA)</text>
+<text x="105.0" y="169.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="105.0" y="188.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">science image</text>
+<text x="105.0" y="207.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">mask</text>
+<text x="105.0" y="226.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">difference image</text>
+<text x="105.0" y="245.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">PSF</text>
+<rect x="215" y="60" width="245" height="230" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="337.5" y="112.83333333333333" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">1. Data &amp; preprocessing (Aaryan)</text>
+<text x="337.5" y="131.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">query metadata, pick nights</text>
+<text x="337.5" y="150.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">download 4 files per exposure</text>
+<text x="337.5" y="169.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">load, mask bad pixels</text>
+<text x="337.5" y="188.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">estimate background &amp; noise</text>
+<text x="337.5" y="207.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">detect blobs (2-sigma, SEP)</text>
+<text x="337.5" y="226.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">split train / val / test BY</text>
+<text x="337.5" y="245.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">NIGHT</text>
+<rect x="495" y="60" width="260" height="230" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="625.0" y="131.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">2. Labels, stamps, CNN (Paras)</text>
+<text x="625.0" y="150.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">cut 3 x 31 x 31 stamps per blob</text>
+<text x="625.0" y="169.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">labels: planted fakes + known</text>
+<text x="625.0" y="188.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">asteroids, rest = bogus</text>
+<text x="625.0" y="207.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">normalise, augment, balance</text>
+<text x="625.0" y="226.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">CNN scores p(real) per blob</text>
+<rect x="790" y="60" width="260" height="230" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="920.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">3. Linking &amp; classifier (Satvik)</text>
+<text x="920.0" y="160.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">link blobs into straight tracks</text>
+<text x="920.0" y="179.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">17 numbers per track</text>
+<text x="920.0" y="198.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">XGBoost scores each track</text>
+<text x="920.0" y="217.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">cross-match known asteroids</text>
+<rect x="1085" y="60" width="130" height="230" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="1150.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Candidates</text>
+<text x="1150.0" y="160.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">unknown tracks</text>
+<text x="1150.0" y="179.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1150.0" y="198.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">a person looks</text>
+<text x="1150.0" y="217.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">at the stamps</text>
+<line x1="180" y1="175" x2="215" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="460" y1="175" x2="495" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="755" y1="175" x2="790" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="1050" y1="175" x2="1085" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="215" y="350" width="835" height="190" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="632.5" y="376" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">4. Evaluation &amp; discovery engine (Advik)</text>
+<rect x="235" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="330.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Scoreboard</text>
+<text x="330.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">plant fakes, measure</text>
+<text x="330.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">what is recovered</text>
+<text x="330.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(completeness)</text>
+<rect x="445" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="540.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Honest testing</text>
+<text x="540.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">train / val / test</text>
+<text x="540.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ untouched holdout</text>
+<text x="540.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">versions v1..v5</text>
+<rect x="655" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="750.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Deep search</text>
+<text x="750.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">add frames along a</text>
+<text x="750.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">trial motion: +0.7 mag</text>
+<text x="750.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">fainter than 1 frame</text>
+<rect x="865" y="400" width="170" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="950.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Live viewer</text>
+<text x="950.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">watch every stage</text>
+<text x="950.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">run live in a</text>
+<text x="950.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">browser</text>
+<line x1="340" y1="350" x2="340" y2="292" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<text x="340.0" y="317.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#6b7280" text-anchor="middle">measures the stages above</text>
+<line x1="920" y1="350" x2="920" y2="292" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="30" y="350" width="150" height="190" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="105.0" y="413.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Provenance</text>
+<text x="105.0" y="431.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">archive + metadata</text>
+<text x="105.0" y="449.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">cached on disk</text>
+<text x="105.0" y="467.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so every run is</text>
+<text x="105.0" y="485.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">repeatable</text>
+<text x="620" y="600" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Two ML models do the learning: a CNN on pixels (stage 2) and gradient-boosted trees on track numbers (stage 3).</text>
+<text x="620" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Everything else is physics, search and statistics. Nothing is reported as a discovery without a person checking it.</text>
+<text x="620" y="665" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Colour = owner of that part of the work.</text>
+</svg>

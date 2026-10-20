@@ -1,0 +1,37 @@
+# Conda environment for the asteroid hunter project.
+# Create:  conda env create -f environment.yml
+# Update:  conda env update -f environment.yml --prune
+name: asthunt
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  # numbers and tables
+  - numpy
+  - pandas
+  - pyarrow
+  - scipy
+  # astronomy
+  - astropy
+  - astroquery
+  - sep
+  - galsim
+  # machine learning
+  - scikit-learn
+  - xgboost
+  # PyTorch from conda-forge, NOT pip: the pip build ships its own OpenMP
+  # library, which clashes with conda's and crashes the process ("OMP: Error #15").
+  # The conda-forge build still supports the Apple GPU (MPS).
+  - pytorch
+  # plots, notebooks, utilities
+  - matplotlib
+  - jupyterlab
+  - ipykernel
+  - pyyaml
+  - tqdm
+  - requests
+  # testing
+  - pytest
+  - pip
+  - pip:
+      - -e .

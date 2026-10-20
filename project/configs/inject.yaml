@@ -1,0 +1,8 @@
+# Fake asteroids planted into every night (same fakes across that night's frames)
+asteroids_per_night: 300
+magnitude_range: [17.0, 22.0]      # bright to below the detection limit
+rate_range_arcsec_per_hour: [5.0, 100.0]
+edge_margin_pixels: 60             # keep fakes away from the image border
+match_radius_pixels: 2.0           # a detection this close to a fake counts as "found"
+known_match_radius_pixels: 2.0     # Horizons positions: median 0.26 px from our detections, 90% within 0.79 px (SkyBoT was 2.7 px off and needed 4)
+known_asteroid_max_v_mag: 20.5     # fainter known asteroids are rarely detected; their "matches" are mostly chance coincidences

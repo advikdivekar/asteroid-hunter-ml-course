@@ -1,0 +1,23 @@
+# Big or regenerable things never go into git
+data/
+reports/
+logs/
+*.fits
+*.fits.fz
+*.sh
+
+# Python and notebook clutter
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Temp file conda writes during the pip step
+condaenv.*.requirements.txt
+
+# Claude Code housekeeping
+.claude/

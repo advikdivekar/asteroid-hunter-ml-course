@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5560"/></marker></defs>
+<rect width="1200" height="800" fill="#ffffff"/>
+<text x="600.0" y="34" font-size="22" fill="#1a202c" text-anchor="middle" font-weight="bold">System overview: from raw ZTF images to a vetted candidate</text>
+<rect x="40" y="70" width="230" height="90" rx="9" fill="#e3f0fb" stroke="#2b6cb0" stroke-width="1.8"/>
+<text x="155.0" y="101.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">ZTF public archive (IRSA)</text>
+<text x="155.0" y="119.0" font-size="12" fill="#3d4852" text-anchor="middle">science, mask, difference</text>
+<text x="155.0" y="137.0" font-size="12" fill="#3d4852" text-anchor="middle">image, PSF per exposure</text>
+<rect x="330" y="70" width="220" height="90" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="440.0" y="101.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">1. Acquire + clean</text>
+<text x="440.0" y="119.0" font-size="12" fill="#3d4852" text-anchor="middle">query field/night, download,</text>
+<text x="440.0" y="137.0" font-size="12" fill="#3d4852" text-anchor="middle">bad-pixel mask, common grid</text>
+<rect x="40" y="210" width="230" height="100" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="155.0" y="237.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Live monitor (watch)</text>
+<text x="155.0" y="255.0" font-size="12" fill="#3d4852" text-anchor="middle">polls the archive, searches each</text>
+<text x="155.0" y="273.0" font-size="12" fill="#3d4852" text-anchor="middle">complete new night, writes</text>
+<text x="155.0" y="291.0" font-size="12" fill="#3d4852" text-anchor="middle">alerts.jsonl</text>
+<rect x="600" y="60" width="360" height="400" rx="14" fill="none" stroke="#a0aab4" stroke-width="1.4" stroke-dasharray="7 5"/>
+<text x="614" y="80" font-size="13" fill="#5c6770" text-anchor="start" font-weight="bold">run_full_search: three searches per unit</text>
+<rect x="620" y="90" width="320" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="780.0" y="117.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">POINT search</text>
+<text x="780.0" y="135.0" font-size="12" fill="#3d4852" text-anchor="middle">objects visible in single frames</text>
+<text x="780.0" y="153.0" font-size="12" fill="#3d4852" text-anchor="middle">CNN + linker + tracklet score</text>
+<text x="780.0" y="171.0" font-size="12" fill="#3d4852" text-anchor="middle">8 - 120 arcsec/hr</text>
+<rect x="620" y="215" width="320" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="780.0" y="242.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">FAST search</text>
+<text x="780.0" y="260.0" font-size="12" fill="#3d4852" text-anchor="middle">trailed streaks (NEOs)</text>
+<text x="780.0" y="278.0" font-size="12" fill="#3d4852" text-anchor="middle">matched filters, 4-32 px long</text>
+<text x="780.0" y="296.0" font-size="12" fill="#3d4852" text-anchor="middle">300 - 15,000 arcsec/hr</text>
+<rect x="620" y="340" width="320" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="780.0" y="367.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">DEEP search</text>
+<text x="780.0" y="385.0" font-size="12" fill="#3d4852" text-anchor="middle">shift-and-stack 8 frames</text>
+<text x="780.0" y="403.0" font-size="12" fill="#3d4852" text-anchor="middle">x ~1,200 trial motions, 6 sigma</text>
+<text x="780.0" y="421.0" font-size="12" fill="#3d4852" text-anchor="middle">1 - 120 arcsec/hr, ~1 mag deeper</text>
+<rect x="1000" y="60" width="170" height="80" rx="9" fill="#efe9fb" stroke="#6b46c1" stroke-width="1.8"/>
+<text x="1085.0" y="95.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Known objects</text>
+<text x="1085.0" y="113.0" font-size="12" fill="#3d4852" text-anchor="middle">SkyBoT + JPL Horizons</text>
+<rect x="1000" y="190" width="170" height="100" rx="9" fill="#efe9fb" stroke="#6b46c1" stroke-width="1.8"/>
+<text x="1085.0" y="226.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">2. Cross-match</text>
+<text x="1085.0" y="244.0" font-size="12" fill="#3d4852" text-anchor="middle">drop everything that</text>
+<text x="1085.0" y="262.0" font-size="12" fill="#3d4852" text-anchor="middle">matches a known asteroid</text>
+<rect x="1000" y="340" width="170" height="100" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="1085.0" y="376.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">3. Unknown</text>
+<text x="1085.0" y="394.0" font-size="12" fill="#3d4852" text-anchor="middle">candidates</text>
+<text x="1085.0" y="412.0" font-size="12" fill="#3d4852" text-anchor="middle">(one unit, one night)</text>
+<rect x="610" y="500" width="160" height="80" rx="9" fill="#e6f6ea" stroke="#2f855a" stroke-width="1.8"/>
+<text x="690.0" y="526.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">models/v4 bundle</text>
+<text x="690.0" y="544.0" font-size="12" fill="#3d4852" text-anchor="middle">CNN + classifier</text>
+<text x="690.0" y="562.0" font-size="12" fill="#3d4852" text-anchor="middle">+ thresholds</text>
+<rect x="790" y="500" width="160" height="80" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="870.0" y="526.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">configs/*.yaml</text>
+<text x="870.0" y="544.0" font-size="12" fill="#3d4852" text-anchor="middle">every threshold</text>
+<text x="870.0" y="562.0" font-size="12" fill="#3d4852" text-anchor="middle">with its why</text>
+<line x1="270" y1="115" x2="330" y2="115" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<polyline points="270,260 440,260 440,160" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="355" y="252" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">triggers</text>
+<line x1="550" y1="115" x2="600" y2="115" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="960" y1="240" x2="1000" y2="240" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="1085" y1="140" x2="1085" y2="190" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="1125" y="170" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">positions</text>
+<line x1="1085" y1="290" x2="1085" y2="340" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="1130" y="320" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">unknown only</text>
+<line x1="690" y1="500" x2="690" y2="460" stroke="#4a5560" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#a)"/>
+<text x="665" y="482" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">scores</text>
+<line x1="870" y1="500" x2="870" y2="460" stroke="#4a5560" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#a)"/>
+<text x="905" y="482" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">thresholds</text>
+<rect x="330" y="640" width="300" height="100" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="480.0" y="676.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Two-night hunt (run_hunt.py)</text>
+<text x="480.0" y="694.0" font-size="12" fill="#3d4852" text-anchor="middle">runs the search on night 1 and</text>
+<text x="480.0" y="712.0" font-size="12" fill="#3d4852" text-anchor="middle">night 2, links across nights</text>
+<rect x="700" y="640" width="200" height="100" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="800.0" y="676.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">4. Vetting</text>
+<text x="800.0" y="694.0" font-size="12" fill="#3d4852" text-anchor="middle">stamps by eye, orbit,</text>
+<text x="800.0" y="712.0" font-size="12" fill="#3d4852" text-anchor="middle">Horizons recheck</text>
+<rect x="960" y="640" width="210" height="100" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="1065.0" y="667.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Output</text>
+<text x="1065.0" y="685.0" font-size="12" fill="#3d4852" text-anchor="middle">HTML report + draft ADES;</text>
+<text x="1065.0" y="703.0" font-size="12" fill="#3d4852" text-anchor="middle">MPC only after 2 nights</text>
+<text x="1065.0" y="721.0" font-size="12" fill="#3d4852" text-anchor="middle">and manual vetting</text>
+<polyline points="1085,440 1085,600 480,600 480,640" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="780" y="592" font-size="11" fill="#4a5560" text-anchor="middle" font-style="italic">night-1 candidates feed the hunt</text>
+<line x1="630" y1="690" x2="700" y2="690" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="900" y1="690" x2="960" y2="690" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="40" y="600" font-size="12" fill="#4a5560" text-anchor="start" font-style="italic">Dashed arrows = information used by a stage</text>
+<text x="40" y="620" font-size="12" fill="#4a5560" text-anchor="start" font-style="italic">(model scores, thresholds), not data flowing.</text>
+</svg>

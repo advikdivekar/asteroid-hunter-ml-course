@@ -1,0 +1,18 @@
+# Deep search: shift-and-stack groups of consecutive frames, then link stack detections across the night
+frames_per_stack: 8                 # ~30 min of frames at ZTF's 4-min cadence; sqrt(8) = 2.8x SNR (+1.1 mag)
+max_gap_minutes: 15                 # a longer gap starts a new stack
+max_rate_arcsec_per_hour: 120.0     # trial motions up to this speed, every direction (faster objects trail: see fast movers)
+velocity_step_pixels_per_hour: 3.0  # half a step x 0.5 h stack = 0.75 px worst-case smear
+peak_threshold_sigma: 6.0           # measured on stacked pure noise (4,888 trial motions): 5.0 -> 6,179 false peaks per stack, 6.0 -> 44
+merge_radius_pixels: 3.0
+standardize_over_night: true       # per pixel: (value - night median) / night scatter -> static residuals vanish, wobbling ones are turned down
+clip_sigma: 5.0                    # robust stacking: no single frame can contribute more than 5 sigma
+mask_bright_sigma: 5.0             # hide what single frames already see (+ a 3 px border): no echoes of bright asteroids
+mask_bright_radius_pixels: 3
+max_velocity_mismatch_pixels_per_hour: 6.0   # each stack's own best motion vs the night-long motion; null test: 16 -> 0 tracklets, known asteroids: 20 -> 20
+link:
+  min_rate_arcsec_per_hour: 1.0     # over a ~4 h night even 1 "/hr moves 4 px: slow, distant objects are in reach
+  max_rate_arcsec_per_hour: 120.0
+  match_radius_pixels: 3.0          # stack positions are a little blurrier than single-frame ones
+  min_detections: 3                 # seen in at least 3 independent stacks
+  max_residual_pixels: 2.5

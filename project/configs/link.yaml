@@ -1,0 +1,7 @@
+# Linking detections from one night into straight-line tracklets
+min_rate_arcsec_per_hour: 8.0      # centroid noise (~0.5 px) over a ~30-min night fakes speeds of a few px/hr; slower is indistinguishable from a stationary artifact
+max_rate_arcsec_per_hour: 120.0    # faster than this: outside our search (would also trail)
+match_radius_pixels: 2.0           # a detection this close to the predicted position joins the tracklet
+min_detections: 4                  # out of 5 frames: allows one missed detection
+max_residual_pixels: 1.5           # max distance of any detection from the fitted straight line
+pixel_scale_arcsec: 1.012           # ZTF arcsec per pixel (header PIXSCALE)

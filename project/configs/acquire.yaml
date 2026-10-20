@@ -1,0 +1,73 @@
+# Which ZTF images to download. The split is BY NIGHT, decided here, before
+# we look at any results, so no night can leak between train and test.
+
+field: 618
+ccd: 3
+quadrant: 4
+filter: zr            # r band: most exposures of this field
+frames_per_night: 5   # consecutive exposures linked into tracklets
+
+# Image products to download for every exposure
+products:
+  - sciimg.fits              # science image
+  - mskimg.fits              # bit mask (meanings in its header: BIT00..BIT15)
+  - scimrefdiffimg.fits.fz   # difference image (science minus reference)
+  - diffimgpsf.fits          # PSF model of the difference image
+
+# The deep, fast and counterpart searches do not need the science image (59% of the download: 38 of 64 MB per frame).
+# load_exposure then runs in "light mode" (see its docstring); measured identical on a whole quadrant (328 of 328 stacked peaks
+# matched, SNR difference 0.000). The point search (it cuts science stamps) and planting fakes still need all four products.
+light_products:
+  - mskimg.fits
+  - scimrefdiffimg.fits.fz
+  - diffimgpsf.fits
+
+nights:
+  train:
+    - "2020-09-19"
+    - "2020-09-21"
+    - "2020-09-23"
+    - "2021-09-11"
+    - "2022-09-22"
+    - "2022-09-24"
+    - "2023-09-20"
+    - "2023-09-25"
+  validation:
+    - "2021-09-12"
+    - "2023-09-15"
+  test:
+    - "2019-02-08"   # best night: opposition, 1.6" seeing. Not touched until the end.
+
+# ZTF mask bits that make a pixel unusable (see BITnn keys in any mskimg header).
+# Bit 5 (ghost) is NOT masked: it covers ~4% of the chip and could hide real asteroids.
+bad_mask_bits: [0, 2, 3, 4, 7, 8, 9, 10, 12]
+
+# ---- Round 2 ----
+# A night nobody has looked at. Opened only to produce final scoreboard numbers.
+holdout_nights:
+  - "2022-06-17"
+
+# Nights with many exposures: used for stacking (deep search) and two-night linking.
+# Every good frame of these nights is downloaded, not just the first 5.
+deep_nights:
+  - "2019-02-08"   # 55 frames over 4.4 hours
+  - "2019-01-23"   # 10 frames
+  - "2019-01-20"   # 3 frames (3 nights before 2019-01-23: a two-night pair)
+
+# More of the sky: other CCD quadrants of the same exposures, for generalisation.
+extra_quadrants:
+  - [3, 1]
+  - [12, 2]
+
+# Other fields, each assigned to ONE split by night. Field 567 (CCD 10, quadrant 1) sits next to
+# field 618 on the ecliptic; these nights are near opposition (dense with asteroids), which the
+# September training nights of field 618 are not.
+extra_sources:
+  - {field: 567, ccd: 10, quadrant: 1, split: train, nights: ["2021-01-18", "2020-01-04"]}
+
+# Hunt units: searched for new objects, NEVER used for training or choosing settings.
+# Pairs of nights a few days apart, so a candidate can be confirmed on a second night (the MPC needs two).
+hunt_units:
+  - {field: 618, ccd: 3, quadrant: 4, nights: ["2019-02-08"]}               # 55 frames (also the round-1 test night)
+  - {field: 618, ccd: 3, quadrant: 4, nights: ["2019-01-20", "2019-01-23"]} # 3 + 10 frames, 3 days apart
+  - {field: 567, ccd: 10, quadrant: 1, nights: ["2019-01-28", "2019-01-31"]} # 40 + 19 frames, 3 days apart, near opposition

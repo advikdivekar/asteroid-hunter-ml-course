@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 520" width="1240" height="520"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="620.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: the real/bogus CNN (72,145 learnable numbers)</text>
+<rect x="30" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="95.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">Input</text>
+<text x="95.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">3 x 31 x 31</text>
+<rect x="178" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="243.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="243.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">16 filters</text>
+<text x="243.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="243.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">448 params</text>
+<line x1="160" y1="130" x2="176" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="326" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="391.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="391.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">16 filters</text>
+<text x="391.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="391.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">2,320</text>
+<line x1="308" y1="130" x2="324" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="474" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="539.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="539.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">31 -&gt; 15</text>
+<line x1="456" y1="130" x2="472" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="622" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="687.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3 x2</text>
+<text x="687.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">32 filters</text>
+<text x="687.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="687.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">4,640 + 9,248</text>
+<line x1="604" y1="130" x2="620" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="770" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="835.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="835.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">15 -&gt; 7</text>
+<line x1="752" y1="130" x2="768" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="918" y="70" width="130" height="120" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="983.0" y="108.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Conv 3x3</text>
+<text x="983.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">64 filters</text>
+<text x="983.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="983.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">18,496</text>
+<line x1="900" y1="130" x2="916" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="1066" y="70" width="130" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="1131.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#4b5563" text-anchor="middle">MaxPool</text>
+<text x="1131.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">7 -&gt; 3</text>
+<line x1="1048" y1="130" x2="1064" y2="130" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="1190" y1="190" x2="1190" y2="250" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="1190" y1="250" x2="185" y2="250" stroke="#6b7280" stroke-width="1.5"/>
+<line x1="185" y1="250" x2="185" y2="288" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="90" y="290" width="190" height="110" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="185.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Flatten</text>
+<text x="185.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">64 x 3 x 3</text>
+<text x="185.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">= 576</text>
+<rect x="300" y="290" width="190" height="110" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="395.0" y="322.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Dropout 0.3</text>
+<text x="395.0" y="340.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">switch off 30%</text>
+<text x="395.0" y="358.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">of neurons while</text>
+<text x="395.0" y="376.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">training</text>
+<line x1="282" y1="345" x2="298" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="510" y="290" width="190" height="110" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="605.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Dense 64</text>
+<text x="605.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ ReLU</text>
+<text x="605.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">36,928 params</text>
+<line x1="492" y1="345" x2="508" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="720" y="290" width="190" height="110" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="815.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Dense 1</text>
+<text x="815.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">65 params</text>
+<text x="815.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">-&gt; one logit</text>
+<line x1="702" y1="345" x2="718" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="930" y="290" width="190" height="110" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="1025.0" y="331.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Sigmoid</text>
+<text x="1025.0" y="349.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">logit -&gt; p(real)</text>
+<text x="1025.0" y="367.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">0 to 1</text>
+<line x1="912" y1="345" x2="928" y2="345" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="90" y="430" width="1050" height="70" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="615.0" y="451.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Training recipe</text>
+<text x="615.0" y="468.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Loss: binary cross-entropy (BCEWithLogits)   |   Optimiser: Adam, learning rate 0.001, batch 256   |   Augmentation: random 90-degree rotations + mirror</text>
+<text x="615.0" y="485.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Early stopping: stop when validation average precision has not improved for 4 epochs; keep the best epoch (best: AP 0.899)</text>
+</svg>

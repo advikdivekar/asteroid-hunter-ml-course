@@ -1,0 +1,5 @@
+# Training settings for the real/bogus CNN
+learning_rate: 0.001
+batch_size: 256
+max_epochs: 25
+patience: 4            # stop if validation average precision hasn't improved for this many epochs

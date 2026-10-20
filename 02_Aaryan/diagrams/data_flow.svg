@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 420" width="1240" height="420"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="620.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Aaryan: from the archive to files on disk</text>
+<rect x="40" y="70" width="215" height="130" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="147.5" y="103.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">Ask first</text>
+<text x="147.5" y="121.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">metadata query:</text>
+<text x="147.5" y="139.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">1,552 exposures of</text>
+<text x="147.5" y="157.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">our quadrant</text>
+<text x="147.5" y="175.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(a few seconds)</text>
+<rect x="289" y="70" width="215" height="130" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="396.5" y="103.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">Choose nights</text>
+<text x="396.5" y="121.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">only nights with</text>
+<text x="396.5" y="139.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">&gt;= 4 good r-band frames</text>
+<text x="396.5" y="157.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">quality flag = 0</text>
+<text x="396.5" y="175.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">write split to config</text>
+<line x1="257" y1="135.0" x2="287" y2="135.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="538" y="70" width="215" height="130" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="645.5" y="103.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">Download</text>
+<text x="645.5" y="121.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">4 files / exposure:</text>
+<text x="645.5" y="139.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">science 38 MB, mask 19 MB,</text>
+<text x="645.5" y="157.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">difference 7 MB, PSF 6 KB</text>
+<text x="645.5" y="175.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">retry, resume, atomic</text>
+<line x1="506" y1="135.0" x2="536" y2="135.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="787" y="70" width="215" height="130" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="894.5" y="103.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">Define a UNIT</text>
+<text x="894.5" y="121.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">field + CCD + quadrant</text>
+<text x="894.5" y="139.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ night</text>
+<text x="894.5" y="157.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">e.g. 000618_c03_q4</text>
+<text x="894.5" y="175.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">_2019-02-08</text>
+<line x1="755" y1="135.0" x2="785" y2="135.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="1036" y="70" width="215" height="130" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="1143.5" y="112.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">Load + clean</text>
+<text x="1143.5" y="130.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">read FITS, mask bad pixels,</text>
+<text x="1143.5" y="148.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">reference = science - diff</text>
+<text x="1143.5" y="166.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">background + noise</text>
+<line x1="1004" y1="135.0" x2="1034" y2="135.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="40" y="250" width="560" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="320.0" y="278.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Engineering rules for the downloader</text>
+<text x="320.0" y="296.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">220 files, 3.55 GB for the first 11 nights, 0 missing</text>
+<text x="320.0" y="314.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">re-running skips files that exist (idempotent)</text>
+<text x="320.0" y="332.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a file appears only when complete: .part -&gt; rename (atomic)</text>
+<text x="320.0" y="350.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">waits 20 s, 40 s, 60 s when the server says 503 (busy)</text>
+<rect x="640" y="250" width="560" height="120" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="920.0" y="278.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Where things live</text>
+<text x="920.0" y="296.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">data/raw: never edited</text>
+<text x="920.0" y="314.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">data/interim: cached known-asteroid lookups</text>
+<text x="920.0" y="332.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">data/processed: detections, stamps (float16)</text>
+<text x="920.0" y="350.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">configs/*.yaml: every setting, no numbers hidden in code</text>
+</svg>

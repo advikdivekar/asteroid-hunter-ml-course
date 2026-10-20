@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 560" width="1180" height="560"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Aaryan: four ways a model can cheat, and what we found in our own first data</text>
+<rect x="30" y="65" width="270" height="70" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="165.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">1. Target leakage</text>
+<text x="165.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a feature contains the answer</text>
+<rect x="30" y="150" width="270" height="100" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="165.0" y="186.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">ours</text>
+<text x="165.0" y="203.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">mag, true_rate existed only for rows WE</text>
+<text x="165.0" y="220.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">made: 'is mag missing?' = the label</text>
+<rect x="30" y="265" width="270" height="80" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="165.0" y="300.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">rule</text>
+<text x="165.0" y="317.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">feature must be measurable on new data</text>
+<rect x="315" y="65" width="270" height="70" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="450.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">2. Group leakage</text>
+<text x="450.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">train and test share a source</text>
+<rect x="315" y="150" width="270" height="100" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="450.0" y="195.16666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">ours</text>
+<text x="450.0" y="212.16666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">all tracklets came from the same 4 images</text>
+<rect x="315" y="265" width="270" height="80" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="450.0" y="291.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">rule</text>
+<text x="450.0" y="308.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">split by NIGHT; check_split_leakage must</text>
+<text x="450.0" y="325.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">be empty</text>
+<rect x="600" y="65" width="270" height="70" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="735.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">3. Shortcut learning</text>
+<text x="735.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">classes differ in an easy, unreal way</text>
+<rect x="600" y="150" width="270" height="100" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="735.0" y="186.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">ours</text>
+<text x="735.0" y="203.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">random bogus tracklets were &gt;= 222 px off</text>
+<text x="735.0" y="220.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">a line; real ones &lt;= 2.6 px</text>
+<rect x="600" y="265" width="270" height="80" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="735.0" y="300.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">rule</text>
+<text x="735.0" y="317.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">build hard negatives (near misses)</text>
+<rect x="885" y="65" width="270" height="70" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="1020.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">4. Distribution shift</text>
+<text x="1020.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">deployment data differs from training</text>
+<rect x="885" y="150" width="270" height="100" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="1020.0" y="186.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">ours</text>
+<text x="1020.0" y="203.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">test night is sharper and deeper than</text>
+<text x="1020.0" y="220.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">training nights</text>
+<rect x="885" y="265" width="270" height="80" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="1020.0" y="300.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">rule</text>
+<text x="1020.0" y="317.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">expect and measure it; keep a holdout</text>
+<rect x="120" y="380" width="940" height="150" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+<text x="590.0" y="406" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="middle">The experiment that proved it (same model, different test data)</text>
+<text x="150" y="440" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">trained on easy legacy data -&gt; tested on easy legacy data</text>
+<text x="1030" y="440" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="end">100%</text>
+<text x="150" y="470" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">trained on easy legacy data -&gt; tested on REAL near misses</text>
+<text x="1030" y="470" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="end">50%  (a coin flip)</text>
+<text x="150" y="500" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">trained on real + near misses -&gt; tested on real + near misses</text>
+<text x="1030" y="500" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="end">99%</text>
+</svg>

@@ -1,0 +1,631 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Satvik: handbook</title><style>
+@page { size: A4; margin: 16mm 14mm; }
+body { font: 11pt/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2937; max-width: 190mm; margin: 0 auto; }
+h1 { font-size: 21pt; border-bottom: 3px solid #6d28d9; padding-bottom: 4px; margin-top: 0; }
+h2 { font-size: 15pt; margin-top: 22px; color: #111827; border-bottom: 1px solid #d1d5db; padding-bottom: 2px; }
+h3 { font-size: 12.5pt; margin-top: 16px; color: #374151; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #d1d5db; padding: 4px 7px; vertical-align: top; text-align: left; }
+th { background: #f3f4f6; }
+code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+pre { background: #f3f4f6; padding: 8px; border-radius: 6px; overflow-x: auto; font-size: 9pt; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #6d28d9; margin: 10px 0; padding: 2px 12px; background: #faf5ff; }
+.doc { page-break-before: always; }
+.doc:first-of-type { page-break-before: auto; }
+figure { margin: 14px 0; page-break-inside: avoid; text-align: center; }
+figure svg { max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+figcaption { font-size: 9pt; color: #6b7280; }
+.cover { text-align: center; padding: 45mm 0 20mm; page-break-after: always; }
+.cover h1 { border: 0; font-size: 28pt; }
+.cover p { font-size: 13pt; color: #4b5563; }
+.toc li { margin: 4px 0; }
+</style></head><body><div class="cover"><h1>Satvik: handbook</h1><p>Linking, tree models and metrics</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Satvik: linking, the tracklet classifier (trees) and metrics</h1>
+<p><strong>Marks this part carries:</strong> Model Development (4, shared with Paras) and the evaluation-metrics foundation of Model Evaluation (3, shared with Advik).
+<strong>Why it matters:</strong> this is the classical-ML half of the project (logistic regression, trees, forests, boosting, cross-validation) and the metric thinking that every model in the project is judged by.</p>
+<h2>Your four jobs</h2>
+<ol>
+<li><strong>Linking:</strong> how blobs from different frames become straight-line tracks (a search, not learning), why it is fast, and the biggest bug of the project (pointing shifts).</li>
+<li><strong>The tracklet classifier:</strong> the 17 features and the physical idea behind each, the logistic regression baseline, decision tree -&gt; random forest -&gt; gradient boosting, cross-validation by night, the operating point.</li>
+<li><strong>Metrics and evaluation basics:</strong> confusion matrix, accuracy paradox, precision/recall/FPR, average precision, PR vs ROC, choosing a threshold on validation, calibration and base-rate adjustment.</li>
+<li><strong>Cross-match and vetting:</strong> separating known from unknown asteroids, the expected number of false survivors, and the checklist for a human reviewing a candidate.</li>
+</ol>
+<h2>What is NOT yours</h2>
+<p>Downloads and detection: Aaryan. Labels, stamps, the CNN: Paras (you consume its <code>score</code> column and threshold). Scoreboard, deep search, viewer: Advik.</p>
+<h2>Where your code is (in <code>project/</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Files</th>
+<th>What they do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linking</td>
+<td><code>src/asthunt/link/fit_linear_motion.py</code>, <code>link_detections_into_tracklets.py</code>, <code>measure_sky_motion.py</code>, <code>link_tracklets_across_nights.py</code></td>
+<td>straight-line fit; the seed-and-predict linker with KD-trees; speed on the sky; (two-night linker, brief)</td>
+</tr>
+<tr>
+<td>Features</td>
+<td><code>src/asthunt/features/compute_tracklet_features.py</code>, <code>count_static_neighbours.py</code>, <code>measure_forced_photometry.py</code>, <code>add_path_features.py</code></td>
+<td>the 11 + 2 + 4 = 17 numbers per tracklet</td>
+</tr>
+<tr>
+<td>Models</td>
+<td><code>src/asthunt/models/train_tracklet_classifier.py</code>, <code>train_baseline_classifier.py</code></td>
+<td>XGBoost; logistic-regression baseline</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td><code>src/asthunt/evaluate/compute_classification_metrics.py</code>, <code>choose_threshold.py</code>, <code>calibrate_probabilities.py</code>, <code>adjust_for_base_rate.py</code></td>
+<td>the numbers and the thresholds</td>
+</tr>
+<tr>
+<td>Labels and cross-match</td>
+<td><code>src/asthunt/label/label_tracklets.py</code>, <code>src/asthunt/crossmatch/crossmatch_known_asteroids.py</code>, <code>src/asthunt/report/write_candidate_report.py</code>, <code>write_ades_report.py</code></td>
+<td>tracklet labels; known vs unknown; the HTML report and draft ADES file</td>
+</tr>
+<tr>
+<td>Config</td>
+<td><code>configs/link.yaml</code></td>
+<td>linking limits</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td><code>tests/link</code>, <code>tests/features</code>, <code>tests/evaluate</code>, <code>tests/crossmatch</code>, <code>tests/report</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Lessons and notebooks</td>
+<td><code>docs/ml_basics.md</code>, <code>linking.md</code>, <code>tracklet_classifier.md</code>, <code>metrics_evaluation.md</code>, <code>crossmatch_vetting.md</code>, <code>multi_night_linking.md</code>; notebooks with the same names</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>What you hand over</h2>
+<ul>
+<li>The classical-ML section and the metrics definitions for the report.</li>
+<li>Figures: the linking picture, the model comparison table, the confusion matrix and the PR curve (from the metrics notebook).</li>
+<li>The &quot;how a human vets a candidate&quot; checklist.</li>
+</ul>
+<h2>Your seven key messages</h2>
+<ol>
+<li><strong>Linking is a search, not learning:</strong> physics says an asteroid moves in a straight line at constant speed; a KD-tree makes the search fast.</li>
+<li><strong>We never try all combinations</strong> (about 2 x 10^19); a pair of blobs defines a line and we look up the rest, after the CNN has removed about 76% of blobs.</li>
+<li><strong>The telescope pointing shifts between exposures</strong>, so linking must use a common sky grid; ignoring that was the biggest bug of the project.</li>
+<li><strong>Every feature has a physical reason</strong> (steady speed, steady brightness, shape, what the CNN thought, what the sky shows at the predicted spot).</li>
+<li><strong>Trees fit tables of numbers best;</strong> four models tied in cross-validation by night, so the choice is practical, and that honesty is a result.</li>
+<li><strong>Accuracy is the wrong metric:</strong> &quot;always bogus&quot; scores 96.8%; use recall, precision, average precision, and fix recall first.</li>
+<li><strong>A human makes the final call,</strong> with a written checklist; and we always look at the pictures, not only numbers.</li>
+</ol>
+<h2>Numbers you must know by heart</h2>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Meaning</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>about 2 x 10^19</td>
+<td>combinations if every blob were tried in every frame</td>
+<td><code>docs/linking.md</code></td>
+</tr>
+<tr>
+<td>52,000 -&gt; 3,500</td>
+<td>seed pairs before/after the CNN filter (about 15x cheaper); 0.2 s per night</td>
+<td>same</td>
+</tr>
+<tr>
+<td>8 arcsec/hour</td>
+<td>minimum fitted speed (centroid noise fakes slower speeds)</td>
+<td><code>configs/link.yaml</code></td>
+</tr>
+<tr>
+<td>3 of 5 frames; 1.5 px; 2 px</td>
+<td>minimum detections (v4; v1 used 4 of 5), max residual, match radius</td>
+<td><code>configs/link.yaml</code>, bundle</td>
+</tr>
+<tr>
+<td>2.5 px -&gt; 0.05-0.47 px</td>
+<td>real asteroids' straight-line residual before/after the common sky grid</td>
+<td><code>docs/linking.md</code></td>
+</tr>
+<tr>
+<td>11 + 2 + 4 = 17</td>
+<td>features per tracklet</td>
+<td><code>features/</code></td>
+</tr>
+<tr>
+<td>300 trees, depth 3, lr 0.05, 80% / 80%</td>
+<td>XGBoost settings</td>
+<td><code>train_tracklet_classifier.py</code></td>
+</tr>
+<tr>
+<td>0.999 / 0.983 / 0.999 / 0.999</td>
+<td>cross-validated AP: logistic regression, tree, forest, XGBoost</td>
+<td><code>docs/tracklet_classifier.md</code></td>
+</tr>
+<tr>
+<td>96% real tracklets</td>
+<td>why tracklet AP is saturated (we plant 300 fakes per night)</td>
+<td>same</td>
+</tr>
+<tr>
+<td>96.8% vs 98.4%</td>
+<td>accuracy of &quot;always bogus&quot; vs the baseline</td>
+<td><code>docs/metrics_evaluation.md</code></td>
+</tr>
+<tr>
+<td>0.95 vs 0.78</td>
+<td>ROC AUC vs average precision of the baseline</td>
+<td>same</td>
+</tr>
+<tr>
+<td>1,547 / 582 / 493 / 64,419</td>
+<td>TP / FN / FP / TN of the baseline at threshold 0.5</td>
+<td>same</td>
+</tr>
+<tr>
+<td>0.082; 19.3%; 804</td>
+<td>threshold, precision and false positives per frame at 90% recall (baseline)</td>
+<td>same</td>
+</tr>
+<tr>
+<td>9 of 9</td>
+<td>&quot;false positives&quot; on the test night that were real known asteroids</td>
+<td><code>docs/tracklet_classifier.md</code></td>
+</tr>
+</tbody>
+</table>
+<h2>Hands-on tasks (do these yourself)</h2>
+<ol>
+<li><code>cd project &amp;&amp; pytest tests/link tests/features tests/evaluate tests/crossmatch -q</code>.</li>
+<li>Re-run <code>notebooks/ml_basics.ipynb</code>, <code>metrics_evaluation.ipynb</code> and <code>tracklet_classifier.ipynb</code>. Reproduce the confusion matrix and the four-model comparison.</li>
+<li>Compute by hand: with 2,099 real and 64,974 bogus, FPR 2% and recall 95%, what is the precision? (answer in <code>VIVA_QA.md</code>).</li>
+<li>In <code>configs/link.yaml</code> set <code>min_rate_arcsec_per_hour</code> to 3 in a copy and predict how many more &quot;tracklets&quot; appear and why most would be junk.</li>
+<li>Train a depth-3 decision tree on the tracklet features and read out its first three questions in words.</li>
+</ol>
+<h2>Pitfalls</h2>
+<ul>
+<li>Reporting accuracy or ROC AUC alone for a rare-class problem.</li>
+<li>Using random <code>KFold</code> on grouped data (inflated scores): always group by night.</li>
+<li>Trusting AP from a handful of negatives (38 bogus tracklets in training, 9 in validation).</li>
+<li>Calling a tracklet &quot;bogus&quot; in a label table without checking: all 9 test-night &quot;false positives&quot; were real known asteroids.</li>
+<li>Quoting balanced-training probabilities as real-world probabilities.</li>
+</ul>
+</div><div class="doc"><h1>Satvik: knowledge pack</h1>
+<h2>0. Read first (in this order)</h2>
+<p><code>00_Start_Here/01_Project_Overview</code> -&gt; <code>02_Domain_Primer</code> (sections 8-10) -&gt; <code>03_ML_Primer</code> (sections B, C, D) -&gt; then <code>project/docs/ml_basics.md</code>, <code>linking.md</code>, <code>tracklet_classifier.md</code>, <code>metrics_evaluation.md</code>, <code>crossmatch_vetting.md</code>.</p>
+<hr />
+<h2>1. Linking: from blobs to tracks</h2>
+<p><strong>Goal:</strong> join detections in the 5 frames into <strong>tracklets</strong>: sets of detections on one straight line at a plausible speed. It is a <em>search</em>, not a learning step. Physics supplies the rule: over about 30 minutes an asteroid moves in a straight line at near-constant speed.</p>
+<h3>1.1 Never try every combination</h3>
+<p>5 frames x about 8,000 blobs: about 2 x 10^19 combinations. Instead (see <code>diagrams/linking.svg</code>):</p>
+<ol>
+<li><strong>Seed:</strong> for each pair of frames, take every pair of detections whose implied speed is between the minimum and maximum. A KD-tree <code>query_ball_point</code> finds all neighbours within <code>max_rate x dt</code> instantly.</li>
+<li><strong>Predict:</strong> a seed fixes a velocity, so we know where the object must be in every other frame; a KD-tree <code>query</code> finds the nearest detection there (within 2 px).</li>
+<li><strong>Keep:</strong> at least 3 of 5 frames (v4; v1 required 4 of 5), straight-line residual at most 1.5 px, <strong>fitted</strong> speed within limits.</li>
+<li><strong>De-duplicate:</strong> many seeds find the same tracklet; take them best-first (most detections, smallest residual) and drop any that re-use a detection.
+<strong>Using the CNN to shrink the search:</strong> keeping 95% of real detections (a threshold chosen on validation) removes about 76% of detections; seed pairs fall from 52,000 to 3,500 (about 15x cheaper); linking a night takes about 0.2 s.
+<strong>Why fits and not only seeds:</strong> the speed limit must be checked on the <em>fitted</em> track, not just on seed pairs (a bug we had and fixed with a test).</li>
+</ol>
+<h3>1.2 The biggest bug: the telescope moves between exposures</h3>
+<p>On the test night bright known asteroids failed to link while fakes linked perfectly (100%). Every real asteroid had the <strong>same</strong> residual pattern (0.6, 2.5, 2.4, 0.6, 1.7 px): identical residuals across different objects point to a <strong>per-frame</strong> error, not to orbits.</p>
+<ul>
+<li><strong>Cause:</strong> pointing shifts between exposures (up to 12 px on the test night, 4-12 px on others), and we linked in each frame's own pixels.</li>
+<li><strong>Why it hid:</strong> fakes were planted moving straight <em>in pixel coordinates</em>, so they ignored the shifts. On most nights the drift was smooth and looked like extra velocity; on the test night it jumped.</li>
+<li><strong>Fix:</strong> every detection gets <code>x_common, y_common</code> (its RA/Dec projected onto frame 1's pixel grid) and linking uses those; fakes are planned on frame 1's grid and converted through the sky into each frame's pixels.</li>
+<li><strong>Check:</strong> real asteroids' residuals fell from about 2.5 px to <strong>0.05-0.47 px</strong>.</li>
+</ul>
+<h3>1.3 The minimum speed must beat measurement noise</h3>
+<p>After the fix the test night still had 78 &quot;unknown&quot; tracklets at a median 2.5 arcsec/hour: stationary sources (bad subtractions, variable stars) whose centroids wobble. With about 0.5 px centroid noise over 28 minutes the fitted speed noise is about 1.4 px/hour per axis, so a stationary source can &quot;move&quot; at 3-6 arcsec/hour. New minimum: <strong>8 arcsec/hour</strong>, still far below the speeds of the asteroids we recover (28-48). Cost: fakes planted slower than 8 (18 of 300 per night) cannot be linked, by design.</p>
+<h3>1.4 Results</h3>
+<p>Linking efficiency (linked among linkable fakes) <strong>100%</strong> on the training night shown; tracklets per night 176-212 on training/validation nights (mostly our 300 fakes) with only <strong>1-8 bogus</strong>; on the test night 273 tracklets (34 labelled bogus, of which 14 were known asteroids our labels missed). Bogus ones are <strong>near misses</strong> (a fake plus a noise detection) or chance alignments: valuable hard negatives.</p>
+<h3>1.5 Two-night linking (brief)</h3>
+<p>Tracklets from different nights are joined with a tolerance that grows with the distance travelled; 5 of 5 known asteroids were linked over 3 days with 0 wrong. A candidate means little until it is seen on a second night (the Minor Planet Center needs two).</p>
+<hr />
+<h2>2. The tracklet classifier</h2>
+<h3>2.1 The 17 features and the idea behind each</h3>
+<table>
+<thead>
+<tr>
+<th>group</th>
+<th>features</th>
+<th>idea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>motion</td>
+<td><code>n_detections</code>, <code>rate_arcsec_per_hour</code>, <code>max_residual</code></td>
+<td>steady, straight motion</td>
+</tr>
+<tr>
+<td>brightness</td>
+<td><code>mag_mean</code>, <code>mag_std</code></td>
+<td>an asteroid keeps nearly the same brightness for 30 minutes; noise blips vary</td>
+</tr>
+<tr>
+<td>strength</td>
+<td><code>snr_mean</code>, <code>snr_min</code></td>
+<td>one weak link makes a weak track</td>
+</tr>
+<tr>
+<td>CNN opinion</td>
+<td><code>score_mean</code>, <code>score_min</code></td>
+<td>what the CNN thought of each detection (cross-fitted for training nights)</td>
+</tr>
+<tr>
+<td>shape</td>
+<td><code>npix_std</code>, <code>elongation_mean</code></td>
+<td>a point source keeps the same size and roundness</td>
+</tr>
+<tr>
+<td>static neighbours (v4)</td>
+<td><code>static_neighbours_mean</code>, <code>_max</code></td>
+<td>detections left behind at the track's own positions in other frames: a mover leaves none, an artifact walker leaves many</td>
+</tr>
+<tr>
+<td>forced photometry (v4)</td>
+<td><code>forced_snr_min</code>, <code>forced_snr_median</code>, <code>forced_snr_std</code>, <code>stack_snr</code></td>
+<td>the SNR at the predicted position in <em>every</em> frame, detected or not; real objects leave a weak blob even in frames where they were missed; noise alignments leave nothing</td>
+</tr>
+<tr>
+<td><strong>Why the last two groups exist:</strong> vetting 15 false alarms of v2 by eye showed two failure modes (artifact walkers, noise alignments); each got one feature. <strong>A bug in my own feature:</strong> it counted a slow asteroid's own detections as &quot;static neighbours&quot;, flagging 22% of real tracklets; fixed to 0.4% with a test that reproduces it.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>2.2 Decision tree -&gt; random forest -&gt; gradient boosting (<code>diagrams/boosting.svg</code>)</h3>
+<ul>
+<li><strong>Decision tree:</strong> repeated yes/no splits that best separate the classes; readable, but one tree over- or under-fits.</li>
+<li><strong>Random forest (bagging):</strong> hundreds of trees, each on a random sample of rows and features; average their votes; lower variance.</li>
+<li><strong>Gradient boosting (XGBoost):</strong> trees built one after another, each fitting the <em>errors</em> of the trees so far, scaled by a small learning rate. Usually the most accurate on tables.</li>
+<li><strong>Our settings</strong> (deliberately modest: about 1,600 tracklets): 300 trees, depth 3, learning rate 0.05, each tree sees 80% of rows and 80% of columns.</li>
+<li><strong>Why trees for this table:</strong> features on different scales, no scaling needed, handles missing values and interactions.</li>
+</ul>
+<h3>2.3 Cross-validated by night (<code>GroupKFold</code>; average precision per fold)</h3>
+<table>
+<thead>
+<tr>
+<th>model</th>
+<th>folds</th>
+<th>mean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logistic regression</td>
+<td>0.999 / 0.999 / 0.999 / 0.999</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>decision tree (depth 3)</td>
+<td>0.987 / 0.979 / 0.992 / 0.974</td>
+<td>0.983</td>
+</tr>
+<tr>
+<td>random forest</td>
+<td>0.999 / 0.999 / 1.000 / 0.999</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>XGBoost</td>
+<td>1.000 / 0.999 / 1.000 / 0.999</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>Everything except the single tree is near-perfect and the folds overlap: <strong>a statistical tie.</strong> XGBoost is used because it handles missing values and interactions without extra work, but logistic regression would be a defensible, simpler choice. Fancier is not automatically better.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>2.4 Why it looks so easy, and what really matters</h3>
+<p>In this dataset <strong>96% of tracklets are real</strong> (300 planted fakes per night, junk mostly removed by the CNN and linker): the opposite of the real sky. So AP about 0.999 only says the features separate <em>these</em> examples. The useful numbers: <strong>bogus tracklets per night above the threshold</strong> (about 2 per night from 9 validation bogus examples, &quot;a few&quot;, not &quot;exactly 2&quot;), depth, known asteroids recovered.</p>
+<h3>2.5 Operating point</h3>
+<p>Keep 95% of real tracklets on validation. In the first lesson that gave a cut of 0.980 (precision 0.989); the live bundle v4 was retrained on harder tracklets with 17 features and uses <strong>0.601</strong>. Recall by brightness (validation, v1): at least 98% brighter than 19.5, 93% at 19.5-20, <strong>79%</strong> at 20-20.5: the faint end is where it loses.</p>
+<h3>2.6 The test night (looked at once)</h3>
+<p>AP 0.988, recall 0.887, 9 tracklets labelled &quot;bogus&quot; were kept: <strong>all 9 were real known asteroids</strong> (V 17.5-21.2) that labels missed (fainter than the V &lt;= 20.5 labelling cut, or a frame where the match failed). True false positives on the test night: <strong>0</strong>; the labels were wrong.</p>
+<hr />
+<h2>3. Metrics and evaluation basics (<code>diagrams/confusion_metrics.svg</code>)</h2>
+<h3>3.1 The baseline (ML basics): logistic regression on 6 numbers</h3>
+<p><code>p = sigmoid(w.x + b)</code>, trained by minimising log-loss; features <code>snr, peak, npix, a, b, flux</code>; <code>StandardScaler</code> inside a pipeline (fitted on training data only); stratified split with a fixed seed; L2 regularisation (strength <code>C</code>). On the toy tracklet data: 99.8% (confusion 440 / 2 / 0 / 441); log10 of rate and residual gave 100%, which meant the data was too easy (see Aaryan's leakage audit).</p>
+<h3>3.2 Confusion matrix on 67,041 validation detections (2,129 real)</h3>
+<p><code>TP = 1,547, FN = 582, FP = 493, TN = 64,419</code> at threshold 0.5. Recall = 1,547 / 2,129 = 72.7%; precision = 1,547 / 2,040 = 75.8%; FPR = 493 / 64,912 = 0.76%; 493 false positives over 10 frames = about 49 per frame.</p>
+<h3>3.3 Accuracy fails</h3>
+<p>&quot;Always bogus&quot; gets <strong>96.8%</strong> accuracy and 0% recall; the baseline gets 98.4% with 72.7% recall. Almost the same accuracy, completely different usefulness.</p>
+<h3>3.4 Precision-recall vs ROC</h3>
+<p>ROC AUC 0.95 looked excellent; average precision was 0.78. ROC's x-axis divides by all bogus (65,000), so hundreds of false alarms look like a tiny step; precision divides by the number of alerts. <strong>For rare positives use precision-recall.</strong></p>
+<h3>3.5 Choosing the operating point</h3>
+<p>A missed asteroid is a lost discovery; a false alarm costs a person a minute. So fix a recall target (90%) and minimise false alarms. <code>choose_threshold(labels, scores, 0.90)</code> gave 0.082: recall 90.0%, precision 19.3%, <strong>804 false positives per frame</strong> (the CNN brings this to 176). Pushing from 73% to 90% recall multiplied false alarms by 16. <strong>Always choose thresholds on validation, never on test.</strong></p>
+<h3>3.6 Calibration: do scores mean probabilities?</h3>
+<p>Training was balanced (16.7% real) but the truth is 3.1%, so raw scores are inflated (a prediction of 0.6 was real only about 30% of the time). Two fixes: <strong>base-rate adjustment</strong> (Bayes in odds form: <code>new odds = model odds x (true prior odds / training prior odds)</code>; example from the docstring: 0.9 becomes 0.043 when real is 1 in 1,000 instead of 1 in 6) and <strong>isotonic regression</strong> (a never-decreasing curve from scores to observed fractions), fitted on one half of validation and checked on the other half (fitting and judging on the same rows would flatter it). Calibration changes what you can <em>say</em>, not the ranking.</p>
+<h3>3.7 Completeness curves</h3>
+<p>Completeness by brightness with error bars <code>sqrt(p(1-p)/n)</code>: with p = 0.7 and n = 30 the uncertainty is +/- 0.084, so bins of 30 objects mostly show noise.</p>
+<hr />
+<h2>4. Cross-match and vetting</h2>
+<ul>
+<li><strong>Cross-match:</strong> for every detection find the nearest catalogue prediction in its frame (4 px, covering catalogue offsets); a tracklet is &quot;known&quot; if at least half its detections match the <em>same</em> object, so chance coincidences are negligible.</li>
+<li><strong>Real search on validation night 2023-09-15:</strong> 31,953 detections -&gt; 13 tracklets -&gt; 10 known asteroids, 0 unknown candidates; of 7 known asteroids with V &lt;= 20 present in at least 4 frames, 5 recovered.</li>
+<li><strong>Look-elsewhere effect:</strong> thousands of seed combinations per night means some junk survives every cut; estimate the expected number before looking at candidates (about 2 per night): if a night yields about that many unknown candidates, most are probably bogus.</li>
+<li><strong>Vetting checklist</strong> for every unknown candidate: (1) stamps: point source in science and difference, nothing in reference, every frame? (2) motion steady and plausible (main-belt near opposition: 25-50 arcsec/hour roughly westward)? (3) brightness roughly constant? (4) not on a galaxy or bright star, not along a bleed trail, not a satellite streak? (5) no catalogue match even at a looser radius (15 px)? (6) seen on another night (the MPC needs at least two)?</li>
+<li><strong>Lesson from the test night:</strong> three interesting unknowns looked like main-belt asteroids in the numbers but were a galaxy residual, satellite trails and a saturated-star bleed in the pictures. <strong>Always look at the stamps.</strong></li>
+<li><strong>ADES draft:</strong> the format for reporting to the Minor Planet Center; ours uses mid-exposure times (shutter-open + 15 s), a temporary designation and a header saying &quot;DRAFT ... NOT FOR SUBMISSION&quot;.</li>
+</ul>
+<hr />
+<h2>5. Cross-part cheat sheet</h2>
+<ul>
+<li><strong>Aaryan:</strong> ZTF difference images; unit = field+CCD+quadrant+night; split by night (8/2/1/1); noise via MAD; blobs by SEP at 2 sigma; the leakage audit.</li>
+<li><strong>Paras:</strong> labels (planted fakes, Horizons, &quot;the rest&quot;); 3x31x31 stamps; CNN with 72,145 weights; AP 0.899 vs 0.780; cross-fitting by night; the label bug found by the model.</li>
+<li><strong>Advik:</strong> one deployed path; scoreboard on planted fakes and held-out nights; depth 20.5 -&gt; 21.4 -&gt; 22.1; deep search with a 6-sigma cut; live viewer; a multi-frame CNN tied XGBoost.</li>
+</ul>
+<h2>6. Self-quiz (answers in <code>VIVA_QA.md</code>)</h2>
+<ol>
+<li>Why do identical residual patterns across different asteroids point to a per-frame problem? 2. How does the CNN filter make linking about 15x cheaper? 3. Centroid noise 0.5 px over 30 minutes: what false speed can a stationary source show? 4. What does each new tree in boosting try to fix? 5. Four models score 0.98-0.999 with overlapping folds: how do you choose? 6. Why is &quot;bogus tracklets per night&quot; more useful than AP? 7. What did you check before believing 9 false positives on the test night? 8. Why do we fix recall first? 9. 2,099 real, 64,974 bogus, FPR 2%, recall 95%: precision? 10. A model trained on 50% real says 0.8; real is 3%: adjusted probability?</li>
+</ol>
+</div><div class="doc"><h1>Satvik: presentation guide</h1>
+<p><strong>Your slot: 5 minutes, 5 slides.</strong> (In the 12-minute plan: 3 minutes, slides 1, 3 and 4.) Pictures are in <code>diagrams/</code>.</p>
+<hr />
+<h3>Slide 1: &quot;From blobs to tracks&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>linking.svg</code>.
+<strong>Say:</strong> &quot;The network gives us thousands of plausible blobs per frame. An asteroid, though, moves in a nearly straight line at a steady speed over the half hour of five exposures. So we join blobs from different frames that line up that way. This is a search, not learning. Trying every combination would be about two times ten to the nineteen tracks, so instead two blobs in two frames define a line, and we look up where the object must be in the other frames with a KD-tree. Because the network has already removed about three quarters of the blobs, a night takes about a fifth of a second. The biggest bug of the whole project lived here: the telescope does not point at exactly the same pixels each exposure, up to twelve pixels of shift, so we first put every blob on one common sky grid. Real asteroids' straight-line error dropped from about two and a half pixels to under half a pixel.&quot;</p>
+<h3>Slide 2: &quot;Seventeen numbers per track&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> the feature table from your knowledge pack, grouped: motion, brightness, strength, CNN opinion, shape, static neighbours, forced photometry.
+<strong>Say:</strong> &quot;Each track becomes seventeen numbers, and each has a physical reason: steady speed and a straight line; steady brightness, because noise blips vary; the weakest link; what the neural network thought; a steady shape. Two groups were added after we looked at false alarms by eye: 'static neighbours', to catch artifacts that sit in the same place in every frame, and 'forced photometry', which measures the brightness at the predicted spot even in frames where nothing was detected, because a real object leaves a weak blob there and noise does not. I should also say that I found a bug in my own feature: it counted a slow asteroid's own detections as static neighbours and wrongly flagged 22% of real tracks; I caught it by checking on real examples, fixed it and wrote a test.&quot;</p>
+<h3>Slide 3: &quot;Trees: from one to boosting&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>boosting.svg</code>.
+<strong>Say:</strong> &quot;Tables of numbers on different scales are where tree models work best. A decision tree asks a few yes or no questions; a random forest averages hundreds of random trees; gradient boosting builds trees one after another, each correcting the errors of the ones before. We used XGBoost with deliberately modest settings: 300 shallow trees, small learning rate, each tree seeing 80% of rows and columns, because we have only about 1,600 tracklets. We cross-validated by night, never by random rows. The honest result: logistic regression, forest and XGBoost all scored about 0.999 and their folds overlap: a tie. We kept XGBoost because it handles missing values and interactions without extra work, but a simpler model would also be defensible.&quot;</p>
+<h3>Slide 4: &quot;Why we do not report accuracy&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>confusion_metrics.svg</code>.
+<strong>Say:</strong> &quot;Only about 3% of blobs are real. A model that says 'bogus' every time is 96.8% accurate and finds nothing. So we use the confusion matrix: of 2,129 real objects the baseline found 1,547, recall 73%; of the 2,040 things it flagged, 76% were real, precision. We prefer precision-recall to ROC for rare positives: ROC AUC looked excellent at 0.95 while precision at a useful recall was under 20%. And we choose the threshold on validation nights, never on test.&quot;</p>
+<h3>Slide 5: &quot;Operating point, cross-match, and the human&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> <code>operating_point.svg</code> plus three bullets: fix recall; compare with the catalogue; a person looks.
+<strong>Say:</strong> &quot;A missed asteroid is a lost discovery; a false alarm costs a person a minute. So we fix recall at 90% on validation and then count false alarms: 804 per frame for the simple baseline, 176 for the network. Each surviving track is compared with the catalogue of known asteroids; nearly everything is known. For anything unknown there is a written checklist: does it look like a point source in science and difference but not in the reference, is the motion plausible, is it on a galaxy or a bleed trail, is there any catalogue match, was it seen on another night? On our test night the numbers made three unknown tracks look like asteroids, but the pictures showed a galaxy residual, satellite trails and a bleed trail. We always look at the pictures. Over to Advik, who will show how we measure all of this honestly.&quot;</p>
+<hr />
+<h2>Delivery tips</h2>
+<ul>
+<li>Slide 4 is your strongest: say the 96.8% line slowly.</li>
+<li>Use &quot;recall&quot; and &quot;precision&quot; with one plain sentence each the first time.</li>
+<li>For numbers, round and say what they are: &quot;about 800 false alarms per frame&quot;, not &quot;804.2&quot;.</li>
+</ul>
+<h2>Anticipated first questions</h2>
+<ol>
+<li>&quot;Why XGBoost and not a neural network?&quot; -&gt; small table of 17 numbers, about 1,600 examples: trees are strong, need no scaling; networks would overfit. 2. &quot;Why did models tie?&quot; -&gt; the features carry the signal; simplicity. 3. &quot;How do you pick the threshold?&quot; -&gt; recall target on validation. 4. &quot;What is the baseline?&quot; -&gt; logistic regression on six numbers. 5. &quot;Why cross-validate by night?&quot; -&gt; same-night leakage.</li>
+</ol>
+</div><div class="doc"><h1>Satvik: viva questions and model answers</h1>
+<h2>A. Linking</h2>
+<p><strong>1. What is a tracklet and how is it found?</strong>
+A set of detections in different frames on one straight line at a plausible speed. Seed: a pair of detections in two frames at a plausible speed; predict: that fixes a line, so look up the nearest detection where the object must be in the other frames (KD-tree, 2 px); keep: at least 3 of 5 frames, within 1.5 px of the fitted line, fitted speed 8-120 arcsec/hour; de-duplicate best-first.</p>
+<p><strong>2. Why not try every combination?</strong>
+5 frames x about 8,000 blobs gives about 2 x 10^19 combinations. A pair of blobs defines a line, so we look the rest up instead of enumerating.</p>
+<p><strong>3. How does the CNN make linking cheaper?</strong>
+Keeping 95% of real detections removes about 76% of blobs; seed pairs fall from 52,000 to 3,500 (about 15x) and a night links in about 0.2 s.</p>
+<p><strong>4. Why do identical residual patterns across different asteroids point to a per-frame problem?</strong>
+Different orbits would give different residuals. The same pattern (0.6, 2.5, 2.4, 0.6, 1.7 px) for every asteroid means something common to each frame: the pointing shift.</p>
+<p><strong>5. Explain the common sky grid.</strong>
+Every blob's RA/Dec is projected onto frame 1's pixel grid (<code>x_common</code>, <code>y_common</code>), because asteroids move in straight lines on the sky, not in each frame's pixels. Residuals dropped from about 2.5 px to 0.05-0.47 px.</p>
+<p><strong>6. Why was the bug hidden?</strong>
+Fakes were planted moving straight in pixel coordinates, so they ignored the pointing shifts and linked perfectly. Our simulation shared the pipeline's blind spot. Lesson: test the simulation against real objects.</p>
+<p><strong>7. Why is the minimum speed 8 arcsec/hour?</strong>
+Centroid noise (about 0.5 px over 28 minutes) makes a stationary source appear to move at 3-6 arcsec/hour; 78 such tracklets appeared on the test night. 8 is still far below the 28-48 arcsec/hour of the asteroids we recover. Cost: fakes slower than 8 (18 of 300) cannot be linked, by design.</p>
+<p><strong>8. Centroid noise is 0.5 px over 30 minutes. Roughly what false speed can a stationary source show?</strong>
+Fitted speed noise is about 1.4 px/hour per axis (px/hour is about arcsec/hour here), so false speeds of several arcsec/hour appear; hence a minimum well above that.</p>
+<p><strong>9. Why check the speed on the fitted track and not only on seeds?</strong>
+A seed pair can pass the limit while the final fitted track does not; the check on seeds alone let slow tracks through. Fixed, with a test.</p>
+<h2>B. Features and models</h2>
+<p><strong>10. What features describe a tracklet and why?</strong>
+17 numbers: motion (count, rate, max residual), brightness (mean, std), strength (mean and min SNR), CNN opinion (mean and min score), shape (size spread, elongation), static neighbours (mean, max), forced photometry (min, median, std of the SNR at the predicted spot, stack SNR). Each reflects physical behaviour: a mover is steady, round, leaves nothing behind and leaves a weak blob where it was missed.</p>
+<p><strong>11. What are static neighbours and forced photometry?</strong>
+Static neighbours count detections left at the track's own positions in other frames: a mover leaves none, an artifact walker leaves many. Forced photometry measures SNR at the predicted position in every frame, detected or not; real objects leave a weak blob, noise alignments leave nothing.</p>
+<p><strong>12. What bug did your static-neighbour feature have?</strong>
+It counted a slow asteroid's own detections as neighbours and flagged 22% of real tracklets. Found by checking the feature on real examples; fixed to 0.4%; a test reproduces it; v3 (trained with the bug) was retired and v4 trained correctly.</p>
+<p><strong>13. Why trees for this problem?</strong>
+A small table of numbers on different scales, about 1,600 examples: trees need no scaling, handle interactions and missing values, and are the standard strong choice.</p>
+<p><strong>14. Explain decision tree, random forest and gradient boosting.</strong>
+Tree: yes/no splits; forest: many random trees averaged (bagging, lower variance); boosting: trees built sequentially, each fitting the errors of the previous ones with a small learning rate.</p>
+<p><strong>15. What are your XGBoost settings and why?</strong>
+300 trees, depth 3, learning rate 0.05, subsample 0.8, colsample 0.8: modest on purpose for about 1,600 tracklets; shallow trees and subsampling limit overfitting.</p>
+<p><strong>16. Four models scored 0.98-0.999 with overlapping folds. How do you choose?</strong>
+They are statistically tied; choose on practical grounds (handles missing values and interactions) or simplicity. Logistic regression would be defensible. We say so.</p>
+<p><strong>17. Why cross-validate by night?</strong>
+Rows from the same night share stars, noise and artifacts; random KFold would give inflated scores. GroupKFold keeps each night entirely in one fold.</p>
+<p><strong>18. Why is &quot;bogus tracklets per night&quot; more useful than AP here?</strong>
+96% of our tracklets are real because we plant 300 fakes per night, so AP saturates (about 0.999). What a human experiences is how many junk tracks pass the threshold per night (about 2 from 9 validation examples: &quot;a few&quot;).</p>
+<p><strong>19. The test night showed 9 false positives. What did you check?</strong>
+We compared them with all known asteroids: all 9 were real known objects (V 17.5-21.2) that our labels missed (fainter than the V &lt;= 20.5 label cut, or a frame with a failed match). True false positives: 0; the labels were wrong.</p>
+<h2>C. Metrics</h2>
+<p><strong>20. Why is accuracy useless here?</strong>
+&quot;Always bogus&quot; scores 96.8% with zero recall; the baseline scores 98.4% with 72.7% recall. Accuracy mostly measures the common class.</p>
+<p><strong>21. Define recall, precision and false-positive rate with our numbers.</strong>
+TP 1,547, FN 582, FP 493, TN 64,419. Recall = 1,547 / 2,129 = 72.7%; precision = 1,547 / 2,040 = 75.8%; FPR = 493 / 64,912 = 0.76%.</p>
+<p><strong>22. ROC AUC was 0.95 and AP 0.78. Why the difference?</strong>
+ROC divides false positives by all 65,000 negatives, so hundreds of false alarms look tiny; precision divides by the number of alerts. With rare positives, precision-recall is the honest picture.</p>
+<p><strong>23. How and why do you choose the threshold at a recall target?</strong>
+A missed asteroid is a lost discovery, a false alarm costs a minute, so fix recall (90%) on validation and minimise false alarms. For the baseline: threshold 0.082, precision 19.3%, 804 false positives per frame. Never choose on test.</p>
+<p><strong>24. Worked example: 2,099 real, 64,974 bogus, FPR 2%, recall 95%. What is the precision?</strong>
+TP = 0.95 x 2,099 = 1,994; FP = 0.02 x 64,974 = 1,299; precision = 1,994 / (1,994 + 1,299) = 60.6%.</p>
+<p><strong>25. Worked example: a model trained on 50% real outputs 0.8, but real objects are 3%. What is the adjusted probability?</strong>
+Odds = 0.8 / 0.2 = 4. Prior-odds ratio = (0.03 / 0.97) / (0.5 / 0.5) = 0.0309. New odds = 4 x 0.0309 = 0.124; probability = 0.124 / 1.124 = 11%.</p>
+<p><strong>26. What is calibration and how do you do it?</strong>
+Making scores mean probabilities. Raw scores are inflated because training was balanced (16.7% real vs 3.1% true). Base-rate adjustment (Bayes in odds form) needs no fitting; isotonic regression fits a never-decreasing curve; fit on one half of validation and test on the other. Ranking is unchanged.</p>
+<p><strong>27. What does a completeness error bar mean?</strong>
+Standard error sqrt(p(1-p)/n): with p = 0.7 and n = 30 it is +/- 0.084, so differences between bins of 30 objects are mostly noise.</p>
+<p><strong>28. What is the baseline model and why have one?</strong>
+Logistic regression on six numbers per detection (AP 0.780). Every fancier model must beat it, or it is not worth the complexity.</p>
+<h2>D. Cross-match and vetting</h2>
+<p><strong>29. How do you decide a tracklet is a known asteroid?</strong>
+At least half of its detections match the same catalogue object within 4 px (any brightness). Requiring several matches makes chance coincidences negligible.</p>
+<p><strong>30. A night gives 3 unknown candidates; validation predicts about 2 bogus per night. What do you conclude?</strong>
+Consistent with background: most are probably bogus; vet them, and treat any real one as needing a second night. A non-discovery is the expected outcome.</p>
+<p><strong>31. Walk through the vetting checklist.</strong>
+Stamps (science and difference show a point source, reference nothing, every frame); motion steady and plausible; brightness steady; not on a galaxy, bright star, bleed trail or satellite streak; no catalogue match at a looser radius; seen on another night.</p>
+<p><strong>32. Why look at the pictures if the numbers look convincing?</strong>
+On the test night track #45 had a steady main-belt-like motion and brightness, but the stamps showed it sat on an elongated galaxy visible in the reference: a subtraction residual. Numbers can mislead; pixels settle it.</p>
+<p><strong>33. Why does the ADES draft use mid-exposure times?</strong>
+OBSJD is the shutter-open time; the object was at its recorded position on average 15 s later (JPL Horizons confirmed mid-exposure fits better: 0.13 vs 0.21 arcsec). The draft is marked &quot;NOT FOR SUBMISSION&quot;: real reports need vetted multi-night objects.</p>
+<p><strong>34. &quot;Did you write the models yourself?&quot;</strong> Answer truthfully (see <code>00_Start_Here/07_AI_Use_and_Integrity.md</code>): the project was built with an AI coding assistant under Advik's direction; say what you re-ran or changed (for example the confusion matrix, the model comparison, the hand calculations) and explain a model without notes.</p>
+</div><div class="doc"><h1>Diagrams</h1><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" width="1180" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Satvik: from one decision tree to gradient boosting (XGBoost)</text>
+<rect x="40" y="70" width="320" height="150" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="200.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Decision tree</text>
+<text x="200.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a single tree: a few yes/no</text>
+<text x="200.0" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">questions, e.g. 'is the</text>
+<text x="200.0" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">brightness steady?'</text>
+<text x="200.0" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="200.0" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">readable, but one tree</text>
+<text x="200.0" y="203.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">over- or under-fits</text>
+<rect x="430" y="70" width="320" height="150" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="590.0" y="104.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Random forest (bagging)</text>
+<text x="590.0" y="122.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">hundreds of trees, each on a</text>
+<text x="590.0" y="140.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">random sample of rows and</text>
+<text x="590.0" y="158.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">features; AVERAGE their votes</text>
+<text x="590.0" y="176.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="590.0" y="194.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">lower variance</text>
+<rect x="820" y="70" width="320" height="150" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="980.0" y="95.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Gradient boosting</text>
+<text x="980.0" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">trees built ONE AFTER ANOTHER;</text>
+<text x="980.0" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">each fits the ERRORS of the</text>
+<text x="980.0" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">trees before it, scaled by a</text>
+<text x="980.0" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">small learning rate</text>
+<text x="980.0" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="980.0" y="203.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">usually the best on tables</text>
+<line x1="362" y1="145" x2="428" y2="145" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="752" y1="145" x2="818" y2="145" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="40" y="250" width="1100" height="90" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="590.0" y="290.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Our model (train_tracklet_classifier.py)</text>
+<text x="590.0" y="308.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">300 trees, depth 3, learning rate 0.05, each tree sees 80% of rows and 80% of columns.   Settings are modest on purpose: only ~1,600 tracklets to learn from.</text>
+<rect x="40" y="360" width="1100" height="90" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="590.0" y="391.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Honest result</text>
+<text x="590.0" y="409.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">cross-validated by NIGHT (GroupKFold): logistic regression 0.999, tree 0.983, forest 0.999, XGBoost 0.999 (average precision).</text>
+<text x="590.0" y="427.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">They TIE, so the choice is practical (handles missing values, interactions). A simpler model would also be defensible.</text>
+</svg><figcaption>boosting</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 500" width="1180" height="500"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Satvik: reading a confusion matrix (the logistic-regression baseline, validation nights)</text>
+<rect x="60" y="110" width="200" height="70" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="160.0" y="149.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">called real</text>
+<rect x="270" y="110" width="200" height="70" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="370.0" y="149.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">called bogus</text>
+<text x="40" y="150" font-family="Helvetica, Arial, sans-serif" font-size="1" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<rect x="60" y="190" width="200" height="90" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="160.0" y="229.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#1f2937" text-anchor="middle">1,547</text>
+<text x="160.0" y="249.66666666666666" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#1f2937" text-anchor="middle">true positives</text>
+<rect x="270" y="190" width="200" height="90" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+<text x="370.0" y="229.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">582</text>
+<text x="370.0" y="248.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">false negatives (missed)</text>
+<rect x="60" y="290" width="200" height="90" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+<text x="160.0" y="329.8333333333333" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">493</text>
+<text x="160.0" y="348.8333333333333" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">false positives (alarms)</text>
+<rect x="270" y="290" width="200" height="90" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="370.0" y="329.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#1f2937" text-anchor="middle">64,419</text>
+<text x="370.0" y="349.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#1f2937" text-anchor="middle">true negatives</text>
+<text x="40" y="235" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="end">truly real</text>
+<text x="40" y="335" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="end">truly bogus</text>
+<text x="520" y="130" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">recall = 1,547 / 2,129 = 72.7%</text>
+<text x="520" y="155" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">(of all real objects, how many kept)</text>
+<text x="520" y="180" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start"></text>
+<text x="520" y="205" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">precision = 1,547 / 2,040 = 75.8%</text>
+<text x="520" y="230" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">(of everything flagged, how many real)</text>
+<text x="520" y="255" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start"></text>
+<text x="520" y="280" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">false-positive rate = 493 / 64,912 = 0.76%</text>
+<text x="520" y="305" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start"></text>
+<text x="520" y="330" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">accuracy = (1,547 + 64,419) / 67,041 = 98.4%</text>
+<rect x="60" y="410" width="1060" height="70" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="590.0" y="431.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Why we do not report accuracy alone</text>
+<text x="590.0" y="449.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">Accuracy paradox: 'always say bogus' scores 96.8% accuracy and finds nothing (recall 0%). With rare positives, accuracy only measures the common class.</text>
+<text x="590.0" y="467.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">Use recall, precision and the precision-recall curve.</text>
+</svg><figcaption>confusion metrics</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 500" width="1180" height="500"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Satvik: linking = a smart search, not learning</text>
+<text x="590" y="62" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle">5 frames x ~8,000 blobs: trying every combination = about 2 x 10^19 tracks. Impossible. So: seed, predict, check.</text>
+<rect x="60" y="90" width="120" height="250" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="120" y="112" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">frame 1</text>
+<rect x="230" y="90" width="120" height="250" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="290" y="112" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">frame 2</text>
+<rect x="400" y="90" width="120" height="250" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="460" y="112" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">frame 3</text>
+<rect x="570" y="90" width="120" height="250" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="630" y="112" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">frame 4</text>
+<rect x="740" y="90" width="120" height="250" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="800" y="112" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">frame 5</text>
+<line x1="60" y1="322" x2="860" y2="124" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<circle cx="120" cy="300" r="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="290" cy="262" r="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="460" cy="224" r="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="630" cy="186" r="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="800" cy="148" r="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<circle cx="90" cy="160" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="150" cy="230" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="260" cy="300" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="320" cy="150" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="430" cy="290" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="490" cy="130" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="600" cy="250" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="660" cy="300" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="770" cy="220" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="830" cy="270" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="140" cy="140" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<circle cx="300" cy="205" r="4" fill="none" stroke="#6b7280" stroke-width="1.6"/>
+<rect x="900" y="90" width="250" height="250" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="1025.0" y="125.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">How</text>
+<text x="1025.0" y="142.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1. SEED: two blobs in two</text>
+<text x="1025.0" y="159.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">frames at a plausible speed</text>
+<text x="1025.0" y="176.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">(8-120 arcsec/hour)</text>
+<text x="1025.0" y="193.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1025.0" y="210.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">2. PREDICT: that fixes a line,</text>
+<text x="1025.0" y="227.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">so look UP where the object</text>
+<text x="1025.0" y="244.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">must be in the other frames</text>
+<text x="1025.0" y="261.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">(KD-tree, within 2 px)</text>
+<text x="1025.0" y="278.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1025.0" y="295.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">3. KEEP: &gt;= 3 of 5 frames,</text>
+<text x="1025.0" y="312.1666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">within 1.5 px of the line</text>
+<rect x="40" y="370" width="540" height="110" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="310.0" y="394.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Why it is fast</text>
+<text x="310.0" y="411.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">the CNN removes ~76% of blobs first: seed pairs 52,000 -&gt; 3,500</text>
+<text x="310.0" y="428.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">linking one night takes about 0.2 seconds</text>
+<text x="310.0" y="445.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">minimum speed 8 arcsec/hour: slower 'movers' are just wobbling</text>
+<text x="310.0" y="462.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">stationary artifacts</text>
+<rect x="600" y="370" width="540" height="110" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+<text x="870.0" y="394.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="middle">The biggest bug we found</text>
+<text x="870.0" y="411.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">the telescope POINTING SHIFTS between exposures (up to 12 px).</text>
+<text x="870.0" y="428.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Fix: put every blob on frame 1's sky grid (x_common, y_common)</text>
+<text x="870.0" y="445.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">before linking. Real asteroids' straight-line error fell from</text>
+<text x="870.0" y="462.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">~2.5 px to 0.05-0.47 px.</text>
+</svg><figcaption>linking</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" width="1180" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Satvik: choosing the operating point (fix recall first, then count the false alarms)</text>
+<rect x="40" y="70" width="330" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="205.0" y="90.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">The cost argument</text>
+<text x="205.0" y="108.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a missed asteroid = a lost discovery</text>
+<text x="205.0" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a false alarm = one minute of a</text>
+<text x="205.0" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">person's time</text>
+<text x="205.0" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="205.0" y="180.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so: target 90% recall, then</text>
+<text x="205.0" y="198.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">minimise false alarms</text>
+<rect x="410" y="70" width="330" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="575.0" y="108.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">How we choose</text>
+<text x="575.0" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">threshold chosen on the VALIDATION</text>
+<text x="575.0" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">nights (never on test):</text>
+<text x="575.0" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">'the cut that keeps 90% of real</text>
+<text x="575.0" y="180.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">objects'</text>
+<rect x="780" y="70" width="360" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="960.0" y="101.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Do scores mean probabilities?</text>
+<text x="960.0" y="118.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">raw scores are inflated because</text>
+<text x="960.0" y="135.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">training was balanced (16.7% real,</text>
+<text x="960.0" y="152.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">truth 3.1%). Base-rate adjustment or</text>
+<text x="960.0" y="169.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">isotonic calibration fixes the meaning,</text>
+<text x="960.0" y="186.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">not the ranking</text>
+<text x="590" y="250" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">False alarms per frame at 90% recall (validation nights, 67,041 detections, 3.2% real)</text>
+<text x="40" y="311" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">logistic regression on 6 numbers</text>
+<rect x="330" y="275" width="640.0" height="54" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="982.0" y="310" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#4b5563" text-anchor="start">813</text>
+<text x="40" y="381" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on pixels</text>
+<rect x="330" y="345" width="138.54858548585486" height="54" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="480.54858548585486" y="380" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#1d4ed8" text-anchor="start">176</text>
+<rect x="330" y="415" width="640" height="40" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="650.0" y="439.3333333333333" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">4.6 times fewer false alarms at the same completeness  (AP 0.780 -&gt; 0.899)</text>
+</svg><figcaption>operating point</figcaption></figure></div></body></html>

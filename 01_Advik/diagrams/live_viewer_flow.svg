@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 430" width="1180" height="430"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Advik: how the live viewer works</text>
+<rect x="40" y="70" width="245" height="150" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="162.5" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Browser page</text>
+<text x="162.5" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">pick a night, press Start</text>
+<text x="162.5" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">polls the state every 0.8 s</text>
+<text x="162.5" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">shows pictures + numbers</text>
+<text x="162.5" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">Next / Stop buttons</text>
+<rect x="319" y="70" width="245" height="150" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="441.5" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Small web server</text>
+<text x="441.5" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">serve_live_viewer.py</text>
+<text x="441.5" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(Python standard library)</text>
+<text x="441.5" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">/api/state, /img/..</text>
+<text x="441.5" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">/api/start, /api/next</text>
+<line x1="287" y1="145.0" x2="317" y2="145.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="598" y="70" width="245" height="150" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="720.5" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Shared state</text>
+<text x="720.5" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">live_state.py</text>
+<text x="720.5" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">stages, numbers, pictures</text>
+<text x="720.5" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a gate that waits for</text>
+<text x="720.5" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">'Next' in step mode</text>
+<line x1="566" y1="145.0" x2="596" y2="145.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="877" y="70" width="245" height="150" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="999.5" y="113.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Traced run</text>
+<text x="999.5" y="131.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">run_traced_night.py</text>
+<text x="999.5" y="149.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">calls the REAL functions</text>
+<text x="999.5" y="167.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">in the real order and</text>
+<text x="999.5" y="185.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">reports each stage</text>
+<line x1="845" y1="145.0" x2="875" y2="145.0" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="40" y="250" width="1100" height="80" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="590.0" y="276.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#15803d" text-anchor="middle">Why you can trust what it shows</text>
+<text x="590.0" y="293.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Tested: on a real night the traced run gives the SAME detections, scores, tracks and candidates as run_night_pipeline (maximum difference 0.0).</text>
+<text x="590.0" y="310.6666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">'fakes' plants fake asteroids first, so you can watch them found (bright) or missed (too faint for a single frame).</text>
+<rect x="40" y="345" width="1100" height="70" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="590.0" y="384.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">12 stages: pick night -&gt; open files -&gt; noise -&gt; plant fakes -&gt; find blobs -&gt; stamps -&gt; CNN -&gt; link -&gt; features -&gt; classifier -&gt; known? -&gt; result</text>
+</svg>

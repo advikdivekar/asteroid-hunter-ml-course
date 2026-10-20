@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" width="1180" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Satvik: choosing the operating point (fix recall first, then count the false alarms)</text>
+<rect x="40" y="70" width="330" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="205.0" y="90.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">The cost argument</text>
+<text x="205.0" y="108.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a missed asteroid = a lost discovery</text>
+<text x="205.0" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">a false alarm = one minute of a</text>
+<text x="205.0" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">person's time</text>
+<text x="205.0" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="205.0" y="180.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so: target 90% recall, then</text>
+<text x="205.0" y="198.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">minimise false alarms</text>
+<rect x="410" y="70" width="330" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="575.0" y="108.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">How we choose</text>
+<text x="575.0" y="126.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">threshold chosen on the VALIDATION</text>
+<text x="575.0" y="144.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">nights (never on test):</text>
+<text x="575.0" y="162.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">'the cut that keeps 90% of real</text>
+<text x="575.0" y="180.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">objects'</text>
+<rect x="780" y="70" width="360" height="140" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="960.0" y="101.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">Do scores mean probabilities?</text>
+<text x="960.0" y="118.16666666666667" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">raw scores are inflated because</text>
+<text x="960.0" y="135.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">training was balanced (16.7% real,</text>
+<text x="960.0" y="152.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">truth 3.1%). Base-rate adjustment or</text>
+<text x="960.0" y="169.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">isotonic calibration fixes the meaning,</text>
+<text x="960.0" y="186.16666666666669" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">not the ranking</text>
+<text x="590" y="250" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">False alarms per frame at 90% recall (validation nights, 67,041 detections, 3.2% real)</text>
+<text x="40" y="311" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">logistic regression on 6 numbers</text>
+<rect x="330" y="275" width="640.0" height="54" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="982.0" y="310" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#4b5563" text-anchor="start">813</text>
+<text x="40" y="381" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="start">CNN on pixels</text>
+<rect x="330" y="345" width="138.54858548585486" height="54" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="480.54858548585486" y="380" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="bold" fill="#1d4ed8" text-anchor="start">176</text>
+<rect x="330" y="415" width="640" height="40" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="1.6"/>
+<text x="650.0" y="439.3333333333333" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">4.6 times fewer false alarms at the same completeness  (AP 0.780 -&gt; 0.899)</text>
+</svg>

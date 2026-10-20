@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a5560"/></marker></defs>
+<rect width="1200" height="700" fill="#ffffff"/>
+<text x="600.0" y="34" font-size="22" fill="#1a202c" text-anchor="middle" font-weight="bold">Point search: run_night_pipeline (the evaluated and deployed path)</text>
+<rect x="40" y="90" width="250" height="110" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="165.0" y="122.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">1. Detect</text>
+<text x="165.0" y="140.0" font-size="12" fill="#3d4852" text-anchor="middle">difference images</text>
+<text x="165.0" y="158.0" font-size="12" fill="#3d4852" text-anchor="middle">threshold 2 sigma, area &gt;= 5 px</text>
+<text x="165.0" y="176.0" font-size="12" fill="#3d4852" text-anchor="middle">cut 31x31 stamps (sci/ref/diff)</text>
+<rect x="330" y="90" width="250" height="110" rx="9" fill="#e6f6ea" stroke="#2f855a" stroke-width="1.8"/>
+<text x="455.0" y="122.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">2. Score</text>
+<text x="455.0" y="140.0" font-size="12" fill="#3d4852" text-anchor="middle">real/bogus CNN</text>
+<text x="455.0" y="158.0" font-size="12" fill="#3d4852" text-anchor="middle">3 conv blocks -&gt; 1 logit</text>
+<text x="455.0" y="176.0" font-size="12" fill="#3d4852" text-anchor="middle">keeps score &gt;= bundle threshold</text>
+<line x1="290" y1="145" x2="330" y2="145" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="620" y="90" width="250" height="110" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="745.0" y="122.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">3. Link</text>
+<text x="745.0" y="140.0" font-size="12" fill="#3d4852" text-anchor="middle">straight-line tracklets</text>
+<text x="745.0" y="158.0" font-size="12" fill="#3d4852" text-anchor="middle">8-120 arcsec/hr, &gt;= 4 of 5 frames</text>
+<text x="745.0" y="176.0" font-size="12" fill="#3d4852" text-anchor="middle">residual &lt;= 1.5 px (common grid)</text>
+<line x1="580" y1="145" x2="620" y2="145" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="910" y="90" width="250" height="110" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="1035.0" y="122.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">4. Describe</text>
+<text x="1035.0" y="140.0" font-size="12" fill="#3d4852" text-anchor="middle">motion, brightness scatter,</text>
+<text x="1035.0" y="158.0" font-size="12" fill="#3d4852" text-anchor="middle">CNN opinion, static neighbours,</text>
+<text x="1035.0" y="176.0" font-size="12" fill="#3d4852" text-anchor="middle">forced photometry on the path</text>
+<line x1="870" y1="145" x2="910" y2="145" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="40" y="280" width="250" height="110" rx="9" fill="#e6f6ea" stroke="#2f855a" stroke-width="1.8"/>
+<text x="165.0" y="321.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">5. Score tracklets</text>
+<text x="165.0" y="339.0" font-size="12" fill="#3d4852" text-anchor="middle">tracklet classifier (XGBoost)</text>
+<text x="165.0" y="357.0" font-size="12" fill="#3d4852" text-anchor="middle">-&gt; tracklet_score</text>
+<rect x="330" y="280" width="250" height="110" rx="9" fill="#efe9fb" stroke="#6b46c1" stroke-width="1.8"/>
+<text x="455.0" y="321.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">6. Cross-match known</text>
+<text x="455.0" y="339.0" font-size="12" fill="#3d4852" text-anchor="middle">SkyBoT / Horizons positions</text>
+<text x="455.0" y="357.0" font-size="12" fill="#3d4852" text-anchor="middle">per frame, all brightnesses</text>
+<rect x="620" y="280" width="250" height="110" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="745.0" y="312.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">7. Candidates</text>
+<text x="745.0" y="330.0" font-size="12" fill="#3d4852" text-anchor="middle">score &gt;= threshold</text>
+<text x="745.0" y="348.0" font-size="12" fill="#3d4852" text-anchor="middle">AND no known match</text>
+<text x="745.0" y="366.0" font-size="12" fill="#3d4852" text-anchor="middle">AND not our own fake</text>
+<rect x="910" y="280" width="250" height="110" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.8"/>
+<text x="1035.0" y="321.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">8. Reports</text>
+<text x="1035.0" y="339.0" font-size="12" fill="#3d4852" text-anchor="middle">HTML with stamps</text>
+<text x="1035.0" y="357.0" font-size="12" fill="#3d4852" text-anchor="middle">draft ADES .psv</text>
+<polyline points="1165,145 1180,235 165,235 165,280" fill="none" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="290" y1="335" x2="330" y2="335" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="580" y1="335" x2="620" y2="335" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="870" y1="335" x2="910" y2="335" stroke="#4a5560" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="40" y="440" width="1120" height="220" rx="14" fill="none" stroke="#a0aab4" stroke-width="1.4" stroke-dasharray="7 5"/>
+<text x="54" y="460" font-size="13" fill="#5c6770" text-anchor="start" font-weight="bold">Same code runs in evaluation and in the real search</text>
+<rect x="70" y="480" width="320" height="150" rx="9" fill="#e3f0fb" stroke="#2b6cb0" stroke-width="1.8"/>
+<text x="230.0" y="523.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">with_injections = True</text>
+<text x="230.0" y="541.0" font-size="12" fill="#3d4852" text-anchor="middle">plants fake asteroids of known</text>
+<text x="230.0" y="559.0" font-size="12" fill="#3d4852" text-anchor="middle">magnitude and speed; labels every</text>
+<text x="230.0" y="577.0" font-size="12" fill="#3d4852" text-anchor="middle">detection -&gt; completeness curve,</text>
+<text x="230.0" y="595.0" font-size="12" fill="#3d4852" text-anchor="middle">false alarms per night</text>
+<rect x="440" y="480" width="320" height="150" rx="9" fill="#fff3d6" stroke="#b7791f" stroke-width="1.8"/>
+<text x="600.0" y="532.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">with_injections = False</text>
+<text x="600.0" y="550.0" font-size="12" fill="#3d4852" text-anchor="middle">the real search: nothing planted;</text>
+<text x="600.0" y="568.0" font-size="12" fill="#3d4852" text-anchor="middle">this is what the hunt and the</text>
+<text x="600.0" y="586.0" font-size="12" fill="#3d4852" text-anchor="middle">live monitor call</text>
+<rect x="810" y="480" width="320" height="150" rx="9" fill="#f1f3f5" stroke="#5c6770" stroke-width="1.8"/>
+<text x="970.0" y="532.0" font-size="14" fill="#1a202c" text-anchor="middle" font-weight="bold">Why it matters</text>
+<text x="970.0" y="550.0" font-size="12" fill="#3d4852" text-anchor="middle">what we measure on fakes is what</text>
+<text x="970.0" y="568.0" font-size="12" fill="#3d4852" text-anchor="middle">we deploy: the scoreboard is</text>
+<text x="970.0" y="586.0" font-size="12" fill="#3d4852" text-anchor="middle">honest because the path is shared</text>
+</svg>

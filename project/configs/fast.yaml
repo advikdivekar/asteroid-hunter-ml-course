@@ -1,0 +1,24 @@
+# Fast movers: objects that trail during a 30 s exposure (near-Earth objects)
+exposure_seconds: 30
+streak_lengths_pixels: [4, 8, 16, 32]         # ~480 to ~3,800 "/hr (length in px ~ rate / 120); 64 px fired mostly on detector artifacts
+angle_step_degrees: 15
+standardize_over_night: true      # per pixel (value - median)/scatter over the searched frames: 3,770 -> ~540 streak detections per frame
+detection_threshold_sigma: 7.0                # per frame: trails are spread out, so each frame must stand alone
+link:
+  min_rate_arcsec_per_hour: 300.0
+  max_rate_arcsec_per_hour: 15000.0
+  match_radius_pixels: 4.0
+  min_detections: 3
+  max_residual_pixels: 3.0
+max_angle_difference_degrees: 15              # motion direction vs streak angle
+length_ratio_range: [0.625, 1.6]              # measured streak length / length expected from the speed
+max_length_spread: 0.5                        # std/mean of streak length across frames (one object keeps one length)
+# Cuts chosen from saved candidates of 2 nights: fakes kept 141/146, false tracks 40 -> 0 and 1 -> 0
+min_frames: 5                   # fewer frames: per-pixel median/scatter too noisy (3-frame night: 5,500 streaks/frame vs ~540, 5 false tracks)
+max_frames: 10                  # 5 frames left 7 false tracks on 618/c02/q3 2019-01-23, 10 frames left 1 (an edge artifact, now removed)
+# Optional veto of column-aligned tracks (bleed-trail residuals; 8 of 10 consistent tracks on field 567 were such): OFF until confirmed on other nights.
+# Measured (scripts/evaluate_column_veto.py): these values remove all 8 column-aligned tracks of the 3 field 567 units and cost 2 of 184 recovered injected trails (recovery 91.5% -> 90.5%).
+# The values were chosen looking at those same 8 tracks, so the benefit is optimistic. Real objects moving along the CCD columns are lost by design.
+# column_veto:
+#   max_angle_from_column_degrees: 3.5
+#   max_column_spread_pixels: 12

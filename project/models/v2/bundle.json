@@ -1,0 +1,32 @@
+{
+ "version": "v2",
+ "created": "2026-10-13",
+ "git_commit": "4b66043",
+ "description": "v2: v1 CNN as a 99%-recall filter, linking 3 of 5 frames, XGBoost retrained on the harder tracklets",
+ "train_nights": [
+  "2020-09-19",
+  "2020-09-21",
+  "2020-09-23",
+  "2021-09-11",
+  "2022-09-22",
+  "2022-09-24",
+  "2023-09-20",
+  "2023-09-25"
+ ],
+ "validation_nights": [
+  "2021-09-12",
+  "2023-09-15"
+ ],
+ "quadrants": [
+  [
+   3,
+   4
+  ]
+ ],
+ "benchmark_validation_ap": {
+  "XGBoost, v1 features": 0.9923,
+  "XGBoost + forced photometry": 0.9924,
+  "multi-frame CNN": 0.9921,
+  "average of the last two": 0.9933
+ }
+}

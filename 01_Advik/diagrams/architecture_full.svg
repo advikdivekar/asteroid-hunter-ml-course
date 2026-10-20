@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 760" width="1300" height="760"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="650.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Advik: the architecture in code (one purpose per file)</text>
+<rect x="30" y="70" width="196" height="200" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="128.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="middle">acquire/ clean/</text>
+<text x="128.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">query_ztf_metadata</text>
+<text x="128.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">download_ztf_images</text>
+<text x="128.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">load_exposure</text>
+<text x="128.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">estimate_background</text>
+<rect x="238" y="70" width="196" height="200" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="336.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1d4ed8" text-anchor="middle">detect/ dataset/ label/ simulate/</text>
+<text x="336.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">extract_sources</text>
+<text x="336.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">cut_triplet_stamps</text>
+<text x="336.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">plan_injections</text>
+<text x="336.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">label_detections</text>
+<rect x="446" y="70" width="196" height="200" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="544.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#1d4ed8" text-anchor="middle">models/</text>
+<text x="544.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">define_realbogus_cnn</text>
+<text x="544.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">train_realbogus_cnn</text>
+<text x="544.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">cross_fit_realbogus_scores</text>
+<text x="544.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">save/load_model_bundle</text>
+<rect x="654" y="70" width="196" height="200" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="752.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#b45309" text-anchor="middle">link/ features/ crossmatch/</text>
+<text x="752.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">link_detections_into_tracklets</text>
+<text x="752.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">compute_tracklet_features</text>
+<text x="752.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">train_tracklet_classifier</text>
+<text x="752.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">crossmatch_known_asteroids</text>
+<rect x="862" y="70" width="196" height="200" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="960.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#6d28d9" text-anchor="middle">deep/ fast/</text>
+<text x="960.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">build_snr_image</text>
+<text x="960.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">stack_and_find_peaks (GPU)</text>
+<text x="960.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">find_streaks</text>
+<text x="960.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">check_streak_consistency</text>
+<rect x="1070" y="70" width="196" height="200" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="1168.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#6d28d9" text-anchor="middle">evaluate/ pipeline/</text>
+<text x="1168.0" y="157.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">build_scoreboard</text>
+<text x="1168.0" y="173.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">measure_completeness</text>
+<text x="1168.0" y="189.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">run_night_pipeline</text>
+<text x="1168.0" y="205.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1f2937" text-anchor="middle">run_full_search</text>
+<rect x="30" y="300" width="1240" height="80" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="650.0" y="326.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">One deployed path</text>
+<text x="650.0" y="344.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">run_night_pipeline calls the stages in order: detect -&gt; CNN -&gt; link -&gt; features -&gt; classifier -&gt; cross-match -&gt; candidates.  The SAME function is used for evaluation (with planted</text>
+<text x="650.0" y="362.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">fakes) and for the real search.</text>
+<rect x="30" y="400" width="400" height="130" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="230.0" y="433.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Reproducibility</text>
+<text x="230.0" y="451.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">configs/*.yaml: every setting</text>
+<text x="230.0" y="469.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">the night split, thresholds, sizes</text>
+<text x="230.0" y="487.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">tests/: 150+ tests, all offline</text>
+<text x="230.0" y="505.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">environment.yml: exact software</text>
+<rect x="450" y="400" width="400" height="130" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="650.0" y="433.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Model bundles (a mini registry)</text>
+<text x="650.0" y="451.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">models/v1 ... v5: a version =</text>
+<text x="650.0" y="469.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">CNN + tracklet model + thresholds</text>
+<text x="650.0" y="487.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ the commit and nights used,</text>
+<text x="650.0" y="505.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">never overwritten</text>
+<rect x="870" y="400" width="400" height="130" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="1070.0" y="433.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Live viewer</text>
+<text x="1070.0" y="451.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">scripts/live_viewer.py runs the</text>
+<text x="1070.0" y="469.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">real functions one stage at a time</text>
+<text x="1070.0" y="487.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">and shows the pictures in a browser</text>
+<text x="1070.0" y="505.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(src/asthunt/viewer/)</text>
+<rect x="30" y="555" width="1240" height="150" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="650.0" y="598.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Engineering habits that make the results trustworthy</text>
+<text x="650.0" y="616.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">1. All numbers in the README come from reports/scoreboard.csv, produced by ONE function (no notebook computes its own).</text>
+<text x="650.0" y="634.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2. The holdout night is opened in one place only, to write one number.</text>
+<text x="650.0" y="652.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">3. A model is compared at the SAME false-alarm level, never at its own chosen threshold.</text>
+<text x="650.0" y="670.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">4. Quick fixes were refused when a measurement pointed to a different cause (e.g. a linking bug, not a model problem).</text>
+</svg>
