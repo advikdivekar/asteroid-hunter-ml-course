@@ -81,13 +81,13 @@ def main():
               ("04_Satvik", "Satvik", "Linking, tree models and metrics")]
     for folder, name, role in people:
         base = ROOT / folder
-        docs = [(label, base / file) for label, file in [("Part brief", "PART_BRIEF.md"), ("Knowledge pack", "KNOWLEDGE_PACK.md"),
-                                                          ("Presentation guide", "PRESENTATION_GUIDE.md"), ("Viva questions and answers", "VIVA_QA.md")]]
-        build(f"{name}: handbook", role, docs, [base / "diagrams"], base / f"Handbook_{name}",
+        docs = [(label, base / file) for label, file in [("Part brief", "01_Part_Brief.md"), ("Knowledge pack", "02_Knowledge_Pack.md"),
+                                                          ("Presentation guide", "03_Presentation_Guide.md"), ("Viva questions and answers", "04_Viva_QA.md")]]
+        build(f"{name}: handbook", role, docs, [base, base / "07_Diagrams"], base / f"05_Handbook_{name}",
               "Read 00_Start_Here first; then this handbook.")
     start = ROOT / "00_Start_Here"
     docs = [(path.stem.replace("_", " "), path) for path in sorted(start.glob("0*.md"))]
-    build("Asteroid Hunter: Start Here", "Everyone reads this first", docs, [start / "diagrams"], start / "Handbook_Start_Here")
+    build("Asteroid Hunter: Start Here", "Everyone reads this first", docs, [start, start / "11_Diagrams"], start / "09_Handbook_Start_Here")
 
 
 if __name__ == "__main__":

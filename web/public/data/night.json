@@ -1,0 +1,355 @@
+{
+ "unit": "000618_c03_q4_2019-02-08",
+ "frames": 5,
+ "blobs": 41522,
+ "blobs_real": 1348,
+ "kept_by_cnn": 22058,
+ "kept_real": 1336,
+ "real_total": 1348,
+ "tracklets": 273,
+ "tracklets_known": 18,
+ "tracklets_fake": 224,
+ "fakes_planted": 300,
+ "cnn_threshold": 0.008146009407937527,
+ "tracklet_threshold": 0.6008815169334412,
+ "scoreboard": [
+  {
+   "version": "v1",
+   "split": "holdout",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9045407853008076,
+   "detection_recall": 0.953731343283582,
+   "bogus_kept_per_frame": 1468.3333333333333,
+   "tracklet_ap": 0.9997149712302892,
+   "mag_at_50_completeness": 20.13888888888889,
+   "known_recovered": "16/18",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v2",
+   "split": "holdout",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9045407853008076,
+   "detection_recall": 0.9850746268656716,
+   "bogus_kept_per_frame": 4716.266666666666,
+   "tracklet_ap": 0.9967990202038548,
+   "mag_at_50_completeness": 20.4622641509434,
+   "known_recovered": "17/18",
+   "unexplained_per_night": 0.3333333333333333
+  },
+  {
+   "version": "v3",
+   "split": "holdout",
+   "evaluated": "2026-10-13",
+   "code": "4b66043",
+   "nights": 1,
+   "frames": 5,
+   "detection_ap": 0.9061462707534148,
+   "detection_recall": 0.9853211009174312,
+   "bogus_kept_per_frame": 4808.0,
+   "tracklet_ap": 0.9976939758414782,
+   "mag_at_50_completeness": 20.45767716535433,
+   "known_recovered": "8/8",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v4",
+   "split": "holdout",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9045407853008076,
+   "detection_recall": 0.9850746268656716,
+   "bogus_kept_per_frame": 4716.266666666666,
+   "tracklet_ap": 0.997972504231412,
+   "mag_at_50_completeness": 20.469501201923077,
+   "known_recovered": "17/18",
+   "unexplained_per_night": 0.3333333333333333
+  },
+  {
+   "version": "v5",
+   "split": "holdout",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9100658439701232,
+   "detection_recall": 0.9865671641791044,
+   "bogus_kept_per_frame": 4347.8,
+   "tracklet_ap": 0.9978397462922142,
+   "mag_at_50_completeness": 20.457589285714285,
+   "known_recovered": "17/18",
+   "unexplained_per_night": 0.3333333333333333
+  },
+  {
+   "version": "v1",
+   "split": "test",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9415254820266892,
+   "detection_recall": 0.9741379310344828,
+   "bogus_kept_per_frame": 1244.9333333333334,
+   "tracklet_ap": 0.9980303821870152,
+   "mag_at_50_completeness": 20.526041666666668,
+   "known_recovered": "39/44",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v2",
+   "split": "test",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9415254820266892,
+   "detection_recall": 0.9923645320197044,
+   "bogus_kept_per_frame": 4292.933333333333,
+   "tracklet_ap": 0.9921483147638062,
+   "mag_at_50_completeness": 21.39367816091954,
+   "known_recovered": "40/44",
+   "unexplained_per_night": 13.333333333333334
+  },
+  {
+   "version": "v3",
+   "split": "test",
+   "evaluated": "2026-10-13",
+   "code": "4b66043",
+   "nights": 1,
+   "frames": 5,
+   "detection_ap": 0.9436743855442504,
+   "detection_recall": 0.9910979228486648,
+   "bogus_kept_per_frame": 4144.4,
+   "tracklet_ap": 0.9901478955917936,
+   "mag_at_50_completeness": 21.40625,
+   "known_recovered": "18/21",
+   "unexplained_per_night": 7.0
+  },
+  {
+   "version": "v4",
+   "split": "test",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9415254820266892,
+   "detection_recall": 0.9923645320197044,
+   "bogus_kept_per_frame": 4292.933333333333,
+   "tracklet_ap": 0.993057648686566,
+   "mag_at_50_completeness": 21.342183770883057,
+   "known_recovered": "40/44",
+   "unexplained_per_night": 5.0
+  },
+  {
+   "version": "v5",
+   "split": "test",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9398280530918816,
+   "detection_recall": 0.9916256157635468,
+   "bogus_kept_per_frame": 3857.3333333333335,
+   "tracklet_ap": 0.9929268906907736,
+   "mag_at_50_completeness": 20.558286516853933,
+   "known_recovered": "38/44",
+   "unexplained_per_night": 0.3333333333333333
+  },
+  {
+   "version": "v1",
+   "split": "validation",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 6,
+   "frames": 30,
+   "detection_ap": 0.9192684732320352,
+   "detection_recall": 0.9596273291925466,
+   "bogus_kept_per_frame": 1183.9,
+   "tracklet_ap": 0.9995167894681856,
+   "mag_at_50_completeness": 20.17748917748918,
+   "known_recovered": "21/28",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v2",
+   "split": "validation",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 6,
+   "frames": 30,
+   "detection_ap": 0.9192684732320352,
+   "detection_recall": 0.9917701863354036,
+   "bogus_kept_per_frame": 3900.8,
+   "tracklet_ap": 0.9975332473749275,
+   "mag_at_50_completeness": 20.46495220755576,
+   "known_recovered": "24/28",
+   "unexplained_per_night": 0.1666666666666666
+  },
+  {
+   "version": "v3",
+   "split": "validation",
+   "evaluated": "2026-10-13",
+   "code": "4b66043",
+   "nights": 2,
+   "frames": 10,
+   "detection_ap": 0.8983903978997153,
+   "detection_recall": 0.9901408450704224,
+   "bogus_kept_per_frame": 4130.4,
+   "tracklet_ap": 0.9961866760817812,
+   "mag_at_50_completeness": 20.488917525773196,
+   "known_recovered": "10/12",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v4",
+   "split": "validation",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 6,
+   "frames": 30,
+   "detection_ap": 0.9192684732320352,
+   "detection_recall": 0.9917701863354036,
+   "bogus_kept_per_frame": 3900.8,
+   "tracklet_ap": 0.9981116832735736,
+   "mag_at_50_completeness": 20.486523526724532,
+   "known_recovered": "24/28",
+   "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v5",
+   "split": "validation",
+   "evaluated": "2026-10-14",
+   "code": "bdfc2c4",
+   "nights": 6,
+   "frames": 30,
+   "detection_ap": 0.9230397348812752,
+   "detection_recall": 0.9900621118012424,
+   "bogus_kept_per_frame": 3647.0666666666666,
+   "tracklet_ap": 0.9986529769326462,
+   "mag_at_50_completeness": 20.420816911501255,
+   "known_recovered": "24/28",
+   "unexplained_per_night": 0.0
+  }
+ ],
+ "metrics": {
+  "average_precision": 0.9436743855442505,
+  "roc_auc": 0.9867535327408857,
+  "always_bogus_accuracy": 0.967535282500843,
+  "deployed": {
+   "threshold": 0.008146009407937527,
+   "tp": 1336,
+   "fp": 20722,
+   "fn": 12,
+   "tn": 19452,
+   "recall": 0.9910979228486647,
+   "precision": 0.060567594523528875,
+   "f1": 0.11415876271041613,
+   "accuracy": 0.500650257694716,
+   "false_alarms_per_photo": 4144.4
+  },
+  "at_recall": {
+   "0.90": {
+    "threshold": 0.8481156229972839,
+    "tp": 1214,
+    "fp": 128,
+    "fn": 134,
+    "tn": 40046,
+    "recall": 0.900593471810089,
+    "precision": 0.9046199701937406,
+    "f1": 0.9026022304832713,
+    "accuracy": 0.993690091999422,
+    "false_alarms_per_photo": 25.6
+   },
+   "0.95": {
+    "threshold": 0.15903209149837494,
+    "tp": 1281,
+    "fp": 1049,
+    "fn": 67,
+    "tn": 39125,
+    "recall": 0.9502967359050445,
+    "precision": 0.5497854077253219,
+    "f1": 0.6965742251223492,
+    "accuracy": 0.9731226819517365,
+    "false_alarms_per_photo": 209.8
+   }
+  }
+ },
+ "feature_importance": [
+  [
+   "n_detections",
+   0.3887
+  ],
+  [
+   "score_mean",
+   0.37
+  ],
+  [
+   "stack_snr",
+   0.0815
+  ],
+  [
+   "forced_snr_min",
+   0.0421
+  ],
+  [
+   "static_neighbours_mean",
+   0.0172
+  ],
+  [
+   "score_min",
+   0.0146
+  ],
+  [
+   "elongation_mean",
+   0.0142
+  ],
+  [
+   "mag_std",
+   0.0111
+  ],
+  [
+   "max_residual",
+   0.0094
+  ],
+  [
+   "snr_mean",
+   0.0086
+  ],
+  [
+   "forced_snr_std",
+   0.0075
+  ],
+  [
+   "forced_snr_median",
+   0.0073
+  ],
+  [
+   "mag_mean",
+   0.0065
+  ],
+  [
+   "rate_arcsec_per_hour",
+   0.0064
+  ],
+  [
+   "npix_std",
+   0.0062
+  ],
+  [
+   "snr_min",
+   0.0054
+  ],
+  [
+   "static_neighbours_max",
+   0.0033
+  ]
+ ]
+}

@@ -21,7 +21,7 @@ It was inspired by an online post where someone found a planet candidate in old 
 - The **tracklet classifier** combines about 17 numbers per track (speed, straightness, steady brightness, what the CNN thought, ...) better than any single threshold.
 - Everything physical (matched filtering, linking by straight lines, shift-and-stack) is *not* ML: it is search and statistics. Knowing which part needs learning and which does not is part of good ML design.
 
-## The pipeline (see `diagrams/system_overview.svg`)
+## The pipeline (see `11_Diagrams/01_system_overview.svg`)
 | Stage | What happens | Owner |
 |---|---|---|
 | Data | ask the archive, download 4 files per exposure, mask bad pixels, estimate noise, detect blobs, split by night | Aaryan |

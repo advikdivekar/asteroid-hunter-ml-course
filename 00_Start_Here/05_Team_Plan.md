@@ -42,10 +42,10 @@ If you only get **12 minutes**: 2 + 2 + 3 + 3 + 2 (skip the live demo; show one 
 ## Timeline suggestion (about 2 weeks; compress if needed)
 | Days | Everyone | Advik | Aaryan | Paras | Satvik |
 |---|---|---|---|---|---|
-| 1-2 | Read `00_Start_Here`; run the tests; open the viewer once | prepare the demo; check numbers against `scoreboard.csv` | read `KNOWLEDGE_PACK`; re-run `data_acquisition` + `difference_imaging` notebooks | re-run `neural_networks` notebook; read `realbogus_cnn.md` | re-run `ml_basics` + `metrics_evaluation` notebooks |
+| 1-2 | Read `00_Start_Here`; run the tests; open the viewer once | prepare the demo; check numbers against `scoreboard.csv` | read `02_Knowledge_Pack.md`; re-run `data_acquisition` + `difference_imaging` notebooks | re-run `neural_networks` notebook; read `realbogus_cnn.md` | re-run `ml_basics` + `metrics_evaluation` notebooks |
 | 3-6 | Study your pack; write your own summary in your own words | scoreboard + deep search notebooks; draft the report's evaluation chapter | leakage audit notebook; EDA figures for the slides | dataset building + CNN notebooks; error-analysis story | linking + tracklet classifier notebooks; metrics exercises |
-| 7-9 | Slides from `PRESENTATION_GUIDE.md`; practise 3 times with a timer | integrate slides; rehearse the demo | | | |
-| 10-12 | Cross-viva each other with `VIVA_QA.md` and `06_Whole_Project_Viva_QA.md` | | | | |
+| 7-9 | Slides from `03_Presentation_Guide.md`; practise 3 times with a timer | integrate slides; rehearse the demo | | | |
+| 10-12 | Cross-viva each other with `04_Viva_QA.md` and `06_Whole_Project_Viva_QA.md` | | | | |
 | 13-14 | Dress rehearsal, fix weak answers, finalise the report | | | | |
 
 ## Rules for the team

@@ -21,7 +21,7 @@ That does not make the project worthless, but it does mean two things you must h
    - re-run your notebooks from the first cell and write down what each output means in your own words;
    - change one thing (a threshold, a layer, a feature, a split) and record what happened and why;
    - add one small experiment of your own (the optional extras in `04_Course_Mapping.md` are good candidates);
-   - write your report section yourself; use `KNOWLEDGE_PACK.md` to learn, not to copy.
+   - write your report section yourself; use `02_Knowledge_Pack.md` to learn, not to copy.
 4. **Cite sources.** Papers are in `04_Course_Mapping.md`; also cite software (PyTorch, XGBoost, scikit-learn, astropy, SEP) and data (ZTF via IRSA, with the acknowledgement text from IRSA's release notes, https://irsa.ipac.caltech.edu/data/ZTF/docs/releases/ztf_release_notes_latest).
 5. **In the viva, do not bluff.** "That part is Paras's; from my understanding it works like this..." is fine.
 

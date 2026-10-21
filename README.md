@@ -11,6 +11,7 @@ Team: **Advik, Aaryan, Paras, Satvik**.
 asteroid_ml_project/
   README.md                    <- you are here
   00_Start_Here/               <- EVERYONE reads this first (about 1 hour)
+      00_How_Our_Model_Works.svg  the one ML architecture (the CNN) in one picture, with real stamps
       01_Project_Overview.md      what the project is, the results, the pipeline
       02_Domain_Primer.md         the astronomy you need, in plain words
       03_ML_Primer.md             the ML ideas we used, tied to the course syllabus
@@ -19,20 +20,27 @@ asteroid_ml_project/
       06_Whole_Project_Viva_QA.md questions EVERY member must be able to answer
       07_AI_Use_and_Integrity.md  how to be honest about AI help (the course has a GenAI policy)
       08_Glossary.md              every term in one place
-      diagrams/                   system overview, night split
+      09_Handbook_Start_Here.html / .pdf   files 01-08 in one printable file
+      10_Group_Report_Asteroid_Hunter.docx the whole project from start to end, with results
+      11_Diagrams/                01 system overview, 02 night split
   01_Advik/    <- lead: system, evaluation, deep search, live viewer
   02_Aaryan/   <- problem, domain, data, preprocessing, exploration
   03_Paras/    <- labels, dataset, the neural network (CNN)
   04_Satvik/   <- linking, tracklet classifier (trees), metrics
-        each person's folder has:
-            PART_BRIEF.md          what is yours, what to hand over, where the code is
-            KNOWLEDGE_PACK.md      everything you must understand (your part, then the other parts in brief)
-            PRESENTATION_GUIDE.md  slide by slide, what to say, timing, demo cues
-            VIVA_QA.md             questions and model answers
-            diagrams/              the pictures for your slides
-            Handbook_<Name>.html / .pdf   the four documents above in one printable file
+        each person's folder has (numbered in reading order):
+            README.md                      my part step by step + what each file is
+            00_Process_Diagram_<Name>.svg  how I did my part, as one picture
+            01_Part_Brief.md               what is yours, what to hand over, where the code is
+            02_Knowledge_Pack.md           everything you must understand (your part, then the other parts in brief)
+            03_Presentation_Guide.md       slide by slide, what to say, timing, demo cues
+            04_Viva_QA.md                  questions and model answers
+            05_Handbook_<Name>.html / .pdf files 01-04 plus the diagrams in one printable file
+            06_Report_<Name>.docx          my part from start to end in simple words, with results
+            07_Diagrams/                   the pictures for your slides, numbered in step order
+            08_Demo_Screenshots/           (Advik only) a saved picture of every live-viewer stage
+  web/         <- the Next.js web app: the pipeline step by step on real data, the CNN running in the browser, results
   project/     <- the full runnable code (src, tests, configs, models, notebooks, docs). No raw data.
-  tools/       <- make_diagrams.py, build_handbooks.py (regenerate the diagrams and handbooks)
+  tools/       <- make_diagrams.py, make_project_figures.py, build_handbooks.py, export_web_data.py, make_reports.js
 ```
 
 ## Run it (5 minutes)
@@ -49,9 +57,18 @@ The live viewer needs real images on disk. The raw data (about 50 GB) is **not**
 `~/Desktop/asteroid/data`; to use the viewer from this folder, either run the viewer from the original project
 (`cd ~/Desktop/asteroid && python scripts/live_viewer.py`) or copy/link that `data` folder into `project/` (do NOT zip a link: it would try to include 50 GB).
 
+## See it work (web app)
+
+```bash
+cd web
+npm install      # once
+npm run dev      # open http://localhost:3000
+```
+No Python and no raw data needed: the app ships a small slice of the real test night and the real CNN weights (made by `tools/export_web_data.py`).
+
 ## Read in this order
 1. `00_Start_Here/01_Project_Overview.md`, then `05_Team_Plan.md`, then `04_Course_Mapping.md`.
-2. Your own folder: `PART_BRIEF.md` -> `KNOWLEDGE_PACK.md` -> `PRESENTATION_GUIDE.md` -> `VIVA_QA.md`.
+2. Your own folder: `README.md` -> `01_Part_Brief.md` -> `02_Knowledge_Pack.md` -> `03_Presentation_Guide.md` -> `04_Viva_QA.md`.
 3. `06_Whole_Project_Viva_QA.md` together, out loud, taking turns.
 
 ## What this project is NOT

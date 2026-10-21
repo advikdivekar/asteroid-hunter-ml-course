@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 712" width="1560" height="712">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
+<rect width="1560" height="712" fill="#f1efea"/>
+<text x="60" y="64" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="800" fill="#0e0e10" text-anchor="start" >Advik: how I did my part</text>
+<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >System, evaluation, deep search and live viewer (lead) · follow the arrows</text>
+<rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
+<text x="84" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Design the system</text>
+<text x="84" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >split into 4 stages with clear</text>
+<text x="84" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >hand-overs; one deployed code path</text>
+<text x="84" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >pipeline/run_night_pipeline.py</text>
+<rect x="430" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 02</text>
+<text x="454" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Set the test rules</text>
+<text x="454" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >plant fakes on nights nobody tuned</text>
+<text x="454" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >on; compare at equal false alarms</text>
+<text x="454" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/measure_completeness.py</text>
+<rect x="800" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 03</text>
+<text x="824" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Build the scoreboard</text>
+<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >one table for every version v1 -&gt; v5;</text>
+<text x="824" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >every number comes from here</text>
+<text x="824" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/build_scoreboard.py</text>
+<rect x="1170" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
+<text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Find where we lose</text>
+<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >asteroids were lost at linking, not</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >the classifier: fixed (v2, v4)</text>
+<text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/scoreboard.md</text>
+<rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Test bigger ideas fairly</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >multi-frame CNN tied XGBoost (0.993</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >vs 0.992); 3x data did not help</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/multiframe_model.md</text>
+<rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
+<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Deep search</text>
+<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >add frames along 4,888 trial motions;</text>
+<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >6 sigma; null test 0 false: 22.1 mag</text>
+<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >deep/stack_and_find_peaks.py</text>
+<rect x="430" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 07</text>
+<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Live viewer + demo</text>
+<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >runs the real pipeline stage by stage</text>
+<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >in the browser</text>
+<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/live_viewer.py</text>
+<rect x="60" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
+<text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Make it reproducible</text>
+<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >versioned model bundles, configs, 166</text>
+<text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >offline tests</text>
+<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/save_model_bundle.py</text>
+<path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M764 224.0 H796" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1134 224.0 H1166" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1335.0 312 V360" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1174 448.0 H1126" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M804 448.0 H756" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
+<text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Result: depth 20.5 -&gt; 21.4 -&gt; 22.1 mag; 31 known asteroids recovered; no false discovery claimed</text>
+</svg>

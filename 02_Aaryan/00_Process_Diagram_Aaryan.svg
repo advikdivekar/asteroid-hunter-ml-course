@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 712" width="1560" height="712">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
+<rect width="1560" height="712" fill="#f1efea"/>
+<text x="60" y="64" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="800" fill="#0e0e10" text-anchor="start" >Aaryan: how I did my part</text>
+<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Problem, data and preprocessing · follow the arrows</text>
+<rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
+<text x="84" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Define the problem</text>
+<text x="84" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >find moving dots in ZTF difference</text>
+<text x="84" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >images; success = depth + known</text>
+<text x="84" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >asteroids found</text>
+<text x="84" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/project_setup.md</text>
+<rect x="430" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 02</text>
+<text x="454" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Ask the archive first</text>
+<text x="454" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >metadata query: 1,552 exposures,</text>
+<text x="454" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >16.4% flagged, 40 usable nights</text>
+<text x="454" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >acquire/query_ztf_metadata.py</text>
+<rect x="800" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 03</text>
+<text x="824" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Split by night, early</text>
+<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >8 train / 2 validation / 1 test / 1</text>
+<text x="824" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >holdout night, fixed in a config</text>
+<text x="824" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >configs/acquire.yaml</text>
+<rect x="1170" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
+<text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Download 4 files each</text>
+<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >science, mask, difference, PSF: 220</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >files, 3.55 GB</text>
+<text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >acquire/download_ztf_images.py</text>
+<rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Clean every picture</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >bad-pixel mask, reference = science -</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >difference, noise level</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >clean/load_exposure.py</text>
+<rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
+<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Find the blobs</text>
+<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >2 sigma, 5 px minimum: about 7,800</text>
+<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >blobs per frame</text>
+<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >detect/extract_sources.py</text>
+<rect x="430" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 07</text>
+<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Audit for leakage</text>
+<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >the first dataset cheated: 100% -&gt;</text>
+<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >50% -&gt; 99%; rebuilt</text>
+<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/check_split_leakage.py</text>
+<path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M764 224.0 H796" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1134 224.0 H1166" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1335.0 312 V360" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1174 448.0 H1126" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M804 448.0 H756" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
+<text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Paras a clean blob table and a leak-free split by night</text>
+</svg>

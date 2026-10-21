@@ -460,16 +460,16 @@ def cnn_results():
 def build_all():
     out = ROOT
     diagrams = {
-        "00_Start_Here/diagrams/system_overview.svg": system_overview, "00_Start_Here/diagrams/split_by_night.svg": split_by_night,
-        "02_Aaryan/diagrams/data_flow.svg": data_flow, "02_Aaryan/diagrams/difference_imaging.svg": difference_imaging,
-        "02_Aaryan/diagrams/preprocessing_funnel.svg": preprocessing_funnel, "02_Aaryan/diagrams/leakage_types.svg": leakage_types,
-        "03_Paras/diagrams/label_sources.svg": label_sources, "03_Paras/diagrams/triplet_stamp.svg": triplet_stamp,
-        "03_Paras/diagrams/cnn_architecture.svg": cnn_architecture, "03_Paras/diagrams/cnn_results.svg": cnn_results, "03_Paras/diagrams/cross_fitting.svg": cross_fitting,
-        "04_Satvik/diagrams/linking.svg": linking, "04_Satvik/diagrams/boosting.svg": boosting,
-        "04_Satvik/diagrams/confusion_metrics.svg": confusion_metrics, "04_Satvik/diagrams/operating_point.svg": operating_point,
-        "01_Advik/diagrams/architecture_full.svg": architecture_full, "01_Advik/diagrams/shift_and_stack.svg": shift_and_stack,
-        "01_Advik/diagrams/scoreboard_versions.svg": scoreboard_versions, "01_Advik/diagrams/evaluation_protocol.svg": evaluation_protocol,
-        "01_Advik/diagrams/live_viewer_flow.svg": live_viewer_flow,
+        "00_Start_Here/11_Diagrams/01_system_overview.svg": system_overview, "00_Start_Here/11_Diagrams/02_split_by_night.svg": split_by_night,
+        "02_Aaryan/07_Diagrams/01_data_flow.svg": data_flow, "02_Aaryan/07_Diagrams/02_difference_imaging.svg": difference_imaging,
+        "02_Aaryan/07_Diagrams/03_preprocessing_funnel.svg": preprocessing_funnel, "02_Aaryan/07_Diagrams/04_leakage_types.svg": leakage_types,
+        "03_Paras/07_Diagrams/01_label_sources.svg": label_sources, "03_Paras/07_Diagrams/02_triplet_stamp.svg": triplet_stamp,
+        "03_Paras/07_Diagrams/03_cnn_architecture.svg": cnn_architecture, "03_Paras/07_Diagrams/04_cnn_results.svg": cnn_results, "03_Paras/07_Diagrams/05_cross_fitting.svg": cross_fitting,
+        "04_Satvik/07_Diagrams/01_linking.svg": linking, "04_Satvik/07_Diagrams/02_boosting.svg": boosting,
+        "04_Satvik/07_Diagrams/04_confusion_metrics.svg": confusion_metrics, "04_Satvik/07_Diagrams/03_operating_point.svg": operating_point,
+        "01_Advik/07_Diagrams/01_architecture_full.svg": architecture_full, "01_Advik/07_Diagrams/04_shift_and_stack.svg": shift_and_stack,
+        "01_Advik/07_Diagrams/03_scoreboard_versions.svg": scoreboard_versions, "01_Advik/07_Diagrams/02_evaluation_protocol.svg": evaluation_protocol,
+        "01_Advik/07_Diagrams/05_live_viewer_flow.svg": live_viewer_flow,
     }
     for path, make in diagrams.items():
         make().save(out / path)

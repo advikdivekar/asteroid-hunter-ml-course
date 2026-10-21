@@ -1,0 +1,1535 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Asteroid Hunter: Start Here</title><style>
+@page { size: A4; margin: 16mm 14mm; }
+body { font: 11pt/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2937; max-width: 190mm; margin: 0 auto; }
+h1 { font-size: 21pt; border-bottom: 3px solid #6d28d9; padding-bottom: 4px; margin-top: 0; }
+h2 { font-size: 15pt; margin-top: 22px; color: #111827; border-bottom: 1px solid #d1d5db; padding-bottom: 2px; }
+h3 { font-size: 12.5pt; margin-top: 16px; color: #374151; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #d1d5db; padding: 4px 7px; vertical-align: top; text-align: left; }
+th { background: #f3f4f6; }
+code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+pre { background: #f3f4f6; padding: 8px; border-radius: 6px; overflow-x: auto; font-size: 9pt; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #6d28d9; margin: 10px 0; padding: 2px 12px; background: #faf5ff; }
+.doc { page-break-before: always; }
+.doc:first-of-type { page-break-before: auto; }
+figure { margin: 14px 0; page-break-inside: avoid; text-align: center; }
+figure svg { max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+figcaption { font-size: 9pt; color: #6b7280; }
+.cover { text-align: center; padding: 45mm 0 20mm; page-break-after: always; }
+.cover h1 { border: 0; font-size: 28pt; }
+.cover p { font-size: 13pt; color: #4b5563; }
+.toc li { margin: 4px 0; }
+</style></head><body><div class="cover"><h1>Asteroid Hunter: Start Here</h1><p>Everyone reads this first</p><p></p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>01 Project Overview</li><li>02 Domain Primer</li><li>03 ML Primer</li><li>04 Course Mapping</li><li>05 Team Plan</li><li>06 Whole Project Viva QA</li><li>07 AI Use and Integrity</li><li>08 Glossary</li><li>Diagrams</li></ol></div><div class="doc"><h1>01. Project overview</h1>
+<h2>The idea in plain words</h2>
+<p>Telescopes photograph the same patch of sky again and again. Stars stay put. <strong>Asteroids move</strong>, so over a few minutes an asteroid
+is a dot that creeps in a straight line. Surveys like the Zwicky Transient Facility (ZTF) take millions of images, and almost all
+the dots they flag are junk (bad image subtraction, cosmic rays, noise). Our project builds a pipeline that:</p>
+<ol>
+<li>takes ZTF's <strong>difference images</strong> (tonight's picture minus an old picture of the same sky, so everything that did not change disappears),</li>
+<li>finds every blob left over,</li>
+<li>uses a <strong>neural network</strong> to decide which blobs look like a real moving object (not junk),</li>
+<li><strong>links</strong> blobs from different frames into straight-line tracks,</li>
+<li>uses a second model (<strong>gradient-boosted trees</strong>) to score each track,</li>
+<li>compares the tracks with the catalogue of known asteroids, and keeps what is unknown for a person to examine.</li>
+</ol>
+<p>It was inspired by an online post where someone found a planet candidate in old Kepler telescope data using AI-assisted code
+(we checked that post: the signal belongs to an already confirmed planet, see <code>project/docs/kepler_post_check.md</code>).</p>
+<h2>Why machine learning is needed here</h2>
+<ul>
+<li>One night of one CCD quadrant (5 frames) gives about <strong>36,000-41,000 blobs</strong>, and only about <strong>3% are real</strong> (validation nights: 3.2%). Hand-written rules for &quot;looks like a real object&quot; fail because junk comes in many shapes (dipoles, spikes, edges, ghosts).</li>
+<li>A <strong>CNN</strong> learns those shapes from labelled examples; a rule-based filter could not.</li>
+<li>The <strong>tracklet classifier</strong> combines about 17 numbers per track (speed, straightness, steady brightness, what the CNN thought, ...) better than any single threshold.</li>
+<li>Everything physical (matched filtering, linking by straight lines, shift-and-stack) is <em>not</em> ML: it is search and statistics. Knowing which part needs learning and which does not is part of good ML design.</li>
+</ul>
+<h2>The pipeline (see <code>11_Diagrams/01_system_overview.svg</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What happens</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data</td>
+<td>ask the archive, download 4 files per exposure, mask bad pixels, estimate noise, detect blobs, split by night</td>
+<td>Aaryan</td>
+</tr>
+<tr>
+<td>Labels + CNN</td>
+<td>cut 3x31x31 stamps, labels from planted fakes and known asteroids, normalise/augment/balance, CNN gives p(real)</td>
+<td>Paras</td>
+</tr>
+<tr>
+<td>Linking + classifier</td>
+<td>join blobs into tracks, 17 features, XGBoost, cross-match with known asteroids, metrics</td>
+<td>Satvik</td>
+</tr>
+<tr>
+<td>Evaluation + discovery engine</td>
+<td>scoreboard, honest testing, shift-and-stack (deep search), fast movers, live viewer</td>
+<td>Advik</td>
+</tr>
+</tbody>
+</table>
+<h2>Headline results (all from <code>project/reports/scoreboard.csv</code> or the lesson documents)</h2>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Number</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNN vs a simple feature model (validation nights, 67,041 detections, 3.2% real)</td>
+<td>average precision <strong>0.899</strong> vs <strong>0.780</strong></td>
+</tr>
+<tr>
+<td>False alarms per frame at 90% recall</td>
+<td><strong>176</strong> (CNN) vs <strong>813</strong> (logistic regression): 4.6x fewer</td>
+</tr>
+<tr>
+<td>CNN on the untouched test night</td>
+<td>average precision <strong>0.938</strong></td>
+</tr>
+<tr>
+<td>Tracklet classifier</td>
+<td>near-perfect average precision (about 0.999) on planted fakes, which is why we do not use it to judge progress</td>
+</tr>
+<tr>
+<td>Depth: faintest brightness where 50% of planted fakes are found (test night 2019-02-08)</td>
+<td>v1 single frames <strong>20.5</strong>, v4 <strong>21.4</strong>, deep search <strong>22.1</strong> (bigger = fainter)</td>
+</tr>
+<tr>
+<td>Real search of the test night</td>
+<td><strong>31 known asteroids recovered</strong> (brightness 16.2 to 21.8), 0 unexplained candidates above threshold</td>
+</tr>
+<tr>
+<td>Fast (trailed) objects</td>
+<td>97% of planted trails recovered on the nights used to choose the cuts; 93% on a later 10-frame night</td>
+</tr>
+<tr>
+<td>3x more training data (v5)</td>
+<td>did <strong>not</strong> help at equal false alarms</td>
+</tr>
+</tbody>
+</table>
+<h2>What we are careful NOT to claim</h2>
+<ul>
+<li><strong>No discovery.</strong> One faint object in a related two-night study passes every check we have (orbit fit, noise tests, no catalogue match). It still needs a human reading the images and the Minor Planet Center's process. Nothing has been reported as a discovery.</li>
+<li>The best depth number (22.1) is for one night and one CCD quadrant.</li>
+<li>Our &quot;real&quot; labels come partly from simulation (planted fakes). We checked that fakes look like real asteroids (a classifier cannot tell them apart: AUC 0.47) but that is a check on certain features, not a proof.</li>
+</ul>
+<h2>The story of how it got better (good for the viva)</h2>
+<ol>
+<li><strong>v1</strong>: CNN + XGBoost on single frames. Looked great (AP 0.999 for tracklets). The scoreboard showed the truth: depth only ~20.5.</li>
+<li>We <strong>measured where asteroids were lost</strong>: at linking, not at the classifier. Relaxing linking found 11% more asteroids but created ~1,500 chance tracks per night (these became the hard negatives).</li>
+<li>A bigger multi-frame CNN <strong>tied</strong> the simple XGBoost model, so we kept the simple one (<strong>v4</strong>).</li>
+<li>3x more training data (<strong>v5</strong>) did <strong>not</strong> help: the limit is how many photons one 30-second frame holds.</li>
+<li>Therefore we added the <strong>deep search</strong> (adding frames along a trial motion): +0.7 magnitude.</li>
+<li>Along the way, real bugs were found by checking results against reality: SkyBoT catalogue positions were ~2.9 arcsec off; telescope pointing shifts between exposures; a feature that wrongly flagged 22% of real tracks. Each was fixed and a test written.</li>
+</ol>
+<h2>Where everything is</h2>
+<ul>
+<li>Lessons (one per phase, with a quiz): <code>project/docs/*.md</code>; matching notebooks: <code>project/notebooks/*.ipynb</code>.</li>
+<li>Code: <code>project/src/asthunt/&lt;stage&gt;/&lt;verb_object&gt;.py</code> (one purpose per file). Tests: <code>project/tests/</code>.</li>
+<li>Settings: <code>project/configs/*.yaml</code>. Trained model versions: <code>project/models/v1 ... v5</code>.</li>
+<li>The plan and status table: <code>project/PLAN.md</code>.</li>
+</ul>
+</div><div class="doc"><h1>02. Domain primer: the astronomy you need (no prior astronomy assumed)</h1>
+<p>You do not need to be an astronomer. You need about twelve ideas, each explained so you can say it in your own words in a viva.</p>
+<h2>1. What an asteroid is, and why it shows up as a moving dot</h2>
+<p>Asteroids are rocky bodies orbiting the Sun (most between Mars and Jupiter, the <em>main belt</em>). From Earth, stars are so far away that they
+appear fixed. An asteroid is close enough that it visibly <strong>moves against the stars</strong>: tens of arcseconds per hour for a typical main-belt asteroid
+near opposition (our data: 28-48 arcsec per hour). An arcsecond is 1/3600 of a degree.
+Over the ~30 minutes of 5 consecutive exposures, an asteroid moves in a <strong>nearly straight line at a nearly constant speed</strong>. That is the physical fact the whole <em>linking</em> stage relies on.</p>
+<h2>2. The telescope and the survey</h2>
+<p><strong>ZTF (Zwicky Transient Facility)</strong> photographs the northern sky with a camera at Palomar Observatory (California). The camera has 16 CCD chips; each chip is read out in
+4 <strong>quadrants</strong> of about 3072 x 3080 pixels. One pixel is about <strong>1.01 arcseconds</strong>. A standard exposure lasts <strong>30 seconds</strong>. Images come in filters (we use <strong>r band</strong>, &quot;zr&quot;).
+The data is public through <strong>IRSA</strong> (a NASA/IPAC archive).</p>
+<p>A <strong>unit</strong> in our project = one <em>field</em> (a patch of sky) + one <em>CCD</em> + one <em>quadrant</em> + one <em>night</em>. Example: <code>000618_c03_q4_2019-02-08</code> = field 618, CCD 3, quadrant 4, night 8 Feb 2019.</p>
+<h2>3. The four files per exposure</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>science image</td>
+<td>the picture itself (about 38 MB)</td>
+</tr>
+<tr>
+<td>reference image</td>
+<td>a deep picture of the same sky built from many old exposures (we recompute it as science minus difference)</td>
+</tr>
+<tr>
+<td><strong>difference image</strong></td>
+<td>science minus the (blurred, aligned) reference: static things cancel</td>
+</tr>
+<tr>
+<td>mask</td>
+<td>16 yes/no flags per pixel: saturated, dead, cosmic ray, ghost, ...</td>
+</tr>
+<tr>
+<td>PSF</td>
+<td>the blur shape of a point source in the difference image</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Difference imaging: the key trick</h2>
+<p><code>difference = science - reference</code>. Stars, galaxies and the sky glow are the same in both and cancel. What remains:
+new or moving things (<strong>positive blobs</strong>, what we want), faded things (negative blobs, ignored), imperfect cancellation of bright stars (<strong>dipoles</strong>), cosmic rays, and noise.
+Most blobs in a difference image are junk, which is exactly why a classifier is needed.</p>
+<h2>5. Noise, sigma, and signal-to-noise (SNR)</h2>
+<p>Every pixel has random noise. We measure its spread (<strong>sigma</strong>) robustly (with the <em>median absolute deviation</em>, MAD, so bright blobs do not fool it:
+sigma = 1.4826 x median(|x - median|)). A blob &quot;5 sigma&quot; bright is 5 times the noise level. <strong>SNR</strong> = measured flux divided by its uncertainty.
+With pure noise, about 1 pixel in 3.5 million exceeds +5 sigma, so a 5-sigma blob is unlikely to be chance, <em>unless you looked in many places</em> (see 12).</p>
+<h2>6. The PSF (point spread function)</h2>
+<p>A star or asteroid is a point of light, but the atmosphere and optics blur it into a small round blob (about 2 pixels wide for us). The blur shape is the <strong>PSF</strong>.
+Knowing it lets us do <strong>matched filtering</strong>: smooth the image with the blur shape, which makes faint point-like sources stand out of random noise.</p>
+<h2>7. Magnitudes (how astronomers measure brightness)</h2>
+<p>A <strong>magnitude</strong> is a log brightness scale where <strong>bigger = fainter</strong>. 5 magnitudes = a factor of 100 in brightness. So one magnitude is a factor of about 2.5.
+Our single-frame limit is about <strong>magnitude 20.5-21.4</strong>; the deep search reaches about <strong>22.1</strong>, which is 0.7 magnitudes fainter, a factor of about 1.9 in brightness.
+The faintest star the naked eye can see is about magnitude 6, so these asteroids are about a million times fainter (15 magnitudes = a factor of 10^6).</p>
+<h2>7b. Opposition</h2>
+<p>At <strong>opposition</strong> the asteroid is opposite the Sun in the sky: closest to Earth and brightest, and there are the most of them near the <em>ecliptic</em> (the plane of the planets).
+Our test night, 2019-02-08, was near opposition, so it is both the most asteroid-rich and a deliberate &quot;distribution shift&quot; from the training nights.</p>
+<h2>8. WCS (sky coordinates) and why pointing matters</h2>
+<p>The <strong>WCS</strong> converts pixel positions to sky positions (RA, Dec). The telescope does not point at exactly the same pixels in consecutive exposures (shifts up to 12 pixels). An asteroid moves in a straight
+line <strong>on the sky</strong>, not in each frame's pixels. So we put every blob on frame 1's common sky grid before linking. Forgetting this was our biggest bug.</p>
+<h2>9. Known versus unknown asteroids</h2>
+<p>Hundreds of thousands of asteroids are catalogued. The <strong>Minor Planet Center (MPC)</strong> keeps the official list. We look them up with <strong>SkyBoT</strong> (a service that predicts where known objects are)
+and <strong>JPL Horizons</strong> (NASA's very accurate ephemeris). We measured SkyBoT positions to be about 2.9 arcsec (2.7 px) off, while Horizons is within 0.26 px. Almost everything we detect is <strong>already known</strong>; only objects matching nothing are <em>candidates</em>.</p>
+<h2>10. Tracklet</h2>
+<p>A <strong>tracklet</strong> = a set of detections in different frames that line up as one moving object. It needs at least 3 of the 5 frames, a straight line within 1.5 pixels, and a speed between 8 and 120 arcsec/hour.</p>
+<h2>11. Injection-recovery and completeness</h2>
+<p>We cannot know which real asteroids are in an image, so we <strong>plant fake asteroids</strong> (known brightness, speed, position) into the real images, run the normal pipeline and count how many come out.
+The fraction recovered, as a function of brightness, is the <strong>completeness</strong>. &quot;50% completeness at magnitude 20.5&quot; means: half of the fakes of that brightness are found. This is the standard method in survey astronomy.</p>
+<h2>12. Look-elsewhere effect (why we need a 6-sigma cut in the deep search)</h2>
+<p>If you test thousands of places or motions, some random noise will reach 5 sigma by chance. In the deep search we try 4,888 motions at every pixel, so noise alone produced 6,179 peaks at 5 sigma but only 44 at 6 sigma (on a pure-noise test). So we require 6 sigma. This is the same logic as multiple-testing correction in statistics.</p>
+<h2>Two more terms you will hear</h2>
+<ul>
+<li><strong>Dipole</strong>: a bright half next to a dark half, the typical leftover of a bright star that did not subtract perfectly.</li>
+<li><strong>Ghost / bleed trail</strong>: optical or detector artifacts (a bright star's charge spilling along a CCD column). Bleed trails line up along columns and can fool a fast-object search; we found six of seven fast &quot;tracks&quot; we inspected were such artifacts.</li>
+</ul>
+<h2>Self-test (say each in one sentence)</h2>
+<ol>
+<li>Why do we use difference images? 2. What does &quot;5 sigma&quot; mean? 3. Which is brighter, magnitude 18 or 21? By how much? 4. What is opposition and why did we choose such a night for the test?</li>
+<li>Why must pointing shifts be corrected before linking? 6. What is a tracklet? 7. What does 50% completeness mean? 8. Why can an astronomer not just trust one 5-sigma blob?</li>
+</ol>
+</div><div class="doc"><h1>03. ML primer: the ideas we used, tied to the syllabus</h1>
+<p>Each idea has three lines: <strong>what it is</strong>, <strong>where it appears in our project</strong>, <strong>the syllabus session it matches</strong> (from the course policy document).
+If you can explain these in your own words, you can pass a viva on any part.</p>
+<h2>A. The problem setting</h2>
+<p><strong>Supervised learning</strong>: learn a function from examples with known answers. <em>Ours:</em> the CNN learns real/bogus from labelled stamps; XGBoost learns real/bogus tracklets from labelled tracklets. <em>Syllabus: types of learning, supervised vs unsupervised.</em>
+<strong>Classification vs regression</strong>: classification predicts a category (real/bogus), regression a number. <em>Ours:</em> classification; one small regression (a straight-line fit from stack SNR to magnitude in the deep search: mag = 26.25 - 5.23 log10(SNR)). <em>Syllabus: linear regression.</em>
+<strong>Features and labels</strong>: a feature is a number measurable on new unlabelled data; the label is the answer. <em>Ours:</em> <code>mag</code> and <code>true_rate</code> existed only for planted fakes, so they were illegal features (target leakage). <em>Syllabus: ML requirements (CO1).</em></p>
+<h2>B. Models</h2>
+<p><strong>Logistic regression</strong>: <code>p = sigmoid(w.x + b)</code>, trained by minimising log-loss. <em>Ours:</em> the baseline on 6 numbers per detection (AP 0.780), and in the model comparison on tracklets. <em>Syllabus: logistic regression, hypothesis, cost function.</em>
+<strong>Gradient descent</strong>: repeat <code>w &lt;- w - learning_rate x gradient</code>. <em>Ours:</em> written by hand in numpy in <code>notebooks/neural_networks.ipynb</code>, then Adam in PyTorch for the CNN. <em>Syllabus: gradient descent, cost function.</em>
+<strong>Neural network</strong>: layers of &quot;weighted sum, then non-linearity&quot;. Without the non-linearity, stacked layers collapse into one linear function. <em>Ours:</em> the CNN. <em>Syllabus: NN hypothesis, cost, activation functions.</em>
+<strong>Backpropagation</strong>: the chain rule applied from the output back, so one sweep gives every gradient. For sigmoid + cross-entropy the output error is simply <code>p - y</code>. <em>Ours:</em> coded by hand and checked numerically (matches to 8 decimals). <em>Syllabus: backpropagation.</em>
+<strong>Convolutional neural network (CNN)</strong>: filters (3x3 grids of learned weights) slide across an image looking for a local pattern; pooling shrinks the image so deeper filters see larger areas. <em>Ours:</em> 5 convolution layers over 3 stacked pictures (science, reference, difference); 72,145 weights. <em>Syllabus: neural networks (applied).</em>
+<strong>Decision tree -&gt; random forest -&gt; gradient boosting</strong>: a tree asks yes/no questions; a forest averages many random trees (bagging, lowers variance); boosting builds trees one after another, each correcting the errors so far. <em>Ours:</em> XGBoost on 17 numbers per tracklet (300 trees, depth 3, learning rate 0.05). <em>Syllabus: trees, bagging, random forests, boosting.</em></p>
+<h2>C. Making models behave</h2>
+<p><strong>Overfitting</strong>: the model memorises noise; training error falls, validation error rises. <em>Ours:</em> a demo on 40 points (validation loss lowest at step 22 then climbs), and early stopping in the CNN. <em>Syllabus: bias and variance, evaluating a hypothesis.</em>
+<strong>Regularisation</strong>: anything that stops the model fitting noise: a penalty on large weights (L2 in logistic regression, strength <code>C</code>), <strong>dropout</strong> (0.3 in the CNN head), <strong>early stopping</strong> (patience 4), <strong>subsampling</strong> (XGBoost uses 80% of rows and columns per tree), <strong>data augmentation</strong> (random rotations and mirrors). <em>Syllabus: regularization (CO2).</em>
+<strong>Feature scaling / normalisation</strong>: put numbers on a comparable scale. <em>Ours:</em> per-stamp robust normalisation <code>(x - median) / (1.4826 MAD)</code>, clipped to [-10, 50]. Trees need no scaling.
+<strong>Class imbalance</strong>: real objects are about 3% of detections. We balanced <em>training</em> (all real + 5 bogus per real = 16.7% real) but kept <em>validation</em> realistic. Side effect: raw probabilities are inflated; fix with base-rate adjustment or isotonic calibration.</p>
+<h2>D. Evaluating honestly (the heart of &quot;model evaluation&quot;, worth 3 marks)</h2>
+<p><strong>Train / validation / test</strong>: train fits the model; validation chooses settings and thresholds; test is opened once. <em>Ours:</em> <strong>split by night</strong>, decided in a config file before modelling. <em>Syllabus: train-validation-test.</em>
+<strong>Data leakage</strong>: information at training time that will not exist at use time. Four forms we found: target leakage (<code>mag</code>), group leakage (all tracklets from 4 images), shortcut learning (random bogus tracklets 222+ px off a line), distribution shift (test night sharper). Evidence: accuracy 100% -&gt; 50% -&gt; 99% depending on the test data.
+<strong>Cross-validation</strong>: repeat train/test over several splits. <em>Ours:</em> <code>GroupKFold</code> by night (never random rows). <strong>Cross-fitting</strong> is the same idea used so a second model does not see over-confident first-model scores.
+<strong>Confusion matrix, precision, recall, false-positive rate</strong>: see <code>04_Satvik/07_Diagrams/04_confusion_metrics.svg</code>. <em>Syllabus: error metrics for skewed classes, precision/recall trade-off.</em>
+<strong>Accuracy paradox</strong>: &quot;always bogus&quot; scores 96.8% accuracy and finds nothing. With rare positives use recall, precision and the <strong>precision-recall curve (average precision)</strong>. ROC AUC looked excellent (0.95) when precision at useful recall was under 20%. <em>Syllabus: ROC curves.</em>
+<strong>Threshold / operating point</strong>: pick the cut on validation to keep 90% of real objects, then count false alarms. <strong>Calibration</strong>: do scores mean probabilities? (reliability plot; isotonic regression; Bayes base-rate correction).
+<strong>Error analysis</strong>: look at the model's most confident mistakes. <em>Ours:</em> the CNN's top &quot;bogus&quot; scores were known asteroids -&gt; exposed a 2.9 arcsec catalogue offset (label error). 9 &quot;false positives&quot; on the test night were real known asteroids our labels missed. <em>Syllabus: error analysis.</em>
+<strong>Completeness curve (injection-recovery)</strong>: the domain's version of a recall-by-condition plot (recall vs brightness). <strong>Adversarial validation</strong>: train a classifier to tell fakes from real; AUC 0.47 means it cannot -&gt; fakes are realistic.
+<strong>Fair comparison</strong>: compare models at the same false-alarm level, not at each one's own threshold.</p>
+<h2>E. Ideas from the research side</h2>
+<p><strong>Stacking</strong>: one model's output is another's input (CNN scores are features for XGBoost). <strong>Ensembling</strong>: averaging the two models gave only a tie.
+<strong>Occam's rule</strong>: when models tie, use the simplest (a multi-frame CNN tied XGBoost; we kept XGBoost).
+<strong>Negative results are results</strong>: 3x more data did not help; the limit was physics (photons in one frame), not model size.
+<strong>Look-elsewhere effect / multiple testing</strong>: pick the best of 4,888 trials and noise looks significant. Calibrate on pure noise (6 sigma), and run a <strong>null test</strong> (shuffle the frame times; real movers stop lining up; we got 0 false tracks).</p>
+<h2>F. Syllabus topics we did NOT use (be honest about them)</h2>
+<p>Linear regression as a main model, polynomial regression, the normal equation, SVMs, PCA, k-means, hierarchical clustering, regression trees. See <code>04_Course_Mapping.md</code> for how to cover them with small extra experiments if your faculty expects them.
+We touch <strong>anomaly detection</strong> only in spirit: &quot;tracks that match nothing in the catalogue&quot; is an anomaly filter, but it is a catalogue lookup, not a learned anomaly model.</p>
+<h2>Self-test</h2>
+<ol>
+<li>Why does a network need a non-linear activation? 2. What does <code>p - y</code> have to do with backprop? 3. Why is accuracy useless for 3% positives?</li>
+<li>What is the difference between bagging and boosting? 5. Why split by night instead of randomly? 6. What is cross-fitting and what goes wrong without it?</li>
+<li>Why might a model with a worse depth on the scoreboard be just as good as another? 8. What is the look-elsewhere effect?</li>
+</ol>
+</div><div class="doc"><h1>04. The course policy document and what we have done against it</h1>
+<p>Source: <em>Course Policy, Machine Learning (702DB0C015)</em>, B.Tech CSE (Data Science), Semester V, 2026-27, MPSTME NMIMS. Coordinator: Prof. Abhay Kolhe.</p>
+<h2>1. What the document asks of the project</h2>
+<ul>
+<li><strong>Weight:</strong> the project is 15 marks of the 50-mark internal assessment (marked at the 4th and 11th week).</li>
+<li><strong>Team size:</strong> &quot;Group of 2-3 students&quot;. <strong>We are four.</strong> Ask the coordinator to approve a group of four (or decide how to present it) <em>before</em> the presentation.</li>
+<li><strong>Topic approval:</strong> &quot;the faculty member should approve the topic and title of the project by the end of 3rd week&quot;. Confirm that approval exists in writing; if it does not, get it now.</li>
+<li><strong>What to do:</strong> &quot;Identify and implement a journal/IEEE conference research paper based on some topic relevant to the course... Read, understand, summarize and implement the paper(s).&quot;</li>
+<li><strong>Marking scheme:</strong> Problem Understanding and Formulation (3), Data Preprocessing and Exploration (3), Model Development (4), Model Evaluation and Performance (3), Documentation and Presentation (2).</li>
+<li><strong>Course outcomes the project maps to:</strong> CO1 (describe requirements of ML algorithms), CO2 (select and regularise linear and nonlinear models), CO3 (design a machine-learning system), CO4 (classification and clustering to extract insight).</li>
+<li><strong>GenAI policy (read <code>07_AI_Use_and_Integrity.md</code>):</strong> AI may help with planning, research, learning new concepts and deployment, but students must not use it &quot;to develop entire project; the core implementation and critical thinking aspects of the project must be the students' own work&quot;, and &quot;students need to cite the references used&quot;.</li>
+</ul>
+<h2>2. Which research paper(s) does this project implement?</h2>
+<p>The document requires a paper. Our project was inspired by a post, not by a single paper, so we map it to the closest published work. <strong>Confirm the final choice with your coordinator.</strong> All four were checked to exist:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Paper</th>
+<th>How our project relates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Primary</strong> (CNN part)</td>
+<td>Duev, D. A. et al. (2019), <em>Real-bogus classification for the Zwicky Transient Facility using deep learning</em>, MNRAS 489, 3582 (arXiv:1907.11259)</td>
+<td>Same task family: a CNN that separates real detections from false positives in ZTF data. Differences to state openly: ours scores moving-object blobs, uses 31x31 pixel science/reference/difference stamps, and gets labels from planted fakes plus known asteroids. Read the paper and write down exactly what you replicated and what you changed.</td>
+</tr>
+<tr>
+<td>Supporting (ML in ZTF)</td>
+<td>Mahabal, A. et al. (2019), <em>Machine Learning for the Zwicky Transient Facility</em>, PASP 131, 038002 (arXiv:1902.01936)</td>
+<td>Overview of ML at ZTF: real/bogus, star/galaxy, asteroid detection, training samples. Good for the problem formulation and related work.</td>
+</tr>
+<tr>
+<td>Supporting (deep search)</td>
+<td>Whidden, P. J. et al. (2019), <em>Fast algorithms for slow moving asteroids: constraints on the distribution of Kuiper Belt Objects</em>, AJ 157, 119 (arXiv:1901.02492)</td>
+<td>GPU shift-and-stack over a huge number of trial motions (their KBMOD software). Our deep search is the same idea at a smaller scale (4,888 motions).</td>
+</tr>
+<tr>
+<td>Supporting (data)</td>
+<td>Masci, F. J. et al. (2019), <em>The Zwicky Transient Facility: Data Processing, Products, and Archive</em>, PASP 131, 018003 (arXiv:1902.01872)</td>
+<td>Describes the difference images and the archive we use.</td>
+</tr>
+<tr>
+<td>Inspiration</td>
+<td>Shallue, C. J. &amp; Vanderburg, A. (2018), <em>Identifying exoplanets with deep learning...</em>, AJ 155, 94 (arXiv:1712.05044)</td>
+<td>The &quot;AI on old Kepler data&quot; idea the project started from.</td>
+</tr>
+<tr>
+<td>Methods</td>
+<td>Chen, T. &amp; Guestrin, C. (2016), <em>XGBoost: a scalable tree boosting system</em>, KDD; Kingma, D. &amp; Ba, J. (2015), <em>Adam: a method for stochastic optimization</em>, ICLR</td>
+<td>The boosting library and the optimiser we use.</td>
+</tr>
+</tbody>
+</table>
+<p><em>(Only the abstracts and bibliographic details were verified online; you must read the papers yourselves before citing details.)</em></p>
+<h2>3. The marking scheme against what we have (evidence and owner)</h2>
+<table>
+<thead>
+<tr>
+<th>Criterion (marks)</th>
+<th>What we have</th>
+<th>Evidence in the folder</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Problem understanding and formulation (3)</td>
+<td>The problem, why ML, why difference images, success metrics (recall at a fixed false-alarm level, depth), what is out of scope</td>
+<td><code>01_Project_Overview</code>, <code>02_Domain_Primer</code>, <code>project/docs/astronomy_data_primer.md</code>, <code>project/PLAN.md</code></td>
+<td><strong>Aaryan</strong></td>
+</tr>
+<tr>
+<td>Data preprocessing and exploration (3)</td>
+<td>Metadata-first acquisition, split by night, masks, noise estimation, EDA (thresholds, SNR histograms, stamp zoo), leakage audit, normalisation, augmentation, balancing</td>
+<td><code>project/docs/data_acquisition.md</code>, <code>difference_imaging.md</code>, <code>leakage_audit.md</code>, <code>dataset_building.md</code> + notebooks</td>
+<td><strong>Aaryan</strong> (data) and <strong>Paras</strong> (dataset building)</td>
+</tr>
+<tr>
+<td>Model development (4)</td>
+<td>CNN from scratch (backprop notebook first), XGBoost with explained settings, logistic-regression baseline, model comparison (tree, forest, boosting), a multi-frame model that tied</td>
+<td><code>project/docs/realbogus_cnn.md</code>, <code>tracklet_classifier.md</code>, <code>multiframe_model.md</code>, <code>ml_basics.md</code>, <code>neural_networks.md</code></td>
+<td><strong>Paras</strong> (CNN) and <strong>Satvik</strong> (classical models)</td>
+</tr>
+<tr>
+<td>Model evaluation and performance (3)</td>
+<td>Metrics for skewed classes, PR vs ROC, calibration, completeness curves, scoreboard on held-out nights, comparison at equal false alarms, negative results</td>
+<td><code>project/docs/metrics_evaluation.md</code>, <code>scoreboard.md</code>, <code>more_data.md</code>, <code>reports/scoreboard.csv</code></td>
+<td><strong>Advik</strong> (with Satvik on metrics)</td>
+</tr>
+<tr>
+<td>Documentation and presentation (2)</td>
+<td>One lesson per phase with a quiz, notebooks, architecture diagrams, this folder, live viewer demo</td>
+<td><code>project/docs/</code>, <code>project/docs/architecture/</code>, every <code>03_Presentation_Guide.md</code></td>
+<td><strong>Advik</strong> (lead) and everyone</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Syllabus coverage, honestly</h2>
+<p>&quot;Used&quot; = the topic is really in the project (with the file). &quot;Partly&quot; = touched but not a main method. &quot;Not used&quot; = a gap.</p>
+<table>
+<thead>
+<tr>
+<th>Syllabus topic (session)</th>
+<th>Status</th>
+<th>Where / note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supervised vs unsupervised learning</td>
+<td>Supervised: used. Unsupervised: not used</td>
+<td>CNN, XGBoost are supervised</td>
+</tr>
+<tr>
+<td>Linear regression, multiple, polynomial</td>
+<td>Partly</td>
+<td>one linear fit (magnitude vs log SNR) in the deep search; no regression model as such</td>
+</tr>
+<tr>
+<td>Logistic regression</td>
+<td><strong>Used</strong></td>
+<td>baseline (<code>models/train_baseline_classifier.py</code>, <code>docs/ml_basics.md</code>)</td>
+</tr>
+<tr>
+<td>Hypothesis, gradient descent, cost function</td>
+<td><strong>Used</strong></td>
+<td>from-scratch numpy network in <code>notebooks/neural_networks.ipynb</code></td>
+</tr>
+<tr>
+<td>Normal equation</td>
+<td>Not used</td>
+<td></td>
+</tr>
+<tr>
+<td>Regularisation</td>
+<td><strong>Used</strong></td>
+<td>L2 in logistic regression, dropout, early stopping, XGBoost subsampling, augmentation</td>
+</tr>
+<tr>
+<td>Neural networks: hypothesis, cost, backprop, activation</td>
+<td><strong>Used</strong></td>
+<td><code>docs/neural_networks.md</code>, CNN</td>
+</tr>
+<tr>
+<td>Evaluating a hypothesis, train/val/test</td>
+<td><strong>Used</strong></td>
+<td>split by night; leakage audit</td>
+</tr>
+<tr>
+<td>Bias and variance curves</td>
+<td>Partly</td>
+<td>overfitting demo with train/validation loss; no formal learning-curve study</td>
+</tr>
+<tr>
+<td>Error analysis, metrics for skewed classes, precision/recall trade-off</td>
+<td><strong>Used</strong></td>
+<td><code>docs/metrics_evaluation.md</code>, error analysis in the CNN and tracklet docs</td>
+</tr>
+<tr>
+<td>Decision trees, classification trees, trees vs linear models</td>
+<td><strong>Used</strong></td>
+<td><code>docs/tracklet_classifier.md</code> (depth-3 tree vs linear)</td>
+</tr>
+<tr>
+<td>Regression trees</td>
+<td>Not used</td>
+<td></td>
+</tr>
+<tr>
+<td>Bagging, random forests, boosting</td>
+<td><strong>Used</strong></td>
+<td>forest and XGBoost cross-validated</td>
+</tr>
+<tr>
+<td>SVM (maximal margin, SVC, multiclass, relation to logistic regression)</td>
+<td><strong>Not used</strong></td>
+<td>gap</td>
+</tr>
+<tr>
+<td>ROC curves</td>
+<td><strong>Used</strong></td>
+<td>ROC vs precision-recall</td>
+</tr>
+<tr>
+<td>PCA, clustering, k-means, hierarchical clustering</td>
+<td><strong>Not used</strong></td>
+<td>gap (CO4 asks for classification <strong>and clustering</strong>)</td>
+</tr>
+<tr>
+<td>Anomaly detection and large-scale ML</td>
+<td>Partly</td>
+<td>&quot;unknown tracks&quot; is an anomaly-style filter by catalogue lookup; GPU shift-and-stack, float16 stamps, streaming pipeline for scale</td>
+</tr>
+</tbody>
+</table>
+<h3>How to close the gaps if your faculty expects them (small, honest extras, not required by the policy text)</h3>
+<ol>
+<li><strong>SVM on the tracklet features</strong> next to XGBoost (same cross-validation by night): covers SVM and its relation to logistic regression (CO3).</li>
+<li><strong>PCA, then k-means on the CNN's stamp embeddings</strong> (or on raw normalised stamps) to explore the &quot;bogus zoo&quot; (dipoles, spikes, edges): covers PCA and clustering (CO4) and strengthens the exploration marks.</li>
+<li>A <strong>learning curve</strong> (validation score vs number of training nights): covers bias/variance curves.
+Each is a day of work for one person and is a <em>new</em> experiment you must run and understand yourselves. Ask Advik if you want the starting code reviewed.</li>
+</ol>
+<h2>5. What we have done, in one paragraph (for the report's abstract)</h2>
+<p>We implemented an end-to-end machine-learning pipeline for detecting moving objects in archival ZTF difference images. We built reproducible data acquisition split by night, generated labels by injection-recovery and catalogue matching and audited their quality, trained a convolutional real/bogus classifier (average precision 0.899 on validation, 0.938 on the test night, 4.6x fewer false alarms than a logistic-regression baseline), linked detections into tracks and scored them with gradient-boosted trees, and evaluated the whole system with a scoreboard on held-out nights using planted asteroids (depth of about 20.5 magnitudes for single frames, 21.4 after improving linking, 22.1 with a shift-and-stack deep search). We report negative results honestly (a multi-frame CNN tied XGBoost; three times more training data did not help) and make no discovery claim.</p>
+<h2>6. Things to decide with your coordinator this week</h2>
+<ul>
+<li>[ ] Is a group of four acceptable, and how will individual contribution be assessed?</li>
+<li>[ ] Is the topic approved (title, paper choice)? Get it in writing.</li>
+<li>[ ] How should AI assistance be declared (see <code>07_AI_Use_and_Integrity.md</code>)?</li>
+<li>[ ] Is a live demo allowed/expected? (The live viewer needs the data on a laptop.)</li>
+<li>[ ] Will the missing syllabus topics (SVM, clustering) be expected?</li>
+</ul>
+</div><div class="doc"><h1>05. Team plan: who owns what</h1>
+<h2>The split (by pipeline stage, matched to the marking scheme)</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Owner</th>
+<th>One-line title</th>
+<th>Rubric marks it carries</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Advik</strong> (lead)</td>
+<td><strong>System architecture, evaluation, deep search, live viewer</strong></td>
+<td>Model evaluation (3), documentation and presentation (2), plus the integration of everyone's work</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Aaryan</strong></td>
+<td><strong>Problem, domain, data and preprocessing</strong></td>
+<td>Problem understanding (3), data preprocessing and exploration (3, shared)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Paras</strong></td>
+<td><strong>Labels, dataset building and the neural network (CNN)</strong></td>
+<td>Model development (4, shared), data preparation (shared)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Satvik</strong></td>
+<td><strong>Linking, the tracklet classifier (trees) and metrics</strong></td>
+<td>Model development (4, shared), evaluation basics (shared)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why Advik has the most important part:</strong> it is the part that decides whether the numbers can be believed (the evaluation protocol, the scoreboard, the held-out nights, fair model comparison), it contains the main new method (the deep search, +0.7 magnitude) and it connects all other parts into one running system, plus the live viewer used in the demo. If this part is wrong, every other part's numbers are meaningless. Advik also opens and closes the presentation.</p>
+<h2>How the parts connect (the &quot;contract&quot; between owners)</h2>
+<pre><code>Aaryan  -&gt;  units of images, split by night, cleaned (masks, noise, sky coordinates), blobs detected
+Paras   -&gt;  (3x31x31 stamps + labels) -&gt; trained CNN -&gt; p(real) for every blob
+Satvik  -&gt;  tracks from the CNN-kept blobs -&gt; 17 features -&gt; XGBoost score -&gt; known/unknown
+Advik   -&gt;  runs it all as one deployed path, measures it on planted fakes and held-out nights, adds the deep search, shows it live
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Handover</th>
+<th>What is handed over</th>
+<th>File to look at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Aaryan -&gt; Paras</td>
+<td><code>load_exposure</code> output, the blobs table from <code>extract_sources</code> (x, y, flux, SNR, shape), the nights split, <code>configs/acquire.yaml</code>, <code>detect.yaml</code></td>
+<td><code>clean/load_exposure.py</code>, <code>detect/extract_sources.py</code>, <code>acquire/</code></td>
+</tr>
+<tr>
+<td>Paras -&gt; Satvik</td>
+<td><code>detections</code> table with a <code>score</code> column (cross-fitted for training nights) and the CNN threshold</td>
+<td><code>models/predict_realbogus.py</code>, <code>models/cross_fit_realbogus_scores.py</code></td>
+</tr>
+<tr>
+<td>Satvik -&gt; Advik</td>
+<td>tracklets with <code>tracklet_score</code> and <code>known_name</code></td>
+<td><code>pipeline/run_night_pipeline.py</code></td>
+</tr>
+<tr>
+<td>Advik -&gt; all</td>
+<td>the scoreboard: the one place numbers come from</td>
+<td><code>evaluate/build_scoreboard.py</code>, <code>reports/scoreboard.csv</code></td>
+</tr>
+</tbody>
+</table>
+<p>Rule: <strong>every number in your slides must be traceable to a file</strong> (a lesson document, a notebook output or <code>scoreboard.csv</code>). If you cannot point at the file, do not say the number.</p>
+<h2>Presentation order (adjust to your time slot; default 20 minutes + questions)</h2>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Who</th>
+<th>Time</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Advik</td>
+<td>3 min</td>
+<td>The problem, the idea, the whole pipeline in one picture, who does what</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Aaryan</td>
+<td>4 min</td>
+<td>The data, difference imaging, preprocessing, splitting by night, leakage</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Paras</td>
+<td>5 min</td>
+<td>Labels (injection-recovery), stamps, the CNN, training, results, the label-bug story</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Satvik</td>
+<td>5 min</td>
+<td>Linking, the 17 features, trees and boosting, metrics, why accuracy fails</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Advik</td>
+<td>5 min</td>
+<td>Evaluation protocol, scoreboard v1 to v4, deep search, <strong>live demo</strong> (3 min), limits, conclusion</td>
+</tr>
+<tr>
+<td></td>
+<td>everyone</td>
+<td></td>
+<td>questions: each answers about their own part first; anyone may add</td>
+</tr>
+</tbody>
+</table>
+<p>If you only get <strong>12 minutes</strong>: 2 + 2 + 3 + 3 + 2 (skip the live demo; show one screenshot per stage).</p>
+<h2>Timeline suggestion (about 2 weeks; compress if needed)</h2>
+<table>
+<thead>
+<tr>
+<th>Days</th>
+<th>Everyone</th>
+<th>Advik</th>
+<th>Aaryan</th>
+<th>Paras</th>
+<th>Satvik</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-2</td>
+<td>Read <code>00_Start_Here</code>; run the tests; open the viewer once</td>
+<td>prepare the demo; check numbers against <code>scoreboard.csv</code></td>
+<td>read <code>02_Knowledge_Pack.md</code>; re-run <code>data_acquisition</code> + <code>difference_imaging</code> notebooks</td>
+<td>re-run <code>neural_networks</code> notebook; read <code>realbogus_cnn.md</code></td>
+<td>re-run <code>ml_basics</code> + <code>metrics_evaluation</code> notebooks</td>
+</tr>
+<tr>
+<td>3-6</td>
+<td>Study your pack; write your own summary in your own words</td>
+<td>scoreboard + deep search notebooks; draft the report's evaluation chapter</td>
+<td>leakage audit notebook; EDA figures for the slides</td>
+<td>dataset building + CNN notebooks; error-analysis story</td>
+<td>linking + tracklet classifier notebooks; metrics exercises</td>
+</tr>
+<tr>
+<td>7-9</td>
+<td>Slides from <code>03_Presentation_Guide.md</code>; practise 3 times with a timer</td>
+<td>integrate slides; rehearse the demo</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10-12</td>
+<td>Cross-viva each other with <code>04_Viva_QA.md</code> and <code>06_Whole_Project_Viva_QA.md</code></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>13-14</td>
+<td>Dress rehearsal, fix weak answers, finalise the report</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>Rules for the team</h2>
+<ol>
+<li><strong>Everyone must be able to answer questions on the whole pipeline at the level of <code>06_Whole_Project_Viva_QA.md</code></strong>, not only their own part.</li>
+<li><strong>Run things yourself.</strong> Re-run your notebooks, change one setting, see what changes, and write what you saw. This is what makes the explanation yours (see <code>07_AI_Use_and_Integrity.md</code>).</li>
+<li><strong>One source of numbers.</strong> If a number changes, tell Advik; slides and the report are updated from one list.</li>
+<li><strong>Say &quot;I don't know&quot; correctly:</strong> &quot;I did not test that; my guess is ... and I would check by ...&quot;. That is a good viva answer. A made-up number is not.</li>
+<li><strong>Do not claim a discovery.</strong> Ever.</li>
+</ol>
+<h2>Report structure (suggested; one section per owner)</h2>
+<ol>
+<li>Introduction and problem formulation (Aaryan) · 2. Related work and the paper(s) implemented (Aaryan + Paras) · 3. Data and preprocessing, exploration (Aaryan)</li>
+<li>Labels and dataset (Paras) · 5. Models: CNN (Paras), classical models (Satvik) · 6. Evaluation methodology and results (Advik, with Satvik's metrics)</li>
+<li>Deep search and live system (Advik) · 8. Limitations and negative results (Advik) · 9. Conclusion · References · AI-use declaration (everyone, see file 07)</li>
+</ol>
+</div><div class="doc"><h1>06. Whole-project viva: questions every member must answer</h1>
+<p>How to use: take turns asking each other, answer out loud in 30-60 seconds, then read the model answer. The model answers are short on purpose; add your own example from <em>your</em> part.</p>
+<h3>The basics</h3>
+<p><strong>Q1. What does the project do, in one sentence?</strong>
+It is an ML pipeline that searches archival ZTF telescope images for moving objects (asteroids), separates real ones from junk with a CNN and a tree model, checks them against the catalogue of known asteroids, and measures honestly how deep and how reliable the search is.</p>
+<p><strong>Q2. Why difference images?</strong>
+Subtracting an old reference of the same sky from tonight's picture cancels stars, galaxies and sky glow, so only new or moving things remain. That shrinks the search from about 1,950 sources to a few hundred strong ones per frame.</p>
+<p><strong>Q3. Why does the project need machine learning at all?</strong>
+Most blobs in a difference image are junk, in many shapes (dipoles, cosmic rays, edges, noise); only about 3% are real. Hand-written rules cannot capture all those shapes. A CNN learns them from labelled examples, and gradient-boosted trees combine many weak track-level clues better than a single cut. The rest of the pipeline (matched filtering, linking, shift-and-stack) is physics and search, not learning.</p>
+<p><strong>Q4. What are the two ML models, and what are their inputs and outputs?</strong>
+(1) A CNN: input a 3 x 31 x 31 stamp (science, reference, difference), output p(real) for one blob. (2) XGBoost: input 17 numbers describing a track (speed, straightness, brightness steadiness, CNN scores, forced photometry...), output a score for the whole track.</p>
+<p><strong>Q5. What is a unit and what is a tracklet?</strong>
+A unit is one field + CCD + quadrant + night. A tracklet is a set of detections in different frames that lie on a straight line at a plausible asteroid speed (at least 3 of 5 frames, within 1.5 px of the line, 8-120 arcsec/hour).</p>
+<h3>Data and honesty</h3>
+<p><strong>Q6. Why split by night and not randomly?</strong>
+Frames from one night share the same stars, noise and artifacts. A random split would put near-copies in train and test and inflate scores. Splitting by night, decided in a config file before modelling, keeps the test honest.</p>
+<p><strong>Q7. Give an example of data leakage from your own project.</strong>
+Our first dataset had <code>mag</code> and <code>true_rate</code> columns that existed only for planted fakes, so &quot;is mag missing?&quot; equalled the label. Also, the random bogus tracklets were 222+ pixels off a line while real ones were within 2.6 px, so a one-line rule scored 100%. Trained on that data, a model got 50% (a coin flip) on realistic near-miss tracklets and 99% when trained on realistic data.</p>
+<p><strong>Q8. How do you get labels when the sky is not labelled?</strong>
+Three sources: planted fake asteroids (perfect labels, but only as real as the simulation), known asteroids from catalogues (real, but fewer, positions from JPL Horizons), and everything else called bogus (with a little label noise, because it includes undiscovered real objects).</p>
+<p><strong>Q9. How do you know your fakes look like real asteroids?</strong>
+A classifier trained to tell fakes from real known asteroids (matched in brightness, cross-validated by night) scored AUC 0.46-0.48, where 0.5 means indistinguishable. Also real asteroids and fakes both fade out between magnitudes 20.5 and 21.5.</p>
+<p><strong>Q10. What was the biggest bug and how was it found?</strong>
+The telescope pointing shifts between exposures (up to 12 px). We linked blobs in each frame's own pixel coordinates, so real asteroids did not line up while fakes (planted straight in pixel coordinates) did. Real asteroids all showed the same residual pattern, which pointed at a per-frame error. Fix: put every blob on frame 1's sky grid before linking; real residuals fell from about 2.5 px to 0.05-0.47 px. Lesson: test the simulation against real objects, not only against itself.</p>
+<h3>Models and metrics</h3>
+<p><strong>Q11. Why not just report accuracy?</strong>
+Only about 3% of blobs are real, so &quot;always bogus&quot; scores 96.8% accuracy while finding nothing. We report recall (how many real objects we keep), precision (how pure the flagged set is), false alarms per frame and average precision.</p>
+<p><strong>Q12. Why is a precision-recall curve better than ROC here?</strong>
+ROC's x-axis divides by all bogus (65,000), so hundreds of false alarms look like a tiny step: ROC AUC was 0.95 while precision at useful recall was under 20%. Precision divides by the number of alerts, so it shows directly how polluted the output is.</p>
+<p><strong>Q13. How did you choose the thresholds?</strong>
+On the validation nights only, never on test: the CNN cut keeps 95% of real detections; the tracklet cut keeps 95% of real tracklets. Fixing recall first and then counting false alarms follows the cost argument: a missed asteroid is a lost discovery, a false alarm costs one minute of a person's time.</p>
+<p><strong>Q14. What is cross-fitting and why did you need it?</strong>
+The tracklet model uses the CNN's scores as features. A CNN scoring nights it trained on is over-confident, and the tracklet model would learn that. So training nights are scored by CNNs trained on other nights (4 folds of 2 nights), and validation/test nights by the final CNN. It is stacking without leakage.</p>
+<p><strong>Q15. How do you prevent overfitting?</strong>
+CNN: dropout 0.3, data augmentation (rotations and mirrors), early stopping on validation AP with patience 4. XGBoost: shallow trees (depth 3), small learning rate (0.05), 80% row and column subsampling. Everything is judged on nights the model never saw.</p>
+<p><strong>Q16. The tracklet classifier scores AP 0.999. Is it great?</strong>
+No. That number is saturated: 96% of tracklets in that data are real because we plant 300 fakes per night, the opposite of the real sky. It cannot show improvement. What matters is depth, known asteroids recovered, and bogus tracklets per night on held-out nights.</p>
+<h3>Results and evaluation</h3>
+<p><strong>Q17. What does &quot;50% completeness at magnitude 20.5&quot; mean?</strong>
+Plant fake asteroids of known brightness; at magnitude 20.5 the system recovers half of them. Bigger magnitude is fainter, so a deeper system has a bigger number.</p>
+<p><strong>Q18. How did the system improve from v1 to v4, and why?</strong>
+v1 reached depth about 20.5. We measured where asteroids were lost: at linking, not at the classifier. Relaxing linking found 11% more but created about 1,500 chance tracks per night, which became hard negatives; adding two physics features (static neighbours, forced photometry) controlled them. Depth on the test night rose to 21.4. A multi-frame CNN only tied the simple XGBoost, so we kept XGBoost.</p>
+<p><strong>Q19. Why did 3x more training data (v5) not help?</strong>
+At equal false-alarm levels v4 was equal or slightly better. The system is limited by how many photons one 30-second frame holds, so more examples cannot reveal what is not in the image. That is why the deep search, which adds frames, gained +0.7 magnitude, more than any model change.</p>
+<p><strong>Q20. What is the deep search and why does it work?</strong>
+Shift the frames along a trial motion so a moving object lands on the same pixel and add them. The signal adds N times but the noise only sqrt(N) times, so 8 frames gain about 2.8x, +1.1 magnitudes. We try 4,888 motions on the GPU. Because we pick the best of thousands of trials, noise alone reaches 5 sigma (look-elsewhere effect), so we require 6 sigma, and a null test with shuffled frame times produced 0 false tracks.</p>
+<p><strong>Q21. How do you know the deep search is not finding noise?</strong>
+Calibrate the threshold on pure noise; a null test (shuffle the frame times so real movers no longer line up) gives 0 false tracks after the velocity-consistency cut; the cut also kept 20 of 20 known asteroids. Injection-recovery gives 94-100% recovery at magnitude 21.4-21.9.</p>
+<p><strong>Q22. Why compare models at the same false-alarm level?</strong>
+A rule like &quot;95% recall on validation&quot; lands on different points of each model's trade-off curve. v5 looked 0.8 mag worse at its own threshold, but at matched alarms it tied v4. Fair comparison means the same operating point.</p>
+<h3>Limits and ethics</h3>
+<p><strong>Q23. Did you discover an asteroid?</strong>
+No. The system recovers known asteroids reliably to about magnitude 21. One faint object in a related two-night study passes every check we have (an orbit fit, noise tests, no catalogue match), but that is not a discovery: it needs a human to read the stamps and the Minor Planet Center's process. Nothing has been reported.</p>
+<p><strong>Q24. What are the main limitations?</strong>
+Depth is capped by single frames (the deep search helps on one quadrant of one night); the training data covers one field mostly; &quot;real&quot; labels come partly from simulation; catalogue positions have errors; the test night is no longer perfectly untouched because real bugs were fixed after looking (so a separate holdout night exists); and &quot;unknown&quot; only means &quot;not in the catalogue we queried&quot;.</p>
+<p><strong>Q25. What would you do with more time?</strong>
+Evaluate on more fields and nights; try an SVM and clustering of the &quot;bogus zoo&quot; for the course syllabus; add a learning curve; run the deep search on more nights; get an independent confirmation from another survey.</p>
+<p><strong>Q26. How reproducible is it?</strong>
+Configs hold every setting; the night split is in a config; random seeds are <code>[project seed, night date]</code>; model versions are bundles with the commit and nights used; archive answers and known-asteroid lookups are cached; about 150 offline tests; <code>environment.yml</code> pins the software.</p>
+<p><strong>Q27. How did you use AI in this project?</strong> (answer truthfully; see <code>07_AI_Use_and_Integrity.md</code>)
+The project was developed with an AI coding assistant (Claude) under Advik's direction, including code, documentation and diagrams; each of us then re-ran and studied our part. We declare this as the course policy requires. Be ready to show that you understand your own part without notes.</p>
+<h3>Where the course topics are</h3>
+<p><strong>Q28. Which syllabus topics does the project use?</strong>
+Logistic regression (baseline), gradient descent and backpropagation (from scratch), neural networks/CNN, regularisation (L2, dropout, early stopping), train/validation/test, error analysis and skewed-class metrics, decision trees, bagging, random forests and boosting, ROC. Not used: SVM, PCA, clustering, normal equation (we say so openly).</p>
+<p><strong>Q29. If I gave you 3 minutes and a whiteboard, how would you draw the pipeline?</strong>
+Data (IRSA, split by night) -&gt; difference image -&gt; detect blobs -&gt; stamps -&gt; CNN -&gt; keep blobs above a cut -&gt; link into tracks on the sky grid -&gt; 17 features -&gt; XGBoost -&gt; cross-match with known asteroids -&gt; unknown candidates -&gt; a person. Underneath: planted fakes and held-out nights measure every stage; the deep search adds frames along trial motions for fainter objects.</p>
+<p><strong>Q30. What did you personally learn that surprised you?</strong> (prepare your own answer)
+Good examples: a model's most confident &quot;mistakes&quot; revealed a labelling error; a near-perfect AP meant nothing; adding data did not help; the evaluation design mattered more than the model.</p>
+</div><div class="doc"><h1>07. AI use and academic integrity (please read this before you present)</h1>
+<h2>What the course policy says</h2>
+<p>From the <em>Course Policy</em>, section &quot;GenAI Usage&quot; (Projects):</p>
+<ul>
+<li><strong>Allowed:</strong> use AI to &quot;assist in the planning, design, and outlining of project ideas&quot; and to &quot;conduct research, analyze data, and find relevant information&quot;. &quot;GenAI is permitted to be used only for the deployment of model or learning new concepts beyond classroom. Students need to cite the references used.&quot;</li>
+<li><strong>Not allowed:</strong> &quot;Develop entire project; the core implementation and critical thinking aspects of the project must be the students' own work.&quot; And: &quot;Use AI in ways that bypass the learning process and objectives of the course.&quot;</li>
+<li>General rule for assignments: do not use AI &quot;for creating entire code or solutions using AI without understanding and personal contribution&quot; and do not copy &quot;AI-generated content and pass it off as their own work&quot;.</li>
+<li>AI tools are <strong>not allowed during exams and quizzes</strong>.</li>
+</ul>
+<h2>The honest situation</h2>
+<p>This project's code, lessons, tests and diagrams were developed in a long working session between <strong>Advik and an AI coding assistant (Claude)</strong>. Advik directed the work, made decisions and reviewed results; the assistant wrote most of the code and documents. The folder you are reading, including the viva answers, was also generated with AI help.</p>
+<p>That does not make the project worthless, but it does mean two things you must handle honestly:</p>
+<ol>
+<li><strong>The policy expects the core implementation and critical thinking to be yours.</strong> Be ready to show it: you must understand every line of your part, and ideally have done real work in it yourself (re-run, modify, extend, write in your own words).</li>
+<li><strong>You must declare the AI help.</strong> Hiding it, if discovered, is a much bigger problem than the help itself.</li>
+</ol>
+<h2>What to do (practical, in order)</h2>
+<ol>
+<li><strong>Tell the coordinator now</strong>, in a short email, how AI was used and ask whether the project is acceptable as it stands and what they expect from you personally. Do this before the presentation, not after a question in the viva.</li>
+<li><strong>Write the declaration</strong> in the report (draft below, edit so it is true for you).</li>
+<li><strong>Do real work on your own part</strong>, so that the declaration is honest and the viva is easy:
+<ul>
+<li>re-run your notebooks from the first cell and write down what each output means in your own words;</li>
+<li>change one thing (a threshold, a layer, a feature, a split) and record what happened and why;</li>
+<li>add one small experiment of your own (the optional extras in <code>04_Course_Mapping.md</code> are good candidates);</li>
+<li>write your report section yourself; use <code>02_Knowledge_Pack.md</code> to learn, not to copy.</li>
+</ul>
+</li>
+<li><strong>Cite sources.</strong> Papers are in <code>04_Course_Mapping.md</code>; also cite software (PyTorch, XGBoost, scikit-learn, astropy, SEP) and data (ZTF via IRSA, with the acknowledgement text from IRSA's release notes, https://irsa.ipac.caltech.edu/data/ZTF/docs/releases/ztf_release_notes_latest).</li>
+<li><strong>In the viva, do not bluff.</strong> &quot;That part is Paras's; from my understanding it works like this...&quot; is fine.</li>
+</ol>
+<h2>Draft declaration (edit to match what is true for you)</h2>
+<blockquote>
+<p><strong>Use of generative AI.</strong> This project was developed with the assistance of an AI coding assistant (Claude, by Anthropic), used under the direction of Advik Divekar. The assistant helped to plan the project, write and test the source code, write the lesson documents and diagrams, and prepare study material. Each team member then studied, re-ran and [describe what you personally did: e.g. modified and evaluated] the part they present: Advik (system, evaluation and deep search), Aaryan (data and preprocessing), Paras (labels and the neural network), Satvik (linking, tree models and metrics). We understand and can explain the methods and results, and all references used are cited. [Add anything else that is true: experiments you added, data you inspected yourself, errors you found.]</p>
+</blockquote>
+<h2>A note about the project itself</h2>
+<p>Because the policy is about <em>learning</em>, the most valuable thing you can do with this folder is use it the way a student uses a worked example: read, run, break it on purpose, explain it out loud, and then extend it.</p>
+</div><div class="doc"><h1>08. Glossary</h1>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning (plain words)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Accuracy</strong></td>
+<td>fraction of all predictions that are right; misleading when one class is rare</td>
+</tr>
+<tr>
+<td><strong>Adam</strong></td>
+<td>a gradient-descent variant that adapts each weight's step size; our optimiser</td>
+</tr>
+<tr>
+<td><strong>Adversarial validation</strong></td>
+<td>train a classifier to tell two datasets apart; if it cannot (AUC 0.5) they are alike</td>
+</tr>
+<tr>
+<td><strong>Anomaly detection</strong></td>
+<td>finding items that do not fit the known pattern; our &quot;unknown&quot; tracks are anomalies by catalogue lookup</td>
+</tr>
+<tr>
+<td><strong>Arcsecond (&quot;&quot;)</strong></td>
+<td>1/3600 of a degree; one ZTF pixel is about 1.01 arcsec</td>
+</tr>
+<tr>
+<td><strong>Asteroid (main belt)</strong></td>
+<td>rocky body orbiting the Sun, mostly between Mars and Jupiter</td>
+</tr>
+<tr>
+<td><strong>Augmentation</strong></td>
+<td>making extra training examples by rotating/mirroring; sky has no &quot;up&quot;</td>
+</tr>
+<tr>
+<td><strong>Average precision (AP)</strong></td>
+<td>area under the precision-recall curve; a single summary for rare positives</td>
+</tr>
+<tr>
+<td><strong>Backpropagation</strong></td>
+<td>chain rule from output back to every weight; gives all gradients in one sweep</td>
+</tr>
+<tr>
+<td><strong>Bagging</strong></td>
+<td>train many models on random samples and average them (random forest)</td>
+</tr>
+<tr>
+<td><strong>Base rate</strong></td>
+<td>how common the positive class really is (about 3% real)</td>
+</tr>
+<tr>
+<td><strong>Bias / variance</strong></td>
+<td>systematic error vs sensitivity to the training sample; underfit vs overfit</td>
+</tr>
+<tr>
+<td><strong>Bleed trail</strong></td>
+<td>charge from a saturated star spilling along a CCD column; causes false fast tracks</td>
+</tr>
+<tr>
+<td><strong>Boosting</strong></td>
+<td>trees built one after another, each fixing the previous errors (XGBoost)</td>
+</tr>
+<tr>
+<td><strong>Bogus</strong></td>
+<td>a detection that is not a real moving object (artifact, noise...)</td>
+</tr>
+<tr>
+<td><strong>Bundle (model)</strong></td>
+<td>a saved version: CNN + tracklet model + thresholds + provenance (<code>models/v4</code>)</td>
+</tr>
+<tr>
+<td><strong>Calibration</strong></td>
+<td>making scores mean real probabilities (reliability plot, isotonic regression)</td>
+</tr>
+<tr>
+<td><strong>CCD / quadrant</strong></td>
+<td>a camera chip / one quarter of a chip (about 3072 x 3080 px)</td>
+</tr>
+<tr>
+<td><strong>Class imbalance</strong></td>
+<td>one class is much rarer than the other</td>
+</tr>
+<tr>
+<td><strong>CNN</strong></td>
+<td>convolutional neural network: filters slide over an image to find local patterns</td>
+</tr>
+<tr>
+<td><strong>Common grid</strong></td>
+<td>frame 1's pixel grid; every blob is projected onto it before linking</td>
+</tr>
+<tr>
+<td><strong>Completeness</strong></td>
+<td>fraction of planted fakes recovered (recall by brightness)</td>
+</tr>
+<tr>
+<td><strong>Confusion matrix</strong></td>
+<td>counts of true/false positives and negatives</td>
+</tr>
+<tr>
+<td><strong>Cross-fitting</strong></td>
+<td>scoring each fold with a model that did not train on it, so stage 2 sees honest scores</td>
+</tr>
+<tr>
+<td><strong>Cross-validation (GroupKFold)</strong></td>
+<td>repeated train/test by groups (nights), never by random rows</td>
+</tr>
+<tr>
+<td><strong>Deep search</strong></td>
+<td>shift-and-stack along trial motions to reach fainter than one frame</td>
+</tr>
+<tr>
+<td><strong>Depth</strong></td>
+<td>the brightness (magnitude) where 50% of fakes are recovered</td>
+</tr>
+<tr>
+<td><strong>Difference image</strong></td>
+<td>science minus reference: only new things remain</td>
+</tr>
+<tr>
+<td><strong>Dipole</strong></td>
+<td>bright half beside dark half: imperfect subtraction of a bright star</td>
+</tr>
+<tr>
+<td><strong>Dropout</strong></td>
+<td>randomly switching off neurons during training to reduce overfitting</td>
+</tr>
+<tr>
+<td><strong>Early stopping</strong></td>
+<td>stop training when validation performance stops improving; keep the best epoch</td>
+</tr>
+<tr>
+<td><strong>Ephemeris</strong></td>
+<td>a table of where an object should be at given times</td>
+</tr>
+<tr>
+<td><strong>FITS</strong></td>
+<td>the standard astronomical image file format</td>
+</tr>
+<tr>
+<td><strong>Forced photometry</strong></td>
+<td>measuring flux at a predicted position even where nothing was detected</td>
+</tr>
+<tr>
+<td><strong>Gradient descent</strong></td>
+<td>repeatedly move weights against the gradient of the loss</td>
+</tr>
+<tr>
+<td><strong>Holdout night</strong></td>
+<td>a night never used for choosing anything; opened only to write one number</td>
+</tr>
+<tr>
+<td><strong>IRSA</strong></td>
+<td>NASA/IPAC archive that serves the ZTF data</td>
+</tr>
+<tr>
+<td><strong>Injection-recovery</strong></td>
+<td>plant fakes, run the pipeline, count what comes out</td>
+</tr>
+<tr>
+<td><strong>Isotonic regression</strong></td>
+<td>monotone curve used to calibrate scores</td>
+</tr>
+<tr>
+<td><strong>KD-tree</strong></td>
+<td>data structure for fast nearest-neighbour lookups</td>
+</tr>
+<tr>
+<td><strong>Leakage</strong></td>
+<td>information at training time that will not exist at use time (target, group, shortcut, shift)</td>
+</tr>
+<tr>
+<td><strong>Linking</strong></td>
+<td>joining blobs from different frames into one straight-line track</td>
+</tr>
+<tr>
+<td><strong>Log-loss (cross-entropy)</strong></td>
+<td>the loss for probabilities: confident and wrong costs a lot</td>
+</tr>
+<tr>
+<td><strong>Look-elsewhere effect</strong></td>
+<td>testing many places makes chance peaks likely; raise the threshold</td>
+</tr>
+<tr>
+<td><strong>Magnitude</strong></td>
+<td>log brightness scale: bigger is fainter; 5 mag = 100x</td>
+</tr>
+<tr>
+<td><strong>MAD</strong></td>
+<td>median absolute deviation; robust spread: sigma = 1.4826 x MAD</td>
+</tr>
+<tr>
+<td><strong>Mask</strong></td>
+<td>per-pixel flags (saturated, dead, cosmic ray, ghost...)</td>
+</tr>
+<tr>
+<td><strong>Matched filter</strong></td>
+<td>smoothing with the expected source shape to lift faint sources out of noise</td>
+</tr>
+<tr>
+<td><strong>MPC</strong></td>
+<td>Minor Planet Center: the official keeper of asteroid observations</td>
+</tr>
+<tr>
+<td><strong>Normalisation</strong></td>
+<td>putting stamps in units of their own noise: (x - median) / (1.4826 MAD)</td>
+</tr>
+<tr>
+<td><strong>Null test</strong></td>
+<td>repeat the search on data where there is nothing to find (shuffled times) to measure false alarms</td>
+</tr>
+<tr>
+<td><strong>Opposition</strong></td>
+<td>asteroid opposite the Sun: brightest, most numerous</td>
+</tr>
+<tr>
+<td><strong>Overfitting</strong></td>
+<td>learning the noise of the training set</td>
+</tr>
+<tr>
+<td><strong>Precision / recall / FPR</strong></td>
+<td>purity of what is flagged / share of real objects kept / share of bogus wrongly flagged</td>
+</tr>
+<tr>
+<td><strong>PSF</strong></td>
+<td>point spread function: the blur shape of a point source</td>
+</tr>
+<tr>
+<td><strong>Reference image</strong></td>
+<td>deep picture of the same sky built from old exposures</td>
+</tr>
+<tr>
+<td><strong>Regularisation</strong></td>
+<td>any device that discourages overfitting (L2, dropout, early stopping, subsampling)</td>
+</tr>
+<tr>
+<td><strong>ROC / PR curve</strong></td>
+<td>recall vs false-positive rate / precision vs recall</td>
+</tr>
+<tr>
+<td><strong>Scoreboard</strong></td>
+<td>one function that computes every headline number from the deployed pipeline</td>
+</tr>
+<tr>
+<td><strong>Sigma</strong></td>
+<td>the typical size of the noise; &quot;5 sigma&quot; = 5 times it</td>
+</tr>
+<tr>
+<td><strong>SkyBoT / JPL Horizons</strong></td>
+<td>services that predict where known asteroids are (Horizons is more accurate)</td>
+</tr>
+<tr>
+<td><strong>SNR</strong></td>
+<td>signal-to-noise ratio: flux divided by its uncertainty</td>
+</tr>
+<tr>
+<td><strong>Stamp (triplet)</strong></td>
+<td>3 x 31 x 31 cut-out: science, reference, difference</td>
+</tr>
+<tr>
+<td><strong>Shift-and-stack</strong></td>
+<td>shift frames to follow a trial motion, then add them</td>
+</tr>
+<tr>
+<td><strong>Tracklet</strong></td>
+<td>a set of detections that line up as one moving object</td>
+</tr>
+<tr>
+<td><strong>Unit</strong></td>
+<td>one field + CCD + quadrant + night</td>
+</tr>
+<tr>
+<td><strong>WCS</strong></td>
+<td>the mapping between pixels and sky coordinates (RA, Dec)</td>
+</tr>
+<tr>
+<td><strong>XGBoost</strong></td>
+<td>a fast gradient-boosted tree library</td>
+</tr>
+<tr>
+<td><strong>ZTF</strong></td>
+<td>Zwicky Transient Facility, a survey telescope at Palomar Observatory</td>
+</tr>
+</tbody>
+</table>
+</div><div class="doc"><h1>Diagrams</h1><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1010" width="1680" height="1010">
+<rect width="1680" height="1010" fill="#f1efea"/>
+<text x="840.0" y="58" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="800" fill="#0e0e10" text-anchor="middle" >How our model works: the real/bogus CNN</text>
+<text x="840.0" y="90" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="middle" >Asteroid Hunter · ZTF difference images · one small convolutional neural network decides if a blob is a real moving object</text>
+<text x="70" y="150" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#0e0e10" text-anchor="start" >Input</text>
+<text x="70" y="172" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#6b6a66" text-anchor="start" >one blob = 3 pictures, 31 x 31 px</text>
+<image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHwAAAB8CAAAAACOdYtiAAAGSklEQVR4nO2bS29bRRTH/x6PHcdOmjiOmzZPalKilj5ABaQWpPIQ6gLWLNgg8Q1gz6dCSCxYIRaIIKCUtkmgD/pI0yZx83DiNLEddKTflUYV+1lMRrLuzX3Mief/OGfmXue+kLQjqU9SQVJV0q6koqSOJC9pUNKApL8ltSUNSfpX0veSvpHUlLRPH3lJJUlPJK1JusR2h2usDXGPU8Tmkg3ui+BsmCxIGgHnUXBr8B92JQ1LKoPdWUlTklYk1SRdhyc9Sa9wzO7blLQNH7I+65Iexf7mLtngfg9dHkpqSToh6bmkcbBpo91F+PAEjnh4YO0h5wbhzh4eYfsPJH0k6Q+4ckzSU3iR7rC7mMH9Cp7eQ4eG1xy6rIJVEW/vl7QsaUbSz+BWAcNTbF8jNxhvcpIuwwk7f49+Tkr6M/Y3d8kG91U0/QzsT+Phq5L+waOPg+MyeBk/ruDbTY6V8IVNfPsdNG48WOeeGp6xK2ks9jd3yQb3A2DwQtJFSRv4d4ecvcff4+B2nvrNzh+Acx4f7/AZIU9swpcadcB98K+TF9IddhczuB9F4wfg1iVX9+Pvj9HtJPi1yMk1dCxqgUy/HTxiiD6K9Nli346vkdvTHXYXM7hfQ+OTgVebx79Nzh4Du5to/HaAXRF+5ODBfXJ9Ca6MU7PvUBtanAkCd5IedhczuG+juUFwqKHLW+T2ZTzA8LVrRwNPaMGBS/SxB/5ZzbYNhy6RM7rcd0PS+7G/uUs2uJ8Er1vk4UU0fDzwd+PCJP49zNpMj+tf5RrD/xzXNKkFduHJt8wFNtD+KTwh3WF3MYP7p+A3hU+fAuNsHW2V+VeWx5v49CPqMbF/GXy3JJ1hrvYm567g93m84LGkd2N/c5ds8Nxn+G0bLE+Cyya1dhM+7OL/JY7N4dWzku7gE7YW9wHX/Y4nePL4ARq3/q02OKrh4ubzcTDNPmVqecNOYNvA06t4uR37QdLXkj6X9GFQk6/DhbuswdRYu3kAZ9pHNZwiNl9Hj120XeQ/yjy6wFzsDp5va2/Tkj6V9BWdWJ33HXwY4n7L1xfoJ5u719B8Wanbq4sZ3D/Hq2fBZRNtXgxqsCrbi9Rs117qZJy8fZ5nbbPwaJAavglX1vH0dWqEdIfdRV+H6wOLLtsyeDuwa6H1HfLy/7VPmM8P4OF51m49ftHlnNWLVbiQ7rC76OvtBfCsgM0Bc+t95uNjaHM3wN/m4WHLgXmZ/fWXckYbv7ca3vCuJz3sLrq3V/iItfQRfHoR/O/g1yW48QtzOpvDW/sRHN8K7n/BM7kxuFJA79ZW4VK6w+5iBvc96utp6jfD5jmeXAl0O0Q9lnnyPbT6DEzvButsRbhi8zKxtrPAnM/OzaD7dIfdRc/nW2B7yFxrCux3wX6DOqwIN+7h/afRs+XvKvX7Hv7fQuMltN9g3zR+gnjpDruLGdxPgMUBGI+Cz02Od8jrFc4t4/lzbAfhQo5rC+i/hl+swYMytaJts2c56Q67ixncb6HdNbDI3mGrg18ej74RvBf1Bn69H3jAGLifRPtdnr945unZOo/1X4Ar6Q67ixncGzZL6HgGz14B09scb4B9Dc/uBdhl71XZfX+xjv4ULlygfm/jGTWuE/enO+wuZnBfIB+Po8VMf9epy8+CaZPnZh3qsavBWmoP334dj7D9AZ7JLMCTbfhjfZv2j56fR2s+R27uB78lPPwcurd52jx/r6D3KXJ5ic9QUO914Y/V7z/Rh9UKE2wN/z7ipSs1FzN47kvq9WG0eAMOrKHfM/hzP/gtge0WHrCIprfB1LSdgxs9vCMfvCdn/W+xjpvusLvo8/N5cnaDtfQNarUuOra6XDxXc9RuJbZtzjeCWmAEH18ihw9Tww+SLyaOdK6ILfcxdfsoGjyGXqeCOj17RnKbv0fQcqbjA3S8jAdM4+1bnCvAjzo8mAvW86M1l2xwfxWszX+zd2DfYx2lEszZWoH2s/dYD9H7XThQJrc/DH7ztAxfHhPD9udZy0132F3M4H4VLPvR5mTwWzLD9jfO1dFyCe/PBb9TmqBusxr9V96TyuP1DXzdca35gKdeSHfYXczgfoF59AZ+/gwPv4C3l8jBx8Bxlecr2Xuw7eA3LtPB71vvB2swLfjR4PgJ1m7SHXYXM/h/yQvPPTzlbd0AAAAASUVORK5CYII=" x="160" y="300" width="140" height="140" style="image-rendering:pixelated"/>
+<rect x="160" y="300" width="140" height="140" fill="none" stroke="#0e0e10" stroke-width="1.5"/>
+<text x="304" y="312" font-family="'JetBrains Mono', Menlo, monospace" font-size="11" font-weight="700" fill="#ff5a1f" text-anchor="start" >ch3</text>
+<image href="data:image/png;base64,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" x="110" y="250" width="140" height="140" style="image-rendering:pixelated"/>
+<rect x="110" y="250" width="140" height="140" fill="none" stroke="#0e0e10" stroke-width="1.5"/>
+<text x="254" y="262" font-family="'JetBrains Mono', Menlo, monospace" font-size="11" font-weight="700" fill="#ff5a1f" text-anchor="start" >ch2</text>
+<image href="data:image/png;base64,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" x="60" y="200" width="140" height="140" style="image-rendering:pixelated"/>
+<rect x="60" y="200" width="140" height="140" fill="none" stroke="#0e0e10" stroke-width="1.5"/>
+<text x="204" y="212" font-family="'JetBrains Mono', Menlo, monospace" font-size="11" font-weight="700" fill="#ff5a1f" text-anchor="start" >ch1</text>
+<text x="60" y="590" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="500" fill="#0e0e10" text-anchor="start" >ch1  science (tonight)</text>
+<text x="60" y="610" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="500" fill="#0e0e10" text-anchor="start" >ch2  reference (old sky)</text>
+<text x="60" y="630" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="500" fill="#0e0e10" text-anchor="start" >ch3  difference (new - old)</text>
+<rect x="190" y="330" width="24" height="24" fill="none" stroke="#f4c20d" stroke-width="3"/>
+<path d="M202 442 V500" stroke="#0e0e10" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="202" y="525" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0e0e10" text-anchor="middle" >Kernel 3 x 3</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
+<text x="423.0" y="156" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#0e0e10" text-anchor="middle" >Pooling -&gt; 15x15</text>
+<rect x="360" y="190" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/><rect x="354" y="196" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/><rect x="348" y="202" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/><rect x="342" y="208" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/><rect x="336" y="214" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/><rect x="330" y="220" width="150" height="150" fill="#d9c7a8" stroke="#0e0e10" stroke-width="1"/>
+<rect x="397.5" y="265.0" width="24.0" height="24.0" fill="none" stroke="#f4c20d" stroke-width="2.5"/>
+<text x="405.0" y="410" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >Conv 3x3 x2</text>
+<text x="405.0" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >+ ReLU</text>
+<text x="405.0" y="452" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >16 maps 31x31</text>
+<text x="639.0" y="178" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#0e0e10" text-anchor="middle" >Pooling -&gt; 7x7</text>
+<rect x="602" y="208" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="596" y="214" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="590" y="220" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="584" y="226" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="578" y="232" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="572" y="238" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="566" y="244" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/><rect x="560" y="250" width="110" height="110" fill="#d3bf9c" stroke="#0e0e10" stroke-width="1"/>
+<rect x="609.5" y="283.0" width="17.6" height="17.6" fill="none" stroke="#f4c20d" stroke-width="2.5"/>
+<text x="615.0" y="400" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >Conv 3x3 x2</text>
+<text x="615.0" y="420" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >+ ReLU</text>
+<text x="615.0" y="442" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >32 maps 15x15</text>
+<text x="833.0" y="191" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#0e0e10" text-anchor="middle" >Pooling -&gt; 3x3</text>
+<rect x="820" y="215" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="814" y="221" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="808" y="227" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="802" y="233" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="796" y="239" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="790" y="245" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="784" y="251" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="778" y="257" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="772" y="263" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="766" y="269" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/><rect x="760" y="275" width="80" height="80" fill="#ccb690" stroke="#0e0e10" stroke-width="1"/>
+<rect x="796.0" y="299.0" width="12.8" height="12.8" fill="none" stroke="#f4c20d" stroke-width="2.5"/>
+<text x="800.0" y="395" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >Conv 3x3</text>
+<text x="800.0" y="415" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >+ ReLU</text>
+<text x="800.0" y="437" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >64 maps 7x7</text>
+<rect x="982" y="248" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="978" y="252" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="974" y="256" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="970" y="260" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="966" y="264" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="962" y="268" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="958" y="272" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="954" y="276" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="950" y="280" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="946" y="284" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="942" y="288" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="938" y="292" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="934" y="296" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/><rect x="930" y="300" width="40" height="40" fill="#c4ac82" stroke="#0e0e10" stroke-width="1"/>
+<text x="980" y="395" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >64 x 3 x 3</text>
+<path d="M226 342 L390 270" stroke="#0e0e10" stroke-dasharray="4 4" stroke-width="1"/>
+<path d="M410 280 L610 290" stroke="#0e0e10" stroke-dasharray="4 4" stroke-width="1"/>
+<path d="M620 300 L795 305" stroke="#0e0e10" stroke-dasharray="4 4" stroke-width="1"/>
+<path d="M805 315 L950 310" stroke="#0e0e10" stroke-dasharray="4 4" stroke-width="1"/>
+<path d="M330 640 H950" stroke="#0e0e10" stroke-width="1.2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<rect x="560" y="628" width="160" height="24" fill="#f1efea"/><text x="640" y="646" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="500" fill="#0e0e10" text-anchor="middle" >Feature Maps</text>
+<rect x="1040" y="200" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="222" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="244" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="266" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="288" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="310" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="332" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="354" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="376" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="398" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="420" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="442" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="464" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<rect x="1040" y="486" width="26" height="22" fill="#d9c7a8" stroke="#0e0e10"/>
+<path d="M1026 250 L1040 200 M1026 340 L1040 508" stroke="#0e0e10" stroke-dasharray="4 4"/>
+<text x="1053" y="540" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >Flatten</text>
+<text x="1053" y="560" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >576 numbers</text>
+<text x="1053" y="580" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#ff5a1f" text-anchor="middle" >Dropout 0.3</text>
+<line x1="1066" y1="211" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="190" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="190" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="190" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="220" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="220" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="220" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="250" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="250" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="250" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="280" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="280" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="280" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="310" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="310" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="310" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="340" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="340" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="340" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="370" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="370" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="370" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="400" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="400" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="400" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="430" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="430" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="430" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="460" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="460" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="460" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="490" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="490" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="490" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1066" y1="211" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="255" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="299" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="343" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="387" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="431" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1066" y1="475" x2="1130" y2="520" stroke="#0e0e10" stroke-opacity="0.12"/>
+<line x1="1130" y1="520" x2="1250" y2="235" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="265" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="295" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="325" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="355" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="385" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="415" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="445" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1130" y1="520" x2="1250" y2="475" stroke="#0e0e10" stroke-opacity="0.35"/>
+<line x1="1250" y1="235" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="265" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="295" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="325" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="355" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="385" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="415" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="445" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<line x1="1250" y1="475" x2="1360" y2="355" stroke="#0e0e10" stroke-opacity="0.6"/>
+<circle cx="1130" cy="190" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="220" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="250" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="280" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="310" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="340" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="370" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="400" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="430" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="460" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="490" r="9" fill="#7fb6e6"/>
+<circle cx="1130" cy="520" r="9" fill="#7fb6e6"/>
+<circle cx="1250" cy="235" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="265" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="295" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="325" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="355" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="385" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="415" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="445" r="9" fill="#3c86c9"/>
+<circle cx="1250" cy="475" r="9" fill="#3c86c9"/>
+<circle cx="1360" cy="355" r="11" fill="#16202c"/>
+<text x="1190" y="560" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15.5" font-weight="600" fill="#0e0e10" text-anchor="middle" >Fully Connected</text>
+<text x="1190" y="580" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="400" fill="#6b6a66" text-anchor="middle" >64 neurons + ReLU -&gt; 1</text>
+<text x="1530" y="150" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#0e0e10" text-anchor="middle" >Output</text>
+<rect x="1430" y="290" width="200" height="130" fill="#ff5a1f" rx="3"/>
+<text x="1530" y="330" font-family="'JetBrains Mono', Menlo, monospace" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" >Real  1.00</text>
+<text x="1530" y="370" font-family="'JetBrains Mono', Menlo, monospace" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" >Bogus 0.00</text>
+<text x="1530" y="402" font-family="'JetBrains Mono', Menlo, monospace" font-size="11" font-weight="500" fill="#fff" text-anchor="middle" >known asteroid Mandelshtam</text>
+<path d="M1371 355 H1428" stroke="#0e0e10" stroke-dasharray="4 4"/>
+<text x="1530" y="455" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0e0e10" text-anchor="middle" >Sigmoid</text>
+<text x="1530" y="476" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#6b6a66" text-anchor="middle" >turns the score into</text>
+<text x="1530" y="494" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="#6b6a66" text-anchor="middle" >p(real) from 0 to 1</text>
+<path d="M40 690 V700 H1010 V690" fill="none" stroke="#0e0e10" stroke-width="1.2"/><text x="525.0" y="726" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="#0e0e10" text-anchor="middle" >Feature Extraction</text>
+<path d="M1030 690 V700 H1390 V690" fill="none" stroke="#0e0e10" stroke-width="1.2"/><text x="1210.0" y="726" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="#0e0e10" text-anchor="middle" >Classification</text>
+<path d="M1420 690 V700 H1640 V690" fill="none" stroke="#0e0e10" stroke-width="1.2"/><text x="1530.0" y="726" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="#0e0e10" text-anchor="middle" >Probability</text>
+<rect x="40" y="770" width="1600" height="200" fill="#fff" stroke="#c9c5bb"/>
+<text x="64" y="802" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#6b6a66" text-anchor="start" letter-spacing="1.5">WHERE THIS MODEL SITS IN THE WHOLE PIPELINE</text>
+<rect x="64" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="78" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >1</text>
+<text x="78" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Photos</text>
+<text x="78" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >5 frames of one patch</text>
+<text x="78" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Aaryan</text>
+<path d="M239 881 H255" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="258" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="272" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >2</text>
+<text x="272" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Difference</text>
+<text x="272" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >new minus old sky</text>
+<text x="272" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Aaryan</text>
+<path d="M433 881 H449" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="452" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="466" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >3</text>
+<text x="466" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Blobs</text>
+<text x="466" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >41,522 on the test night</text>
+<text x="466" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Aaryan</text>
+<path d="M627 881 H643" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="646" y="822" width="172" height="118" fill="#ff5a1f" stroke="#ff5a1f"/>
+<text x="660" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="start" >4</text>
+<text x="660" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >CNN</text>
+<text x="660" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#fff" text-anchor="start" >p(real) for every blob</text>
+<text x="660" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#fff" text-anchor="start" >Paras</text>
+<path d="M821 881 H837" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="840" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="854" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >5</text>
+<text x="854" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Link</text>
+<text x="854" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >straight-line tracks</text>
+<text x="854" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Satvik</text>
+<path d="M1015 881 H1031" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="1034" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="1048" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >6</text>
+<text x="1048" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >XGBoost</text>
+<text x="1048" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >17 numbers -&gt; track score</text>
+<text x="1048" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Satvik</text>
+<path d="M1209 881 H1225" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="1228" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="1242" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >7</text>
+<text x="1242" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Known?</text>
+<text x="1242" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >catalogue check</text>
+<text x="1242" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Satvik</text>
+<path d="M1403 881 H1419" stroke="#0e0e10" stroke-width="1.3" marker-end="url(#arrow)"/>
+<rect x="1422" y="822" width="172" height="118" fill="#f1efea" stroke="#c9c5bb"/>
+<text x="1436" y="850" font-family="'JetBrains Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#ff5a1f" text-anchor="start" >8</text>
+<text x="1436" y="880" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Measure</text>
+<text x="1436" y="904" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#6b6a66" text-anchor="start" >scoreboard, deep search</text>
+<text x="1436" y="926" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="600" fill="#6b6a66" text-anchor="start" >Advik</text>
+<text x="1640" y="995" font-family="'JetBrains Mono', Menlo, monospace" font-size="12.5" font-weight="500" fill="#6b6a66" text-anchor="end" >72,145 learnable weights · trained on 53,178 stamps · average precision 0.899 (validation) and 0.938 (untouched test night) · baseline 0.780</text>
+</svg><figcaption>00 How Our Model Works</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 700" width="1240" height="700"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="620.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">The whole system: from telescope images to candidate asteroids</text>
+<rect x="30" y="60" width="150" height="230" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="105.0" y="112.83333333333333" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Data source</text>
+<text x="105.0" y="131.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">ZTF archive</text>
+<text x="105.0" y="150.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">(IRSA)</text>
+<text x="105.0" y="169.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="105.0" y="188.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">science image</text>
+<text x="105.0" y="207.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">mask</text>
+<text x="105.0" y="226.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">difference image</text>
+<text x="105.0" y="245.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">PSF</text>
+<rect x="215" y="60" width="245" height="230" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="337.5" y="112.83333333333333" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="middle">1. Data &amp; preprocessing (Aaryan)</text>
+<text x="337.5" y="131.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">query metadata, pick nights</text>
+<text x="337.5" y="150.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">download 4 files per exposure</text>
+<text x="337.5" y="169.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">load, mask bad pixels</text>
+<text x="337.5" y="188.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">estimate background &amp; noise</text>
+<text x="337.5" y="207.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">detect blobs (2-sigma, SEP)</text>
+<text x="337.5" y="226.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">split train / val / test BY</text>
+<text x="337.5" y="245.83333333333331" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">NIGHT</text>
+<rect x="495" y="60" width="260" height="230" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="625.0" y="131.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="middle">2. Labels, stamps, CNN (Paras)</text>
+<text x="625.0" y="150.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">cut 3 x 31 x 31 stamps per blob</text>
+<text x="625.0" y="169.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">labels: planted fakes + known</text>
+<text x="625.0" y="188.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">asteroids, rest = bogus</text>
+<text x="625.0" y="207.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">normalise, augment, balance</text>
+<text x="625.0" y="226.83333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">CNN scores p(real) per blob</text>
+<rect x="790" y="60" width="260" height="230" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="920.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="middle">3. Linking &amp; classifier (Satvik)</text>
+<text x="920.0" y="160.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">link blobs into straight tracks</text>
+<text x="920.0" y="179.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">17 numbers per track</text>
+<text x="920.0" y="198.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">XGBoost scores each track</text>
+<text x="920.0" y="217.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">cross-match known asteroids</text>
+<rect x="1085" y="60" width="130" height="230" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="1150.0" y="141.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Candidates</text>
+<text x="1150.0" y="160.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">unknown tracks</text>
+<text x="1150.0" y="179.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle"></text>
+<text x="1150.0" y="198.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">a person looks</text>
+<text x="1150.0" y="217.33333333333334" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#1f2937" text-anchor="middle">at the stamps</text>
+<line x1="180" y1="175" x2="215" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="460" y1="175" x2="495" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="755" y1="175" x2="790" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<line x1="1050" y1="175" x2="1085" y2="175" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="215" y="350" width="835" height="190" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="632.5" y="376" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">4. Evaluation &amp; discovery engine (Advik)</text>
+<rect x="235" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="330.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Scoreboard</text>
+<text x="330.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">plant fakes, measure</text>
+<text x="330.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">what is recovered</text>
+<text x="330.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">(completeness)</text>
+<rect x="445" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="540.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Honest testing</text>
+<text x="540.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">train / val / test</text>
+<text x="540.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">+ untouched holdout</text>
+<text x="540.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">versions v1..v5</text>
+<rect x="655" y="400" width="190" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="750.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Deep search</text>
+<text x="750.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">add frames along a</text>
+<text x="750.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">trial motion: +0.7 mag</text>
+<text x="750.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">fainter than 1 frame</text>
+<rect x="865" y="400" width="170" height="120" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="950.0" y="437.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="middle">Live viewer</text>
+<text x="950.0" y="455.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">watch every stage</text>
+<text x="950.0" y="473.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">run live in a</text>
+<text x="950.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">browser</text>
+<line x1="340" y1="350" x2="340" y2="292" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<text x="340.0" y="317.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#6b7280" text-anchor="middle">measures the stages above</text>
+<line x1="920" y1="350" x2="920" y2="292" stroke="#6b7280" stroke-width="2" marker-end="url(#head)"/>
+<rect x="30" y="350" width="150" height="190" rx="10" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.6"/>
+<text x="105.0" y="413.0" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#4b5563" text-anchor="middle">Provenance</text>
+<text x="105.0" y="431.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">archive + metadata</text>
+<text x="105.0" y="449.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">cached on disk</text>
+<text x="105.0" y="467.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">so every run is</text>
+<text x="105.0" y="485.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">repeatable</text>
+<text x="620" y="600" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Two ML models do the learning: a CNN on pixels (stage 2) and gradient-boosted trees on track numbers (stage 3).</text>
+<text x="620" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Everything else is physics, search and statistics. Nothing is reported as a discovery without a person checking it.</text>
+<text x="620" y="665" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Colour = owner of that part of the work.</text>
+</svg><figcaption>01 system overview</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 470" width="1100" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text x="550.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Splitting by NIGHT, decided before any modelling</text>
+<text x="550" y="62" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="middle">Every detection, fake and stamp from one night lives in exactly one group (configs/acquire.yaml).</text>
+<text x="40" y="110" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f766e" text-anchor="start">TRAIN (8 nights): the models learn from these</text>
+<rect x="40" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="99.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2020-09-19</text>
+<rect x="168" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="227.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2020-09-21</text>
+<rect x="296" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="355.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2020-09-23</text>
+<rect x="424" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="483.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2021-09-11</text>
+<rect x="552" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="611.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2022-09-22</text>
+<rect x="680" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="739.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2022-09-24</text>
+<rect x="808" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="867.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2023-09-20</text>
+<rect x="936" y="125" width="118" height="50" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>
+<text x="995.0" y="154.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2023-09-25</text>
+<text x="40" y="215" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1d4ed8" text-anchor="start">VALIDATION (2 nights): choose settings and thresholds here</text>
+<rect x="40" y="230" width="118" height="50" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="99.0" y="259.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2021-09-12</text>
+<rect x="168" y="230" width="118" height="50" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+<text x="227.0" y="259.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2023-09-15</text>
+<text x="40" y="320" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#b45309" text-anchor="start">TEST (1 night): opened once for the final number</text>
+<rect x="40" y="335" width="160" height="50" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.6"/>
+<text x="120.0" y="364.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2019-02-08</text>
+<text x="230" y="365" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="start" font-style="italic">the best night: sharp seeing, field at opposition, the most asteroids</text>
+<text x="640" y="320" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#6d28d9" text-anchor="start">HOLDOUT (1 night): never touched</text>
+<rect x="640" y="335" width="160" height="50" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.6"/>
+<text x="720.0" y="364.0" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#1f2937" text-anchor="middle">2022-06-17</text>
+<text x="550" y="430" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#6b7280" text-anchor="middle" font-style="italic">Why by night? Frames of one night share stars, noise and artifacts. Random row splits would leak that into the test.</text>
+</svg><figcaption>02 split by night</figcaption></figure></div></body></html>

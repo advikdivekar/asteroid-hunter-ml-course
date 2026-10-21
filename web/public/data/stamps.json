@@ -1,0 +1,482 @@
+[
+ {
+  "i": 0,
+  "kind": "fake",
+  "label": 1,
+  "snr": 146.7,
+  "mag": 17.11,
+  "frame": 4,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 1,
+  "kind": "fake",
+  "label": 1,
+  "snr": 107.3,
+  "mag": 17.48,
+  "frame": 3,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 2,
+  "kind": "fake",
+  "label": 1,
+  "snr": 74.2,
+  "mag": 17.86,
+  "frame": 2,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 3,
+  "kind": "fake",
+  "label": 1,
+  "snr": 54.2,
+  "mag": 18.31,
+  "frame": 4,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 4,
+  "kind": "fake",
+  "label": 1,
+  "snr": 36.7,
+  "mag": 18.61,
+  "frame": 3,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 5,
+  "kind": "fake",
+  "label": 1,
+  "snr": 30.4,
+  "mag": 18.85,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.999
+ },
+ {
+  "i": 6,
+  "kind": "fake",
+  "label": 1,
+  "snr": 23.4,
+  "mag": 19.15,
+  "frame": 4,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 7,
+  "kind": "fake",
+  "label": 1,
+  "snr": 17.5,
+  "mag": 19.43,
+  "frame": 3,
+  "name": null,
+  "score_python": 1.0
+ },
+ {
+  "i": 8,
+  "kind": "fake",
+  "label": 1,
+  "snr": 13.3,
+  "mag": 19.76,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.99999
+ },
+ {
+  "i": 9,
+  "kind": "fake",
+  "label": 1,
+  "snr": 8.4,
+  "mag": 20.15,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.99985
+ },
+ {
+  "i": 10,
+  "kind": "fake",
+  "label": 1,
+  "snr": 6.4,
+  "mag": 20.47,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.98265
+ },
+ {
+  "i": 11,
+  "kind": "fake",
+  "label": 1,
+  "snr": 4.6,
+  "mag": 20.78,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.99154
+ },
+ {
+  "i": 12,
+  "kind": "fake",
+  "label": 1,
+  "snr": 3.0,
+  "mag": 21.24,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.70493
+ },
+ {
+  "i": 13,
+  "kind": "fake",
+  "label": 1,
+  "snr": -1.3,
+  "mag": 33.66,
+  "frame": 4,
+  "name": null,
+  "score_python": 0.00296
+ },
+ {
+  "i": 14,
+  "kind": "known",
+  "label": 1,
+  "snr": 18.4,
+  "mag": 19.35,
+  "frame": 1,
+  "name": "2001 VH36",
+  "score_python": 0.25118
+ },
+ {
+  "i": 15,
+  "kind": "known",
+  "label": 1,
+  "snr": 306.2,
+  "mag": 16.21,
+  "frame": 1,
+  "name": "Mandelshtam",
+  "score_python": 0.99999
+ },
+ {
+  "i": 16,
+  "kind": "known",
+  "label": 1,
+  "snr": 7.3,
+  "mag": 20.31,
+  "frame": 1,
+  "name": "2006 VT42",
+  "score_python": 0.99837
+ },
+ {
+  "i": 17,
+  "kind": "known",
+  "label": 1,
+  "snr": 71.5,
+  "mag": 17.88,
+  "frame": 1,
+  "name": "1993 FQ35",
+  "score_python": 1.0
+ },
+ {
+  "i": 18,
+  "kind": "known",
+  "label": 1,
+  "snr": 15.7,
+  "mag": 19.53,
+  "frame": 1,
+  "name": "2003 SW250",
+  "score_python": 0.99983
+ },
+ {
+  "i": 19,
+  "kind": "known",
+  "label": 1,
+  "snr": 9.6,
+  "mag": 20.05,
+  "frame": 1,
+  "name": "2001 OH97",
+  "score_python": 0.99994
+ },
+ {
+  "i": 20,
+  "kind": "known",
+  "label": 1,
+  "snr": 8.2,
+  "mag": 20.17,
+  "frame": 1,
+  "name": "2010 CF185",
+  "score_python": 0.99882
+ },
+ {
+  "i": 21,
+  "kind": "known",
+  "label": 1,
+  "snr": 18.8,
+  "mag": 19.32,
+  "frame": 1,
+  "name": "1999 JH40",
+  "score_python": 0.99314
+ },
+ {
+  "i": 22,
+  "kind": "known",
+  "label": 1,
+  "snr": 9.5,
+  "mag": 20.02,
+  "frame": 1,
+  "name": "2013 MN7",
+  "score_python": 0.99991
+ },
+ {
+  "i": 23,
+  "kind": "known",
+  "label": 1,
+  "snr": 12.8,
+  "mag": 19.72,
+  "frame": 1,
+  "name": "2011 BA55",
+  "score_python": 0.99999
+ },
+ {
+  "i": 24,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 541.9,
+  "mag": 15.68,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.0005
+ },
+ {
+  "i": 25,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 541.5,
+  "mag": 15.66,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.00022
+ },
+ {
+  "i": 26,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 541.3,
+  "mag": 15.7,
+  "frame": 4,
+  "name": null,
+  "score_python": 0.00038
+ },
+ {
+  "i": 27,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 539.2,
+  "mag": 15.66,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.00028
+ },
+ {
+  "i": 28,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 533.3,
+  "mag": 15.62,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.00053
+ },
+ {
+  "i": 29,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 514.2,
+  "mag": 15.72,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.42219
+ },
+ {
+  "i": 30,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 491.7,
+  "mag": 15.7,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.4604
+ },
+ {
+  "i": 31,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 484.7,
+  "mag": 15.8,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.46967
+ },
+ {
+  "i": 32,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 10.9,
+  "mag": 19.97,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.99996
+ },
+ {
+  "i": 33,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 9.1,
+  "mag": 20.05,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.99992
+ },
+ {
+  "i": 34,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 9.2,
+  "mag": 20.13,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.9999
+ },
+ {
+  "i": 35,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 9.6,
+  "mag": 20.01,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.99982
+ },
+ {
+  "i": 36,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 12.5,
+  "mag": 19.75,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.99965
+ },
+ {
+  "i": 37,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 7.1,
+  "mag": 20.3,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.99961
+ },
+ {
+  "i": 38,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 1.7,
+  "mag": 22.06,
+  "frame": 4,
+  "name": null,
+  "score_python": 0.00582
+ },
+ {
+  "i": 39,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 2.1,
+  "mag": 21.71,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.00394
+ },
+ {
+  "i": 40,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 1.2,
+  "mag": 22.38,
+  "frame": 4,
+  "name": null,
+  "score_python": 0.01272
+ },
+ {
+  "i": 41,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 1.7,
+  "mag": 21.96,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.02665
+ },
+ {
+  "i": 42,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 3.2,
+  "mag": 21.25,
+  "frame": 3,
+  "name": null,
+  "score_python": 0.00592
+ },
+ {
+  "i": 43,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 2.0,
+  "mag": 21.8,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.00744
+ },
+ {
+  "i": 44,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 3.7,
+  "mag": 21.1,
+  "frame": 5,
+  "name": null,
+  "score_python": 0.05164
+ },
+ {
+  "i": 45,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 7.8,
+  "mag": 20.24,
+  "frame": 1,
+  "name": null,
+  "score_python": 0.01464
+ },
+ {
+  "i": 46,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 2.8,
+  "mag": 21.48,
+  "frame": 2,
+  "name": null,
+  "score_python": 0.01206
+ },
+ {
+  "i": 47,
+  "kind": "bogus",
+  "label": 0,
+  "snr": 1.1,
+  "mag": 22.43,
+  "frame": 4,
+  "name": null,
+  "score_python": 0.0103
+ }
+]

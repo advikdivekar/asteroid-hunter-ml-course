@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 712" width="1560" height="712">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
+<rect width="1560" height="712" fill="#f1efea"/>
+<text x="60" y="64" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="800" fill="#0e0e10" text-anchor="start" >Satvik: how I did my part</text>
+<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Linking, tracklet classifier and metrics · follow the arrows</text>
+<rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
+<text x="84" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Keep the CNN&#x27;s blobs</text>
+<text x="84" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >drop blobs under the CNN cut (set</text>
+<text x="84" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >low, so almost no real blob is lost)</text>
+<text x="84" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/predict_realbogus.py</text>
+<rect x="430" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 02</text>
+<text x="454" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >One shared sky grid</text>
+<text x="454" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >the telescope points slightly</text>
+<text x="454" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >differently each time: correct for it</text>
+<text x="454" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >link/measure_sky_motion.py</text>
+<rect x="800" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 03</text>
+<text x="824" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Link into tracks</text>
+<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >pairs + KD-tree look-up +</text>
+<text x="824" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >straight-line fit: 52,000 -&gt; 3,500</text>
+<text x="824" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >seeds</text>
+<text x="824" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >link/link_detections_into_tracklets.py</text>
+<rect x="1170" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="140" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
+<text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >17 numbers per track</text>
+<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >speed, straightness, steady</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >brightness, CNN opinion, forced</text>
+<text x="1194" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >photometry</text>
+<text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >features/compute_tracklet_features.py</text>
+<rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Compare 4 models</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >logistic regression, tree, forest,</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >XGBoost; cross-validated by night</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/train_tracklet_classifier.py</text>
+<rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
+<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Pick the threshold</text>
+<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >on validation nights only, at a fixed</text>
+<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >recall</text>
+<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/choose_threshold.py</text>
+<rect x="430" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="430" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="454" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 07</text>
+<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Use the right metrics</text>
+<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >accuracy lies (96.8% for &#x27;always</text>
+<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >bogus&#x27;); use precision, recall, AP</text>
+<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/compute_classification_metrics.py</text>
+<rect x="60" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
+<rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
+<text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
+<text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Known or unknown?</text>
+<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >match tracks to the asteroid</text>
+<text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >catalogue; checklist for a human</text>
+<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >crossmatch/crossmatch_known_asteroids.py</text>
+<path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M764 224.0 H796" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1134 224.0 H1166" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1335.0 312 V360" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M1174 448.0 H1126" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M804 448.0 H756" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
+<text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Advik scored tracks, each marked known or unknown</text>
+</svg>

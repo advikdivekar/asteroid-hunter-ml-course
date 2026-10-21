@@ -1,0 +1,1178 @@
+{
+ "unit": "000618_c03_q4_2019-02-08",
+ "window": {
+  "x0": 2080,
+  "y0": 1917,
+  "size": 160
+ },
+ "frames": [
+  {
+   "frame": 1,
+   "exposure": "ztf_20190208210104_000618_zr_c03_o_q4",
+   "obsjd": 2458522.7101,
+   "noise": 5.77
+  },
+  {
+   "frame": 2,
+   "exposure": "ztf_20190208230428_000618_zr_c03_o_q4",
+   "obsjd": 2458522.73044,
+   "noise": 5.4
+  },
+  {
+   "frame": 3,
+   "exposure": "ztf_20190208233391_000618_zr_c03_o_q4",
+   "obsjd": 2458522.73339,
+   "noise": 5.38
+  },
+  {
+   "frame": 4,
+   "exposure": "ztf_20190208236354_000618_zr_c03_o_q4",
+   "obsjd": 2458522.73635,
+   "noise": 5.35
+  },
+  {
+   "frame": 5,
+   "exposure": "ztf_20190208239306_000618_zr_c03_o_q4",
+   "obsjd": 2458522.73931,
+   "noise": 5.47
+  }
+ ],
+ "tracks": [
+  {
+   "id": 11,
+   "known_name": "1996 XG5",
+   "fake": false,
+   "mag": 17.54,
+   "rate": 38.9,
+   "residual": 0.083,
+   "score_mean": 1.0,
+   "points": [
+    {
+     "frame": 1,
+     "x": 63.22,
+     "y": 85.47
+    },
+    {
+     "frame": 2,
+     "x": 81.17,
+     "y": 80.19
+    },
+    {
+     "frame": 3,
+     "x": 83.73,
+     "y": 79.33
+    },
+    {
+     "frame": 4,
+     "x": 86.49,
+     "y": 78.53
+    },
+    {
+     "frame": 5,
+     "x": 89.06,
+     "y": 77.7
+    }
+   ]
+  },
+  {
+   "id": 223,
+   "known_name": "",
+   "fake": false,
+   "mag": 20.59,
+   "rate": 34.7,
+   "residual": 1.093,
+   "score_mean": 0.9672,
+   "points": [
+    {
+     "frame": 1,
+     "x": 80.54,
+     "y": 156.6
+    },
+    {
+     "frame": 2,
+     "x": 97.97,
+     "y": 152.88
+    },
+    {
+     "frame": 3,
+     "x": 99.0,
+     "y": 151.92
+    },
+    {
+     "frame": 4,
+     "x": 100.97,
+     "y": 151.44
+    },
+    {
+     "frame": 5,
+     "x": 104.15,
+     "y": 150.3
+    }
+   ]
+  }
+ ],
+ "blobs": [
+  {
+   "frame": 1,
+   "x": 109.81,
+   "y": 7.42,
+   "snr": 1.6,
+   "score": 0.0072,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 134.22,
+   "y": 7.01,
+   "snr": 2.0,
+   "score": 0.0132,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 17.58,
+   "y": 17.63,
+   "snr": 2.4,
+   "score": 0.0084,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 89.72,
+   "y": 24.48,
+   "snr": 1.7,
+   "score": 0.0042,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 38.77,
+   "y": 29.91,
+   "snr": 2.0,
+   "score": 0.0059,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 66.96,
+   "y": 39.54,
+   "snr": -0.9,
+   "score": 0.0021,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 33.32,
+   "y": 44.77,
+   "snr": 1.5,
+   "score": 0.0097,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 157.24,
+   "y": 49.95,
+   "snr": 1.3,
+   "score": 0.0075,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 17.17,
+   "y": 53.84,
+   "snr": 2.5,
+   "score": 0.2401,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 14.19,
+   "y": 57.97,
+   "snr": 3.5,
+   "score": 0.01,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 134.79,
+   "y": 58.03,
+   "snr": 1.9,
+   "score": 0.0062,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 157.24,
+   "y": 62.39,
+   "snr": 1.2,
+   "score": 0.0138,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 95.15,
+   "y": 75.64,
+   "snr": 1.4,
+   "score": 0.0044,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 128.96,
+   "y": 75.75,
+   "snr": 1.3,
+   "score": 0.0127,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 63.22,
+   "y": 85.47,
+   "snr": 95.5,
+   "score": 1.0,
+   "kind": "known",
+   "name": "1996 XG5"
+  },
+  {
+   "frame": 1,
+   "x": 146.78,
+   "y": 99.59,
+   "snr": 10.2,
+   "score": 0.0359,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 158.61,
+   "y": 107.57,
+   "snr": 4.4,
+   "score": 0.0119,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 39.86,
+   "y": 112.32,
+   "snr": 1.3,
+   "score": 0.0114,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 88.2,
+   "y": 120.54,
+   "snr": 1.4,
+   "score": 0.0109,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 14.84,
+   "y": 131.69,
+   "snr": 2.7,
+   "score": 0.0054,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 73.85,
+   "y": 133.35,
+   "snr": 1.8,
+   "score": 0.0048,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 136.45,
+   "y": 137.78,
+   "snr": 2.9,
+   "score": 0.0306,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 16.63,
+   "y": 154.19,
+   "snr": 1.5,
+   "score": 0.0062,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 1,
+   "x": 80.54,
+   "y": 156.6,
+   "snr": 5.2,
+   "score": 0.997,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 114.71,
+   "y": 16.46,
+   "snr": 1.4,
+   "score": 0.0069,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 143.66,
+   "y": 27.74,
+   "snr": 0.7,
+   "score": 0.0052,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 81.69,
+   "y": 29.27,
+   "snr": 0.4,
+   "score": 0.0058,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 131.37,
+   "y": 29.14,
+   "snr": 2.6,
+   "score": 0.0049,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 32.29,
+   "y": 33.82,
+   "snr": 0.7,
+   "score": 0.0036,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 118.19,
+   "y": 37.62,
+   "snr": 1.2,
+   "score": 0.01,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 65.76,
+   "y": 44.05,
+   "snr": 2.0,
+   "score": 0.0023,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 106.71,
+   "y": 54.25,
+   "snr": 2.4,
+   "score": 0.0054,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 95.08,
+   "y": 56.73,
+   "snr": 0.7,
+   "score": 0.0048,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 28.38,
+   "y": 59.12,
+   "snr": 1.9,
+   "score": 0.0092,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 139.39,
+   "y": 62.14,
+   "snr": 2.2,
+   "score": 0.006,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 81.17,
+   "y": 80.19,
+   "snr": 98.9,
+   "score": 1.0,
+   "kind": "known",
+   "name": "1996 XG5"
+  },
+  {
+   "frame": 2,
+   "x": 2.42,
+   "y": 90.3,
+   "snr": 1.7,
+   "score": 0.0206,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 145.4,
+   "y": 99.46,
+   "snr": 11.0,
+   "score": 0.085,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 138.42,
+   "y": 104.37,
+   "snr": 1.5,
+   "score": 0.0415,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 135.18,
+   "y": 104.67,
+   "snr": 3.2,
+   "score": 0.0236,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 26.85,
+   "y": 120.69,
+   "snr": 2.0,
+   "score": 0.0136,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 93.29,
+   "y": 122.33,
+   "snr": 1.6,
+   "score": 0.0079,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 136.13,
+   "y": 126.74,
+   "snr": 1.8,
+   "score": 0.0164,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 97.2,
+   "y": 134.42,
+   "snr": 2.2,
+   "score": 0.0314,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 19.18,
+   "y": 140.44,
+   "snr": 2.2,
+   "score": 0.0057,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 105.59,
+   "y": 143.72,
+   "snr": 2.7,
+   "score": 0.0096,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 136.56,
+   "y": 151.76,
+   "snr": 2.0,
+   "score": 0.0061,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 97.97,
+   "y": 152.88,
+   "snr": 4.8,
+   "score": 0.8451,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 2,
+   "x": 147.59,
+   "y": 158.56,
+   "snr": 1.7,
+   "score": 0.013,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 133.33,
+   "y": 2.32,
+   "snr": 2.0,
+   "score": 0.0106,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 90.08,
+   "y": 15.93,
+   "snr": 2.3,
+   "score": 0.0072,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 116.91,
+   "y": 18.76,
+   "snr": 1.8,
+   "score": 0.0139,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 147.12,
+   "y": 24.15,
+   "snr": 1.2,
+   "score": 0.0065,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 130.13,
+   "y": 24.13,
+   "snr": 3.7,
+   "score": 0.0467,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 66.58,
+   "y": 40.94,
+   "snr": -3.4,
+   "score": 0.0042,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 95.59,
+   "y": 46.12,
+   "snr": 2.5,
+   "score": 0.0125,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 131.97,
+   "y": 46.02,
+   "snr": 3.6,
+   "score": 0.0221,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 153.85,
+   "y": 51.22,
+   "snr": 2.7,
+   "score": 0.0241,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 27.77,
+   "y": 57.61,
+   "snr": 2.5,
+   "score": 0.0074,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 134.88,
+   "y": 59.12,
+   "snr": 2.0,
+   "score": 0.0051,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 34.33,
+   "y": 62.11,
+   "snr": 1.9,
+   "score": 0.0061,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 140.83,
+   "y": 77.11,
+   "snr": 1.3,
+   "score": 0.0078,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 83.73,
+   "y": 79.33,
+   "snr": 97.7,
+   "score": 1.0,
+   "kind": "known",
+   "name": "1996 XG5"
+  },
+  {
+   "frame": 3,
+   "x": 154.98,
+   "y": 92.2,
+   "snr": 1.8,
+   "score": 0.0083,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 143.32,
+   "y": 100.14,
+   "snr": 9.2,
+   "score": 0.1212,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 133.43,
+   "y": 106.43,
+   "snr": 2.3,
+   "score": 0.0317,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 154.02,
+   "y": 109.17,
+   "snr": 3.9,
+   "score": 0.0277,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 34.01,
+   "y": 110.43,
+   "snr": 2.5,
+   "score": 0.0136,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 125.34,
+   "y": 125.3,
+   "snr": 1.2,
+   "score": 0.0096,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 104.13,
+   "y": 127.17,
+   "snr": 1.6,
+   "score": 0.0271,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 60.68,
+   "y": 140.19,
+   "snr": 1.4,
+   "score": 0.0053,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 3,
+   "x": 99.0,
+   "y": 151.92,
+   "snr": 6.4,
+   "score": 0.9991,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 117.75,
+   "y": 12.81,
+   "snr": 2.6,
+   "score": 0.0138,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 95.22,
+   "y": 15.69,
+   "snr": 1.3,
+   "score": 0.0093,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 19.86,
+   "y": 32.56,
+   "snr": 3.2,
+   "score": 0.0276,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 65.49,
+   "y": 42.76,
+   "snr": -5.2,
+   "score": 0.0041,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 22.57,
+   "y": 44.45,
+   "snr": 1.5,
+   "score": 0.0049,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 147.68,
+   "y": 45.03,
+   "snr": 2.8,
+   "score": 0.0121,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 17.93,
+   "y": 75.5,
+   "snr": 2.5,
+   "score": 0.0208,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 136.41,
+   "y": 76.13,
+   "snr": 1.9,
+   "score": 0.0084,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 46.17,
+   "y": 80.82,
+   "snr": 2.1,
+   "score": 0.0149,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 86.49,
+   "y": 78.53,
+   "snr": 99.4,
+   "score": 1.0,
+   "kind": "known",
+   "name": "1996 XG5"
+  },
+  {
+   "frame": 4,
+   "x": 117.2,
+   "y": 92.7,
+   "snr": 2.1,
+   "score": 0.0053,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 2.44,
+   "y": 93.35,
+   "snr": 1.7,
+   "score": 0.0048,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 12.59,
+   "y": 93.6,
+   "snr": 3.2,
+   "score": 0.0176,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 145.24,
+   "y": 99.56,
+   "snr": 9.7,
+   "score": 0.441,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 138.11,
+   "y": 106.33,
+   "snr": 2.7,
+   "score": 0.0246,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 92.64,
+   "y": 120.65,
+   "snr": 1.8,
+   "score": 0.0148,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 116.86,
+   "y": 121.46,
+   "snr": 0.6,
+   "score": 0.0047,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 147.47,
+   "y": 126.39,
+   "snr": 3.1,
+   "score": 0.0076,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 3.69,
+   "y": 130.0,
+   "snr": 1.2,
+   "score": 0.0054,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 147.4,
+   "y": 135.31,
+   "snr": 1.1,
+   "score": 0.0077,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 73.26,
+   "y": 148.1,
+   "snr": 2.5,
+   "score": 0.0206,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 12.16,
+   "y": 149.67,
+   "snr": 1.3,
+   "score": 0.0048,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 131.02,
+   "y": 152.51,
+   "snr": 2.5,
+   "score": 0.0161,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 58.01,
+   "y": 154.3,
+   "snr": 1.5,
+   "score": 0.0066,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 100.97,
+   "y": 151.44,
+   "snr": 7.3,
+   "score": 0.9994,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 4,
+   "x": 33.62,
+   "y": 158.74,
+   "snr": 1.1,
+   "score": 0.0091,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 16.89,
+   "y": 3.17,
+   "snr": 1.7,
+   "score": 0.0066,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 126.52,
+   "y": 7.1,
+   "snr": 2.7,
+   "score": 0.0102,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 16.08,
+   "y": 9.07,
+   "snr": 2.6,
+   "score": 0.0134,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 36.51,
+   "y": 16.92,
+   "snr": 1.6,
+   "score": 0.0045,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 15.13,
+   "y": 33.78,
+   "snr": 1.6,
+   "score": 0.0055,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 66.22,
+   "y": 39.57,
+   "snr": -1.8,
+   "score": 0.0028,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 122.5,
+   "y": 53.8,
+   "snr": 2.0,
+   "score": 0.0065,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 155.43,
+   "y": 56.1,
+   "snr": 2.1,
+   "score": 0.0052,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 45.39,
+   "y": 67.5,
+   "snr": 0.9,
+   "score": 0.0173,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 23.48,
+   "y": 77.01,
+   "snr": 2.2,
+   "score": 0.0077,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 89.06,
+   "y": 77.7,
+   "snr": 90.6,
+   "score": 1.0,
+   "kind": "known",
+   "name": "1996 XG5"
+  },
+  {
+   "frame": 5,
+   "x": 122.53,
+   "y": 90.96,
+   "snr": 2.0,
+   "score": 0.0068,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 145.56,
+   "y": 99.83,
+   "snr": 8.2,
+   "score": 0.0659,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 145.25,
+   "y": 106.17,
+   "snr": 3.1,
+   "score": 0.0642,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 67.71,
+   "y": 117.13,
+   "snr": 1.7,
+   "score": 0.0067,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 18.4,
+   "y": 127.37,
+   "snr": 2.9,
+   "score": 0.0132,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 82.47,
+   "y": 130.76,
+   "snr": 1.3,
+   "score": 0.0089,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 23.76,
+   "y": 131.4,
+   "snr": 1.7,
+   "score": 0.0071,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 135.28,
+   "y": 132.07,
+   "snr": 1.6,
+   "score": 0.0041,
+   "kind": "bogus",
+   "name": null
+  },
+  {
+   "frame": 5,
+   "x": 104.15,
+   "y": 150.3,
+   "snr": 5.5,
+   "score": 0.9955,
+   "kind": "bogus",
+   "name": null
+  }
+ ]
+}

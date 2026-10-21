@@ -1,0 +1,6 @@
+{
+  "name": "asteroid-hunter-tools",
+  "private": true,
+  "description": "Builds the Word reports: node make_reports.js",
+  "dependencies": { "docx": "9.5.1" }
+}
