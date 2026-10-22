@@ -6,7 +6,7 @@
 |---|---|---|---|
 | 1 | **Advik** (lead) | **System architecture, evaluation, deep search, live viewer** | Model evaluation (3), documentation and presentation (2), plus the integration of everyone's work |
 | 2 | **Aaryan** | **Problem, domain, data and preprocessing** | Problem understanding (3), data preprocessing and exploration (3, shared) |
-| 3 | **Paras** | **Labels, dataset building and the neural network (CNN)** | Model development (4, shared), data preparation (shared) |
+| 3 | **Paras** | **Labels, dataset building and the classical ML model (features, PCA, XGBoost; SVM/forest/CNN compared; k-means)** | Model development (4, shared), data preparation (shared) |
 | 4 | **Satvik** | **Linking, the tracklet classifier (trees) and metrics** | Model development (4, shared), evaluation basics (shared) |
 
 **Why Advik has the most important part:** it is the part that decides whether the numbers can be believed (the evaluation protocol, the scoreboard, the held-out nights, fair model comparison), it contains the main new method (the deep search, +0.7 magnitude) and it connects all other parts into one running system, plus the live viewer used in the demo. If this part is wrong, every other part's numbers are meaningless. Advik also opens and closes the presentation.
@@ -14,14 +14,14 @@
 ## How the parts connect (the "contract" between owners)
 ```
 Aaryan  ->  units of images, split by night, cleaned (masks, noise, sky coordinates), blobs detected
-Paras   ->  (3x31x31 stamps + labels) -> trained CNN -> p(real) for every blob
-Satvik  ->  tracks from the CNN-kept blobs -> 17 features -> XGBoost score -> known/unknown
+Paras   ->  (3x31x31 stamps + labels) -> 29 features + PCA -> XGBoost -> p(real) for every blob
+Satvik  ->  tracks from the kept blobs -> 17 features -> XGBoost score -> known/unknown
 Advik   ->  runs it all as one deployed path, measures it on planted fakes and held-out nights, adds the deep search, shows it live
 ```
 | Handover | What is handed over | File to look at |
 |---|---|---|
 | Aaryan -> Paras | `load_exposure` output, the blobs table from `extract_sources` (x, y, flux, SNR, shape), the nights split, `configs/acquire.yaml`, `detect.yaml` | `clean/load_exposure.py`, `detect/extract_sources.py`, `acquire/` |
-| Paras -> Satvik | `detections` table with a `score` column (cross-fitted for training nights) and the CNN threshold | `models/predict_realbogus.py`, `models/cross_fit_realbogus_scores.py` |
+| Paras -> Satvik | `detections` table with a `score` column (cross-fitted for training nights) and the stage-1 threshold | `models/predict_realbogus.py`, `scripts/train_classical_bundle.py` |
 | Satvik -> Advik | tracklets with `tracklet_score` and `known_name` | `pipeline/run_night_pipeline.py` |
 | Advik -> all | the scoreboard: the one place numbers come from | `evaluate/build_scoreboard.py`, `reports/scoreboard.csv` |
 
@@ -32,7 +32,7 @@ Rule: **every number in your slides must be traceable to a file** (a lesson docu
 |---|---|---|---|
 | 1 | Advik | 3 min | The problem, the idea, the whole pipeline in one picture, who does what |
 | 2 | Aaryan | 4 min | The data, difference imaging, preprocessing, splitting by night, leakage |
-| 3 | Paras | 5 min | Labels (injection-recovery), stamps, the CNN, training, results, the label-bug story |
+| 3 | Paras | 5 min | Labels (injection-recovery), stamps, the 29 features + PCA, the model comparison (CNN as a reference), k-means junk clusters, the label-bug story |
 | 4 | Satvik | 5 min | Linking, the 17 features, trees and boosting, metrics, why accuracy fails |
 | 5 | Advik | 5 min | Evaluation protocol, scoreboard v1 to v4, deep search, **live demo** (3 min), limits, conclusion |
 | | everyone | | questions: each answers about their own part first; anyone may add |
@@ -57,5 +57,5 @@ If you only get **12 minutes**: 2 + 2 + 3 + 3 + 2 (skip the live demo; show one 
 
 ## Report structure (suggested; one section per owner)
 1. Introduction and problem formulation (Aaryan) · 2. Related work and the paper(s) implemented (Aaryan + Paras) · 3. Data and preprocessing, exploration (Aaryan)
-4. Labels and dataset (Paras) · 5. Models: CNN (Paras), classical models (Satvik) · 6. Evaluation methodology and results (Advik, with Satvik's metrics)
+4. Labels and dataset (Paras) · 5. Models: the stage-1 classical model and its comparison (Paras), the tracklet models (Satvik) · 6. Evaluation methodology and results (Advik, with Satvik's metrics)
 7. Deep search and live system (Advik) · 8. Limitations and negative results (Advik) · 9. Conclusion · References · AI-use declaration (everyone, see file 07)

@@ -1,5 +1,26 @@
 # Paras: viva questions and model answers
 
+## 0. The deployed classical model (read first)
+
+**Q. Why classical ML and not the CNN?** Our faculty asked for classical ML, and the evidence agrees: on the same data XGBoost + PCA scored 0.902 validation AP and the CNN 0.898; on the whole pipeline both find the same known asteroids. A tie goes to the simpler, faster, explainable model.
+
+**Q. What are the 49 inputs?** 29 hand-made features (6 from the blob finder, 23 measured on the three stamps: centre brightness, "already in the old picture?", star-shape correlation, sharpness, dark hole, size, elongation, symmetry...) and 20 PCA numbers of the central pixels.
+
+**Q. Why does PCA help if it never sees the labels?** It finds the main ways stamps differ (a bright centre, a dipole, an edge); real and junk stamps sit in different places along those directions, so the trees can use them. It also adds information our hand-made features missed.
+
+**Q. Why did logistic regression and the SVM drop on the test night (0.655, 0.877) while XGBoost held (0.938)?** The test night is sharper and deeper than training (distribution shift). Linear and kernel boundaries extrapolate to feature values they never saw; trees treat values beyond the last split like the last split, so they degrade gracefully.
+
+**Q. Which input matters most and why?** `diff_psf_match`, the correlation of the difference patch with a round star of ZTF's blur: a real point source is star-shaped, cosmic rays are too sharp, dipoles and edges are not round.
+
+**Q. How were the settings chosen?** On validation only: depth 4 (0.9034) beat 5 and 6 (0.9025); adding PCA raised AP by about 0.005; training on all 305,463 blobs instead of the balanced 53,178 did not help.
+
+**Q. What does k-means add?** It is unsupervised: without labels it groups the 44,290 junk stamps into kinds (93% faint noise, star leftovers, bright stars, old-picture-only). That tells us what junk to design features for; a classifier only says real or not.
+
+**Q. Is p(real) a true probability?** No: training is 16.7% real, the sky 3%, so scores are inflated; we only use them to rank and cut, and Satvik's base-rate adjustment converts them if needed.
+
+---
+
+
 ## A. Labels and data preparation
 **1. Where do your labels come from?**
 Three sources: planted fake asteroids (perfect labels), known asteroids from catalogues (real labels, positions from JPL Horizons), and everything else called bogus (some label noise). The sky itself is not labelled.

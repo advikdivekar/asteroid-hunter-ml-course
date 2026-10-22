@@ -142,39 +142,45 @@ const M = NIGHT.metrics;
 const pct = (x) => `${(100 * x).toFixed(1)}%`;
 const n0 = (x) => Math.round(x).toLocaleString("en-US");
 const CUTS = [["Stage-1 cut (deployed)", M.deployed], ["Cut for 95% recall", M.at_recall["0.95"]], ["Cut for 90% recall", M.at_recall["0.90"]]];
-const CUT_TABLE = [`Our CNN on the whole test night (${n0(NIGHT.blobs)} blobs, ${pct(NIGHT.blobs_real / NIGHT.blobs)} real): recall and precision together`,
+const CUT_TABLE = [`Our model (XGBoost + PCA) on the whole test night (${n0(NIGHT.blobs)} blobs, ${pct(NIGHT.blobs_real / NIGHT.blobs)} real): recall and precision together`,
   ["Cut", "Recall", "Precision", "F1", "False alarms per photo"],
   CUTS.map(([l, o]) => [l, pct(o.recall), pct(o.precision), o.f1.toFixed(2), n0(o.false_alarms_per_photo)]), [3200, 1500, 1500, 1200, 2346]];
 const CUT_NOTE = `Recall alone can look too good: the deployed stage-1 cut keeps ${pct(M.deployed.recall)} of real blobs, but only ${pct(M.deployed.precision)} of the blobs it keeps are real ` +
   `(${n0(M.deployed.false_alarms_per_photo)} junk blobs per photo). That is a deliberate choice: an asteroid dropped here is lost for good, while junk is removed later by linking ` +
   `and the track model. Asking for 90% recall instead gives ${pct(M.at_recall["0.90"].precision)} precision. Average precision over all cuts is ${M.average_precision.toFixed(3)} ` +
   `(random guessing would score ${(NIGHT.blobs_real / NIGHT.blobs).toFixed(3)}). The whole pipeline is judged at the end by depth, known asteroids recovered and unexplained alarms per night.`;
+const CMP = NIGHT.comparison;
+const cmp = (key) => CMP.find((r) => r.model.includes(key));
+const COMPARISON_TABLE = ["Model (same training nights; validation nights; test scored once)", "AP validation", "AP test", "Precision @90% recall", "False alarms per photo @90% recall"];
+const COMPARISON_ROWS = CMP.map((r) => [r.model.includes("chosen") ? `**${r.model}**` : r.model, r["AP validation"].toFixed(3), r["AP test"].toFixed(3),
+  pct(r["precision @90% validation"]), n0(r["false alarms per photo @90% validation"])]);
+const COMPARISON_W = [3900, 1250, 1100, 1650, 1846];
+const OURS = cmp("chosen"), CNN = cmp("CNN"), BASE = cmp("old baseline");
 const COURSE = "Machine Learning (702DB0C015) · B.Tech CSE (Data Science), Semester V · MPSTME, NMIMS · 2026-27";
 const TEAM = "Advik (lead), Aaryan, Paras, Satvik";
 const AI_NOTE = "**About this document.** It was drafted with the help of an AI assistant (Claude, by Anthropic) from the project's own files, " +
   "as the course's GenAI policy allows for planning and learning. Before you submit it, read it fully, change anything that is not true for you, " +
   "and rewrite the parts you present in your own words (see 00_Start_Here/07_AI_Use_and_Integrity.md).";
 const HEADLINE = [
-  ["CNN vs simple model (validation nights, 67,041 blobs, 3.2% real)", "average precision 0.899 vs 0.780", "00_Start_Here/01_Project_Overview.md"],
-  ["False alarms per photo when 90% of real blobs are found", "176 (CNN) vs 813 (simple model): 4.6x fewer", "project/docs/realbogus_cnn.md"],
-  ["CNN on the untouched test night", "average precision 0.938", "project/docs/realbogus_cnn.md"],
-  ["CNN at the deployed stage-1 cut (test night, one quadrant)", `recall ${pct(M.deployed.recall)} but precision ${pct(M.deployed.precision)}: tuned to miss nothing; junk is removed later`, "web/public/data/night.json"],
+  ["Our blob model (XGBoost, 29 features + 20 PCA) vs the old 6-number baseline (validation nights)", `average precision ${OURS["AP validation"].toFixed(3)} vs ${BASE["AP validation"].toFixed(3)}`, "project/reports/realbogus_comparison.csv"],
+  ["False alarms per photo when 90% of real blobs are found", `${n0(OURS["false alarms per photo @90% validation"])} (ours) vs ${n0(BASE["false alarms per photo @90% validation"])} (baseline)`, "same"],
+  ["Our model on the untouched test night", `average precision ${OURS["AP test"].toFixed(3)}`, "same"],
+  ["Deep learning (CNN), comparison only", `AP ${CNN["AP validation"].toFixed(3)} validation, ${CNN["AP test"].toFixed(3)} test: a tie, so we deploy classical ML`, "same"],
+  ["Whole pipeline: v6 (classical) vs v4 (CNN)", "same known asteroids on every split (test 40/44); depth 21.28 vs 21.34", "project/reports/scoreboard.csv"],
+  ["Our model at the deployed stage-1 cut (test night, one quadrant)", `recall ${pct(M.deployed.recall)} but precision ${pct(M.deployed.precision)}: tuned to miss nothing; junk is removed later`, "web/public/data/night.json"],
   ["Track classifier (4 models, cross-validated by night)", "about 0.999 AP for 3 of 4 models: saturated (96% of tracks are easy fakes), so not used to judge", "project/docs/tracklet_classifier.md"],
-  ["Depth: magnitude where half the planted fakes are found (test night)", "v1 20.5 → v4 21.4 → deep search 22.1", "reports/scoreboard.csv, docs/deep_search.md"],
+  ["Depth: magnitude where half the planted fakes are found (test night)", "v1 20.5 → v4/v6 21.3–21.4 → deep search 22.1", "reports/scoreboard.csv, docs/deep_search.md"],
   ["Real search of the test night (no fakes)", "31 known asteroids recovered (16.2 to 21.8 mag)", "00_Start_Here/01_Project_Overview.md"],
   ["Fast (trailed) objects", "97% of planted trails recovered (93% on a later night)", "project/docs/fast_movers.md"],
   ["3x more training data (v5)", "did not help at equal false alarms", "project/docs/more_data.md"],
 ];
-const SCOREBOARD = [ // project/reports/scoreboard.csv (v3 left out: one quadrant only)
-  ["test", "v1", "0.942", "97.4%", "1,245", "0.998", "20.53", "39/44", "0.0"],
-  ["test", "v2", "0.942", "99.2%", "4,293", "0.992", "21.39", "40/44", "13.3"],
-  ["test", "v4", "0.942", "99.2%", "4,293", "0.993", "21.34", "40/44", "5.0"],
-  ["test", "v5", "0.940", "99.2%", "3,857", "0.993", "20.56", "38/44", "0.3"],
-  ["validation", "v1", "0.919", "96.0%", "1,184", "1.000", "20.18", "21/28", "0.0"],
-  ["validation", "v4", "0.919", "99.2%", "3,901", "0.998", "20.49", "24/28", "0.0"],
-  ["holdout", "v1", "0.905", "95.4%", "1,468", "1.000", "20.14", "16/18", "0.0"],
-  ["holdout", "v4", "0.905", "98.5%", "4,716", "0.998", "20.47", "17/18", "0.3"],
-];
+const SB_ORDER = ["v1", "v2", "v4", "v5", "v6"];
+const SCOREBOARD = ["test", "validation", "holdout"].flatMap((split) => NIGHT.scoreboard
+  .filter((r) => r.split === split && SB_ORDER.includes(r.version) && (split === "test" || ["v1", "v4", "v6"].includes(r.version)))
+  .sort((a, b) => SB_ORDER.indexOf(a.version) - SB_ORDER.indexOf(b.version))
+  .map((r) => [split, r.version === "v6" ? "**v6 (classical, deployed)**" : r.version === "v4" ? "v4 (CNN)" : r.version, r.detection_ap.toFixed(3),
+    pct(r.detection_recall), n0(r.bogus_kept_per_frame), r.tracklet_ap.toFixed(3), r.mag_at_50_completeness.toFixed(2), r.known_recovered,
+    r.unexplained_per_night.toFixed(1)]));
 const SB_HEAD = ["nights", "version", "blob AP", "stage-1 recall", "junk kept per photo", "track AP (saturated)", "depth (mag)", "known found", "unexplained per night"];
 const SB_W = [1150, 850, 900, 1000, 1150, 900, 1050, 1000, 1196];
 const GLOSSARY = [
@@ -189,7 +195,11 @@ const GLOSSARY = [
   ["Tracklet (track)", "blobs from different photos that line up as one moving object"],
   ["Magnitude", "brightness scale where a bigger number means fainter; each +1 is about 2.5x fainter"],
   ["Depth", "the magnitude where half the planted fakes are found; bigger is better"],
-  ["CNN", "convolutional neural network: learns patterns in pictures with small sliding filters"],
+  ["Feature", "one number measured on the data that the model reads (29 per blob here, such as 'looks like a star')"],
+  ["PCA", "principal component analysis: keeps the few directions in which the data vary most (675 pixels → 20 numbers)"],
+  ["k-means", "groups data around k centres without using labels (unsupervised)"],
+  ["SVM", "support vector machine: draws the widest-margin boundary between two classes"],
+  ["CNN", "convolutional neural network (deep learning); we kept it only as a comparison"],
   ["XGBoost", "a model made of many small decision trees, each one fixing the mistakes of the ones before"],
   ["Precision / recall", "of what we flagged, how much was real / of what was real, how much we flagged"],
   ["Average precision (AP)", "one number summarising precision at every recall; 1.0 is perfect; good for rare positives"],
@@ -203,7 +213,7 @@ function groupReport() {
   const c = [];
   c.push(...cover("The whole project, start to end", "Group report: how we built it, how it works, and how well it works",
     [`**Course:** ${COURSE}`, `**Team:** ${TEAM}`, "**Data:** public ZTF images from the IRSA archive", "**Date:** October 2026"]));
-  c.push(...contents(["The project in one page", "The problem", "The data", "The pipeline, step by step", "Our ML model: the CNN",
+  c.push(...contents(["The project in one page", "The problem", "The data", "The pipeline, step by step", "Our ML model: classical machine learning",
     "The second model: scoring tracks", "How we tested it", "Results (evaluation metrics)", "How it got better: the story v1 to v5",
     "The deep search", "What did not work, limits, and what we do not claim", "Who did what", "Tools, code, and how to run it",
     "References", "Use of AI (declaration)", "Glossary"]));
@@ -214,7 +224,7 @@ function groupReport() {
   c.push(P("Telescopes photograph the same patch of sky again and again. Stars stay in the same place; asteroids move a little between photos. If we subtract an old photo from tonight's, the stars cancel out and only things that changed are left. The problem is that almost everything left over is junk. On our test night, five photos of one patch of sky gave 41,522 blobs, and only about 3% of them were real. So we:"));
   c.push(...numbered([
     "find every blob in the difference images,",
-    "use a **neural network (CNN)** to decide which blobs look like a real object and which are junk,",
+    "measure **29 numbers plus 20 PCA numbers** for every blob and let **XGBoost** (600 decision trees) decide which blobs look like a real object and which are junk,",
     "**link** blobs from different photos into straight-line tracks,",
     "use a second model (**XGBoost**, made of decision trees) to score each track,",
     "compare the tracks with the catalogue of known asteroids, and keep anything unknown for a person to check,",
@@ -224,7 +234,7 @@ function groupReport() {
   c.push(table(["What we measured", "Result", "Where the number comes from"], HEADLINE, [3800, 3300, 2646]));
   c.push(gap());
   c.push(callout("**What we do not claim:** no new asteroid has been discovered or reported. The pipeline reliably finds known asteroids down to about magnitude 21, and one faint object in a related two-night study passes every check we have, but it still needs a human review and the Minor Planet Center's process.", "16202C", "EEF2F6"));
-  c.push(...figure("model.png", "Figure 1. The one ML architecture of the project: the real/bogus CNN, and where it sits in the pipeline (00_Start_Here/00_How_Our_Model_Works.svg)."));
+  c.push(...figure("model.png", "Figure 1. The deployed ML model: 49 measured numbers and 600 decision trees, and where it sits in the pipeline (00_Start_Here/00_How_Our_Model_Works.svg)."));
 
   c.push(H1("2. The problem"));
   c.push(H2("What we are solving"));
@@ -238,7 +248,7 @@ function groupReport() {
     "**Catalogues have errors too;** one of them was about 2.9 arcseconds off, which we only found because our model disagreed with it.",
   ]));
   c.push(H2("Why machine learning is needed (and where it is not)"));
-  c.push(P("Junk comes in many shapes, and writing a hand-made rule for each one fails. A CNN can **learn** what real and junk look like from labelled examples. A tree model can combine many weak clues about a track better than any single threshold. But some steps are not learning at all: finding blobs, joining them along straight lines and adding photos together are physics and statistics. Knowing which part needs learning and which does not is part of good ML design."));
+  c.push(P("Junk comes in many shapes, and writing a hand-made rule for each one fails. So we measure numbers a person would look at (is it star-shaped? was it already in the old picture? is it one hot pixel?) and a classical model **learns** from labelled examples which combinations mean real. A tree model can combine many weak clues about a track better than any single threshold. But some steps are not learning at all: finding blobs, joining them along straight lines and adding photos together are physics and statistics. Knowing which part needs learning and which does not is part of good ML design."));
   c.push(H2("How we measure success"));
   c.push(P("Not with accuracy: a model that always says 'junk' would be 96.8% accurate and find nothing. Instead we use **precision, recall and average precision**, the number of **false alarms per photo** at a fixed recall, the **depth** (how faint we can go), the number of **known asteroids recovered**, and **unexplained alarms per night**. A simple baseline (logistic regression on six numbers per blob, AP 0.780) is the bar every model must beat."));
   c.push(P("The idea came from an online post where someone found a planet candidate in old Kepler data with AI-written code. We checked that post first: the signal belongs to an already confirmed planet (Kepler-169 e). That taught us the first lesson of the project: check before you claim."));
@@ -276,9 +286,9 @@ function groupReport() {
     ["Plant fakes (test mode)", "Paint 300 fake asteroids into the photos with ZTF's own blur shape, so we know the right answer.", "Paras"],
     ["Find blobs", "Circle every spot at least 2x brighter than the noise and at least 5 pixels big: about 7,800 per photo.", "Aaryan"],
     ["Cut stamps", "Cut a 31 x 31 pixel square around each blob from science, reference and difference.", "Paras"],
-    ["CNN score", "The neural network gives every blob a score from 0 (junk) to 1 (real). Low scores are dropped.", "Paras"],
+    ["ML model", "Measure 29 numbers + 20 PCA numbers per blob; XGBoost gives a score from 0 (junk) to 1 (real). Low scores are dropped.", "Paras"],
     ["Link", "Join kept blobs from different photos that lie on a straight line at a steady speed.", "Satvik"],
-    ["Describe tracks", "Give every track 17 numbers: speed, straightness, steady brightness, CNN opinion and more.", "Satvik"],
+    ["Describe tracks", "Give every track 17 numbers: speed, straightness, steady brightness, the first model's opinion and more.", "Satvik"],
     ["Score tracks", "XGBoost turns the 17 numbers into one track score.", "Satvik"],
     ["Known or unknown?", "Compare with the catalogue of known asteroids (positions from JPL Horizons).", "Satvik"],
     ["Measure", "Count planted fakes found by brightness, known asteroids found, and unexplained alarms.", "Advik"],
@@ -286,35 +296,41 @@ function groupReport() {
   ];
   c.push(table(["#", "Step", "What happens, in plain words", "Owner"], steps.map((s, i) => [String(i + 1), ...s]), [500, 2000, 6046, 1200]));
 
-  c.push(H1("5. Our ML model: the CNN"));
-  c.push(P("We use **one** neural network architecture: a small convolutional neural network (CNN) that looks at the three stamps of a blob and outputs one number, p(real). Small was a deliberate choice: the stamps are only 31 x 31 pixels and the patterns are local, so 72,145 weights are enough, train fast on a laptop, and are hard to overfit."));
+  c.push(H1("5. Our ML model: classical machine learning"));
+  c.push(P("The deployed model is **classical machine learning only**: for every blob we measure 49 numbers from its three pictures and **XGBoost** (600 small decision trees) turns them into one number, p(real). We first built a deep-learning CNN; it scored the same, so it is kept only as a comparison (section 5.5)."));
   c.push(H2("Why three pictures"));
-  c.push(P("A real new object shows up in the **science** and **difference** images but **not** in the **reference**. A badly subtracted star shows up in science **and** reference, with a messy pattern in the difference. A cosmic ray is a sharp spike, narrower than a star. Seeing all three at once lets the filters learn these differences directly."));
-  c.push(...figure("02_triplet_stamp.png", "Figure 4. What the three channels look like for real objects and junk (03_Paras/07_Diagrams/02_triplet_stamp.svg)."));
-  c.push(H2("The layers"));
-  c.push(table(["Layer", "Output size", "What it does", "Weights"], [
-    ["Input", "3 x 31 x 31", "science, reference, difference", "0"],
-    ["2 x Conv 3x3 (16 filters) + ReLU", "16 x 31 x 31", "finds small shapes: dots, edges, rings", "2,768"],
-    ["Max-pool 2x2", "16 x 15 x 15", "keeps the strongest value; halves the size", "0"],
-    ["2 x Conv 3x3 (32 filters) + ReLU", "32 x 15 x 15", "combines shapes into bigger patterns", "13,888"],
-    ["Max-pool 2x2", "32 x 7 x 7", "", "0"],
-    ["Conv 3x3 (64 filters) + ReLU", "64 x 7 x 7", "patterns over the whole blob", "18,496"],
-    ["Max-pool 2x2", "64 x 3 x 3", "", "0"],
-    ["Flatten + Dropout 0.3", "576", "one long list; dropout switches off 30% while training", "0"],
-    ["Fully connected + ReLU", "64", "weighs all the evidence", "36,928"],
-    ["Fully connected + Sigmoid", "1", "p(real) from 0 to 1", "65"],
-    ["**Total**", "", "", "**72,145**"],
-  ], [3100, 1600, 3846, 1200]));
-  c.push(H2("How it was trained"));
+  c.push(P("A real new object shows up in the **science** and **difference** images but **not** in the **reference**. A badly subtracted star shows up in science **and** reference, with a dark hole next to a bright spot in the difference. A cosmic ray is a sharp spike, narrower than a star. Our numbers ask exactly these questions."));
+  c.push(...figure("02_triplet_stamp.png", "Figure 4. What the three pictures look like for real objects and junk (03_Paras/07_Diagrams/02_triplet_stamp.svg)."));
+  c.push(H2("5.1 The 29 hand-made features"));
+  c.push(table(["Group", "Numbers", "The question"], [
+    ["From the blob finder", "snr, peak, npix, a, b, flux", "how strong and how big is the blob?"],
+    ["Brightness", "centre and peak in science, reference, difference; a ring around it", "is something there, and in which pictures?"],
+    ["Old vs new", "ref_to_sci, diff_to_sci", "was it already in the old picture? how much of tonight's light is new?"],
+    ["Shape", "star-shape match, sharpness, concentration, size, elongation, offset, symmetry, roughness", "star-shaped? one hot pixel? stretched? centred? round?"],
+    ["Bad subtraction", "darkest pixel, share of very dark pixels, dipole", "a dark hole next to the bright spot (a misaligned star)?"],
+    ["Old picture", "star-shape match in the reference", "is there a star at this spot in the old picture?"],
+  ], [2200, 4200, 3346]));
+  c.push(P("The most useful single number is the **star-shape match** of the difference picture (its correlation with a round blob of ZTF's blur). Next come the SNR and the two 'already in the old picture?' numbers."));
+  c.push(H2("5.2 PCA (unsupervised)"));
+  c.push(P("PCA takes the central 15 x 15 pixels of all three pictures (675 numbers) and keeps the 20 directions in which the training stamps differ most; they hold 78% of the variation. PCA never sees the labels. A stamp's position along those 20 directions gives 20 more numbers: 49 in total."));
+  c.push(H2("5.3 XGBoost"));
   c.push(...bullets([
-    "**Labels:** planted fakes and known asteroids within 2 pixels of a blob are 'real'; everything else is 'bogus'.",
-    "**Normalising:** every stamp is put on the same scale ((value − median) / noise), so the model compares shapes, not brightness.",
-    "**Augmenting:** random 90° rotations and mirror images (the sky has no 'up'); training data only.",
-    "**Balancing:** all 8,863 real stamps plus 5 bogus per real = 53,178 training stamps (16.7% real). Validation keeps the true mix: 67,041 stamps, 3.2% real.",
-    "**Settings:** Adam optimiser, learning rate 0.001, batch 256, up to 25 epochs, early stopping after 4 epochs without improvement; binary cross-entropy loss. Best validation AP 0.899 at epoch 21.",
-    "**Cross-fitting:** the scores passed to the next model come from CNNs that never saw that night, so the next model does not learn from over-confident scores.",
+    "**600 decision trees**, each asking at most 4 yes/no questions (for example 'is the star-shape match below 0.46?') and adding a small vote; the sum through a sigmoid is p(real).",
+    "**Boosting:** each new tree is fitted to the mistakes of the trees before it; a small learning rate (0.05) and random 80% of rows and columns per tree keep it from over-fitting.",
+    "**Data:** the same 53,178 balanced training stamps (16.7% real) as the CNN; validation keeps the true mix (67,041, 3.2% real).",
+    "**Settings chosen on validation only:** depth 4 beat 5 and 6; PCA raised AP by about 0.005; using all 305,463 training blobs did not help.",
+    "**Cross-fitting:** the training nights are scored by models trained on the other nights (4 folds of 2), so the track model learns from honest scores.",
+    "**Speed:** trains in about 2 seconds on a laptop CPU. The web app runs the same 600 trees in the browser.",
   ]));
-  c.push(P("The web app (web/) runs this exact network, with the trained weights, inside the browser; its scores match PyTorch to within 0.00001 on 48 real stamps."));
+  c.push(H2("5.4 Five classical models compared"));
+  c.push(table(COMPARISON_TABLE, COMPARISON_ROWS, COMPARISON_W));
+  c.push(P(`Logistic regression and the SVM do well on validation but drop on the test night, which is sharper and deeper than the training nights; the tree models hold up. XGBoost with PCA is the best classical model and is deployed (bundle v6).`));
+  c.push(H2("5.5 Deep learning, for comparison only"));
+  c.push(P(`The CNN (5 convolution layers, 72,145 weights, trained on the same stamps) reached AP ${CNN["AP validation"].toFixed(3)} on validation and ${CNN["AP test"].toFixed(3)} on the test night: a tie with our classical model (${OURS["AP validation"].toFixed(3)} / ${OURS["AP test"].toFixed(3)}). On the whole pipeline both versions find the same known asteroids. A tie goes to the simpler, faster model whose every input has a meaning.`));
+  c.push(...figure("cnn_comparison.png", "Figure 5. The CNN we tried first, kept as a comparison (00_Start_Here/00b_CNN_Comparison.svg).", 560));
+  c.push(H2("5.6 Clustering the junk (k-means)"));
+  c.push(P("On the PCA numbers of the 44,290 junk training stamps, k-means with 6 clusters finds the kinds of junk without any labels: 93% are faint noise specks; about 5% are leftovers of stars (present in science and reference, dark hole in the difference); 1% are bright stars that did not subtract; and a small group is bright only in the old picture."));
+  c.push(...figure("junk_clusters.png", "Figure 6. The average stamp of each junk cluster (project/reports/junk_clusters.png).", 560));
 
   c.push(H1("6. The second model: scoring tracks"));
   c.push(P("After linking, each track is described by **17 numbers**. Each has a physical reason: an asteroid moves at a steady speed in a straight line, keeps nearly the same brightness for half an hour, stays a round point, leaves nothing behind at its old positions, and is faintly visible at its predicted position even in photos where no blob was found."));
@@ -322,13 +338,13 @@ function groupReport() {
     ["Motion", "photos it appears in, speed, distance off a straight line", "steady straight motion"],
     ["Brightness", "mean and spread of magnitude", "asteroids keep their brightness; noise does not"],
     ["Strength", "mean and lowest SNR", "one weak point makes a weak track"],
-    ["CNN opinion", "mean and lowest CNN score", "what the network thought of each blob"],
+    ["First-model opinion", "mean and lowest stage-1 score", "what the blob model thought of each blob"],
     ["Shape", "size spread, elongation", "a point source stays the same shape"],
     ["Static neighbours (v4)", "blobs left behind at the track's positions", "a mover leaves none; an artifact leaves many"],
     ["Forced photometry (v4)", "signal at the predicted spot in every photo", "real objects leave a weak signal even when missed"],
   ], [2300, 3700, 3746]));
   c.push(P("We compared four models, always cross-validated **by night** (GroupKFold): logistic regression (0.999 AP), a single decision tree (0.983), a random forest (0.999) and XGBoost (0.999; 300 trees, depth 3, learning rate 0.05). Three of them tie. We use XGBoost because it handles missing values and interactions without extra work, but we say openly that logistic regression would be a defensible simpler choice."));
-  c.push(...figure("02_boosting.png", "Figure 5. From one decision tree to a forest to boosting (04_Satvik/07_Diagrams/02_boosting.svg).", 560));
+  c.push(...figure("02_boosting.png", "Figure 7. From one decision tree to a forest to boosting (04_Satvik/07_Diagrams/02_boosting.svg).", 560));
 
   c.push(H1("7. How we tested it"));
   c.push(...bullets([
@@ -339,7 +355,7 @@ function groupReport() {
     "**Fair comparisons.** Models are compared at the same false-alarm level, not each at its own threshold.",
     "**Statistics.** When we try thousands of possibilities (the deep search), chance alone produces strong-looking signals, so the thresholds are set from pure-noise tests.",
   ]));
-  c.push(...figure("02_evaluation_protocol.png", "Figure 6. The evaluation protocol (01_Advik/07_Diagrams/02_evaluation_protocol.svg)."));
+  c.push(...figure("02_evaluation_protocol.png", "Figure 8. The evaluation protocol (01_Advik/07_Diagrams/02_evaluation_protocol.svg)."));
   c.push(H2("The metrics in plain words"));
   c.push(table(["Metric", "Question it answers"], [
     ["Recall", "Of all the real objects, how many did we find?"],
@@ -352,14 +368,10 @@ function groupReport() {
   ], [3600, 6146]));
 
   c.push(H1("8. Results (evaluation metrics)"));
-  c.push(H2("The CNN against the simple baseline"));
-  c.push(table(["Model (validation nights)", "Average precision", "Precision at 90% recall", "False alarms per photo at 90% recall"], [
-    ["Logistic regression on 6 numbers (baseline)", "0.780", "0.191", "813"],
-    ["**Our CNN**", "**0.899**", "**0.522**", "**176**"],
-  ], [3900, 1800, 2000, 2046]));
-  c.push(P("At the same recall the CNN lets through **4.6x fewer false alarms**. On the untouched test night its average precision is **0.938**."));
-  c.push(...figure("04_cnn_results.png", "Figure 7. CNN results (03_Paras/07_Diagrams/04_cnn_results.svg)."));
-  c.push(H2("The CNN on the whole test night"));
+  c.push(H2("Our blob model against the other models"));
+  c.push(table(COMPARISON_TABLE, COMPARISON_ROWS, COMPARISON_W));
+  c.push(P(`At the same 90% recall our model lets through **${n0(OURS["false alarms per photo @90% validation"])} false alarms per photo**, against ${n0(BASE["false alarms per photo @90% validation"])} for the old baseline. On the untouched test night its average precision is **${OURS["AP test"].toFixed(3)}**.`));
+  c.push(H2("Our model on the whole test night"));
   c.push(table(CUT_TABLE[1], CUT_TABLE[2], CUT_TABLE[3]));
   c.push(P(CUT_NOTE));
   c.push(table(["At the deployed cut", "Kept (predicted real)", "Dropped (predicted junk)"], [
@@ -375,8 +387,8 @@ function groupReport() {
   c.push(P("This is the baseline at threshold 0.5 on the validation nights. Accuracy is 98.4%, but a model that always says 'junk' scores 96.8% and finds nothing. ROC AUC looked excellent (0.95) while average precision was only 0.78. For rare positives, precision and recall tell the truth."));
   c.push(H2("The scoreboard: every version, measured the same way"));
   c.push(table(SB_HEAD, SCOREBOARD, SB_W));
-  c.push(P("From project/reports/scoreboard.csv. Planted-fake runs over 3 quadrant-nights for test and holdout and 6 for validation. On the single test-night quadrant the summary numbers are 20.5 (v1) and 21.4 (v4); with the deep search, **22.1**."));
-  c.push(...figure("03_scoreboard_versions.png", "Figure 8. How the versions compare (01_Advik/07_Diagrams/03_scoreboard_versions.svg)."));
+  c.push(P("From project/reports/scoreboard.csv. Planted-fake runs over 3 quadrant-nights for test and holdout and 6 for validation. v6 is the deployed classical-ML version; v4 is the same design with the CNN. Re-running v4 on the same day reproduced its row exactly, so they compare like for like: the same known asteroids on every split, depth within 0.07 mag. On the single test-night quadrant the summary numbers are 20.5 (v1) and 21.3–21.4 (v4/v6); with the deep search, **22.1**."));
+  c.push(...figure("03_scoreboard_versions.png", "Figure 9. How the versions compare (01_Advik/07_Diagrams/03_scoreboard_versions.svg)."));
   c.push(H2("The real search"));
   c.push(P("Without any fakes, the pipeline found **31 known asteroids** on the test night by itself, from magnitude 16.2 to 21.8, with no unexplained candidates above the threshold. On the test night, all 9 tracks that our labels called 'false positives' turned out to be real known asteroids that the labels had missed."));
 
@@ -386,13 +398,14 @@ function groupReport() {
     "**We measured where asteroids were lost:** at linking, not at the classifier. Relaxing linking (3 of 5 photos instead of 4) found more asteroids but created about 1,500 chance tracks per night, which became useful hard examples (**v2**).",
     "**Looking at false alarms by eye** showed two kinds (artifacts that 'walk' and noise that happens to line up). One new feature group for each gave **v4** with 17 features.",
     "**A bigger multi-frame CNN** tied the simple XGBoost (AP 0.9933 vs 0.9924), so we kept the simple one.",
+    "**Classical ML only (v6):** we replaced the stage-1 CNN with XGBoost on 29 features + PCA. It tied the CNN (AP 0.902 vs 0.898) and, on the scoreboard, found the same known asteroids on every split. v6 is the deployed system.",
     "**Three times more training data (v5)** did not help at equal false alarms: one 30-second photo only holds so much light.",
     "So we **added photos together** (the deep search): +0.7 magnitude, to 22.1.",
   ]));
   c.push(H2("Real bugs found by checking against reality"));
   c.push(...bullets([
     "**Telescope pointing shifts** (up to 12 pixels between photos): real asteroids failed to link while fakes linked perfectly. Fixed by linking on one shared sky grid; leftover error fell from about 2.5 to 0.05-0.47 pixels.",
-    "**Catalogue offset:** the CNN's most confident 'mistakes' were known asteroids; the SkyBoT positions were about 2.9 arcsec off. Switching to JPL Horizons cut the median error from 2.72 to 0.26 pixels.",
+    "**Catalogue offset:** the first model's most confident 'mistakes' were known asteroids; the SkyBoT positions were about 2.9 arcsec off. Switching to JPL Horizons cut the median error from 2.72 to 0.26 pixels.",
     "**Leakage in the first dataset:** 100% accuracy was a warning sign. A test showed 100% → 50% (a coin flip) on realistic data; after rebuilding, 99%. (These are accuracies on a 50/50 balanced set, the one case where accuracy is fair; on real data, 3% positive, we never use it.)",
     "**A bug in one of our own features** flagged 22% of real tracks; after the fix, 0.4%. A test was written for each fix.",
   ]));
@@ -405,7 +418,7 @@ function groupReport() {
     "**Null test:** shuffling the photo times (so real movers no longer line up) gave 16 false tracks per night before a velocity-consistency cut and **0** after, while all 20 known asteroids were kept.",
     "**Result:** half the planted fakes found at **22.1** magnitude, vs 21.4 for the best single-photo system on the same night (+0.7).",
   ]));
-  c.push(...figure("04_shift_and_stack.png", "Figure 9. Shift-and-stack (01_Advik/07_Diagrams/04_shift_and_stack.svg)."));
+  c.push(...figure("04_shift_and_stack.png", "Figure 10. Shift-and-stack (01_Advik/07_Diagrams/04_shift_and_stack.svg)."));
 
   c.push(H1("11. What did not work, limits, and what we do not claim"));
   c.push(...bullets([
@@ -421,19 +434,19 @@ function groupReport() {
   c.push(H1("12. Who did what"));
   c.push(table(["Member", "Part", "Main results", "Course marks it covers"], [
     ["Aaryan", "Problem, data, preprocessing, exploration, leakage audit", "1,552 exposures checked; split by night; leakage proved and fixed (100% → 50% → 99%)", "Problem understanding (3), preprocessing and exploration (3, shared)"],
-    ["Paras", "Labels, dataset, the CNN", "AP 0.899 vs 0.780; 4.6x fewer false alarms; test AP 0.938; catalogue bug found", "Model development (4, shared), data preparation"],
+    ["Paras", "Labels, dataset, the classical ML model (features, PCA, XGBoost; SVM/forest/CNN compared; k-means)", "AP 0.902 vs 0.783; 158 vs 806 false alarms per photo; test AP 0.938; catalogue bug found", "Model development (4, shared), data preparation"],
     ["Satvik", "Linking, track classifier, metrics, cross-match", "pointing-shift fix; 17 features; 4 models tie; metric choices", "Model development (4, shared), evaluation basics"],
     ["Advik (lead)", "System, evaluation, deep search, live viewer, web app", "scoreboard; depth 20.5 → 21.4 → 22.1; 31 known asteroids", "Evaluation (3), documentation and presentation (2), integration"],
   ], [1300, 2600, 3446, 2400]));
-  c.push(P("The hand-over chain: Aaryan → a clean table of blobs and a split by night → Paras → every blob with a CNN score → Satvik → scored tracks marked known or unknown → Advik → the scoreboard, the deep search and the demo. Each person's step-by-step process is in their own report and in 0X_Name/00_Process_Diagram_Name.svg."));
+  c.push(P("The hand-over chain: Aaryan → a clean table of blobs and a split by night → Paras → every blob with a model score → Satvik → scored tracks marked known or unknown → Advik → the scoreboard, the deep search and the demo. Each person's step-by-step process is in their own report and in 0X_Name/00_Process_Diagram_Name.svg."));
   for (const n of ["Aaryan", "Paras", "Satvik", "Advik"]) c.push(...figure(`process_${n}.png`, `Figure. ${n}'s process.`, 560));
 
   c.push(H1("13. Tools, code, and how to run it"));
   c.push(table(["Thing", "Where"], [
     ["Runnable code", "project/src/asthunt/<stage>/<verb_object>.py, one purpose per file"],
     ["Settings", "project/configs/*.yaml (night split, thresholds, sizes)"],
-    ["Trained models", "project/models/v1 ... v5 (CNN + track model + thresholds + provenance)"],
-    ["Tests", "project/tests: 166 offline tests (pytest -q, about 40 s)"],
+    ["Trained models", "project/models/v1 ... v6 (v6 = classical ML, deployed; v1-v5 use the CNN)"],
+    ["Tests", "project/tests: 171 offline tests (pytest -q, about 45 s)"],
     ["Lessons and notebooks", "project/docs/*.md and project/notebooks/*.ipynb, one per phase"],
     ["Live viewer", "python scripts/live_viewer.py (needs the raw images)"],
     ["Web app", "web/: cd web, npm install, npm run dev, open http://localhost:3000 (no Python or raw data needed)"],
@@ -442,7 +455,7 @@ function groupReport() {
 
   c.push(H1("14. References"));
   c.push(...bullets([
-    "Duev, D. A. et al. (2019). Real-bogus classification for the Zwicky Transient Facility using deep learning. MNRAS 489, 3582. (closest published work to our CNN)",
+    "Duev, D. A. et al. (2019). Real-bogus classification for the Zwicky Transient Facility using deep learning. MNRAS 489, 3582. (closest published work; we follow its real/bogus idea with classical ML and use its deep-learning approach as our comparison)",
     "Mahabal, A. et al. (2019). Machine Learning for the Zwicky Transient Facility. PASP 131, 038002.",
     "Masci, F. J. et al. (2019). The Zwicky Transient Facility: Data Processing, Products, and Archive. PASP 131, 018003.",
     "Whidden, P. J. et al. (2019). Fast algorithms for slow moving asteroids. AJ 157, 119. (the shift-and-stack idea)",
@@ -455,7 +468,7 @@ function groupReport() {
 
   c.push(H1("15. Use of AI (declaration)"));
   c.push(callout("Edit this so it is true for each of you before submitting.", "16202C", "EEF2F6"));
-  c.push(P("This project was developed with the assistance of an AI coding assistant (Claude, by Anthropic), used under the direction of Advik Divekar. The assistant helped to plan the project, write and test the source code, write the lesson documents, diagrams, the web app and these reports, and prepare study material. Each team member then studied, re-ran and [describe what you personally did] the part they present: Advik (system, evaluation and deep search), Aaryan (data and preprocessing), Paras (labels and the neural network), Satvik (linking, tree models and metrics). We understand and can explain the methods and results, and all references used are cited."));
+  c.push(P("This project was developed with the assistance of an AI coding assistant (Claude, by Anthropic), used under the direction of Advik Divekar. The assistant helped to plan the project, write and test the source code, write the lesson documents, diagrams, the web app and these reports, and prepare study material. Each team member then studied, re-ran and [describe what you personally did] the part they present: Advik (system, evaluation and deep search), Aaryan (data and preprocessing), Paras (labels and the classical ML model), Satvik (linking, tree models and metrics). We understand and can explain the methods and results, and all references used are cited."));
 
   c.push(H1("16. Glossary"));
   c.push(table(["Word", "Meaning in plain words"], GLOSSARY, [2800, 6946]));
@@ -474,7 +487,7 @@ const PEOPLE = {
       ["Split by night, before modelling", "8 nights for training, 2 for validation, 1 test night (2019-02-08) and later 1 holdout night, written in configs/acquire.yaml before any model was trained, so the split could not change after a bad result. Photos from one night are very alike, so a random split would leak.", "configs/acquire.yaml, evaluate/check_split_leakage.py"],
       ["Download safely", "4 files per exposure: 220 files, 3.55 GB, nothing missing. The downloader is idempotent (running it twice = once), atomic (writes a .part file and renames it only when complete), retries when the archive is busy, and records files that do not exist.", "acquire/download_ztf_images.py"],
       ["Clean every photo", "Read the files, build the bad-pixel mask (satellite trails, saturated, dead, noisy pixels, empty areas; but not 'ghosts', which cover 4% of the chip), compute reference = science − difference, and measure the background and the noise robustly (1.4826 x MAD).", "clean/load_exposure.py, clean/estimate_background.py"],
-      ["Find the blobs", "Smooth with the star's own shape (a matched filter), keep groups of at least 5 pixels at least 2σ above the noise. About 7,800 blobs per photo, only 173 with SNR > 5. Detection is tuned to miss nothing; the CNN is tuned to remove junk.", "detect/extract_sources.py"],
+      ["Find the blobs", "Smooth with the star's own shape (a matched filter), keep groups of at least 5 pixels at least 2σ above the noise. About 7,800 blobs per photo, only 173 with SNR > 5. Detection is tuned to miss nothing; the ML model is tuned to remove junk.", "detect/extract_sources.py"],
       ["Explore the data (EDA)", "The threshold study showed a surprise: 1.5σ gives fewer blobs (6,141) than 2σ (7,764), because noise peaks merge into big blobs and can swallow a faint asteroid. Measuring beats rules of thumb.", "docs/difference_imaging.md"],
       ["Audit for leakage", "Our first dataset scored 100%: a warning sign. I found four kinds of leakage and proved it with an experiment: trained and tested on easy data 100%; tested on realistic near-misses 50% (a coin flip); trained on realistic data 99%. These are accuracies on a 50/50 balanced set, where accuracy is a fair measure; on the real, 3%-positive data we use precision and recall instead. We rebuilt the data.", "docs/leakage_audit.md"],
     ],
@@ -502,71 +515,75 @@ const PEOPLE = {
       ["Why query metadata before downloading?", "It takes seconds and tells us which nights are worth downloading (enough good photos, no quality flags), so we never waste hours on unusable data."],
       ["Why split by night and not randomly?", "Photos from one night share sky, weather and blur. A random split puts near-copies in both training and test, so the score is too good. Splitting by night tests the model on genuinely new conditions."],
       ["Why does 1.5σ give fewer blobs than 2σ?", "At 1.5σ neighbouring noise peaks touch and merge into one big blob, so the count drops and a faint asteroid next to noise can be swallowed."],
-      ["Why is the ghost bit not masked?", "Ghosts cover about 4% of the chip; masking them would hide real objects there. The CNN learns to reject ghosts instead."],
+      ["Why is the ghost bit not masked?", "Ghosts cover about 4% of the chip; masking them would hide real objects there. The ML model learns to reject ghosts instead."],
       ["What does 100% → 50% → 99% prove?", "That the first model learned a shortcut. On realistic hard examples it was a coin flip; trained on realistic data it is genuinely good."],
     ],
   },
   Paras: {
-    folder: "03_Paras", role: "Labels, dataset and the neural network (CNN)",
+    folder: "03_Paras", role: "Labels, dataset and the classical ML model",
     marks: "Model Development (4, shared with Satvik); the model-ready data part of Data Preprocessing (3, shared with Aaryan)",
-    summary: "My part is the deep-learning heart of the project. The sky is not labelled, so I made labels (planted fakes and known asteroids), built a clean dataset of small three-channel pictures, and trained the CNN that decides for every blob whether it is real or junk. The model even found a mistake in our labels.",
+    summary: "My part is the stage-1 machine-learning model: for every blob it decides whether it is real. The sky is not labelled, so I made labels (planted fakes and known asteroids), built a clean dataset of small three-picture stamps, measured 29 numbers with a meaning for each stamp plus 20 PCA numbers, and compared classical models fairly. XGBoost won and is deployed. A deep-learning CNN we tried first tied it and is kept only as a comparison. I also clustered the junk with k-means, and the first model found a mistake in our labels.",
     steps: [
       ["Plant fake asteroids", "For each night, 300 fakes with brightness 17-22 mag and speed 5-100 arcsec/hour in a random direction. Each fake is drawn with ZTF's own PSF for that photo, placed at a sub-pixel position, given realistic Poisson noise, and added to both science and difference images, exactly like a new object.", "simulate/plant_fakes_in_exposure.py"],
       ["Label every blob", "A blob within 2 pixels of a fake or of a known asteroid (positions from the catalogue, matched with a fast KD-tree look-up) is 'real'; the rest is 'bogus'. One training night: 1,059 real vs 36,161 bogus (1 : 34). We accept some label noise: a 'bogus' could be an uncatalogued asteroid.", "label/label_detections.py, label/match_detections_to_positions.py"],
-      ["Cut stamps", "For each blob, a 31 x 31 pixel square from the science, reference and difference images: the CNN's input (3 x 31 x 31).", "detect/cut_triplet_stamps.py"],
-      ["Prepare the data", "Normalise each stamp ((value − median) / (1.4826 x MAD), clipped to [−10, 50]); augment training stamps with rotations and mirroring; balance training to all 8,863 real + 5 bogus each = 53,178 stamps (16.7% real). Validation keeps the true mix (67,041 stamps, 3.2% real).", "dataset/assemble_stamp_dataset.py"],
-      ["Learn the theory first", "In a from-scratch notebook I built a small network with NumPy: forward pass, loss, backpropagation, and a gradient check (both methods gave −0.02896520), then saw over-fitting and why early stopping helps.", "notebooks/neural_networks.ipynb"],
-      ["Build and train the CNN", "5 convolution layers, 3 max-pools, dropout 0.3, two dense layers: 72,145 weights. Adam (learning rate 0.001), batch 256, up to 25 epochs, early stopping on validation AP (patience 4). Best validation AP 0.899 at epoch 21.", "models/define_realbogus_cnn.py, models/train_realbogus_cnn.py"],
-      ["Measure it fairly", "Against the baseline (logistic regression on 6 numbers), at the same 90% recall: false alarms fall from 813 to 176 per photo (4.6x). On the untouched test night AP 0.938.", "docs/realbogus_cnn.md"],
-      ["Learn from its mistakes", "The CNN's most confident 'bogus' blobs were clean point sources, and every one was a known asteroid. The catalogue (SkyBoT) was about 2.9 arcsec off in a constant direction. Switching to JPL Horizons cut the median error from 2.72 to 0.26 px.", "label/refine_known_positions.py, docs/label_quality.md"],
-      ["Check the fakes are realistic", "A classifier asked to tell fakes from real known asteroids (same brightness, cross-validated by night) scored AUC 0.46-0.48: it cannot tell them apart.", "evaluate/measure_injection_realism.py"],
-      ["Cross-fit the scores", "8 training nights in 4 folds of 2: each fold is scored by a CNN trained on the other 6 nights, so the next model never sees over-confident scores.", "models/cross_fit_realbogus_scores.py"],
+      ["Cut stamps", "For each blob, a 31 x 31 pixel square from the science, reference and difference images (3 x 31 x 31).", "detect/cut_triplet_stamps.py"],
+      ["Prepare the data", "Normalise each stamp ((value − median) / (1.4826 x MAD), clipped to [−10, 50]) so '5' means 5x the noise on any night; balance training to all 8,863 real + 5 bogus each = 53,178 stamps (16.7% real). Validation keeps the true mix (67,041 stamps, 3.2% real).", "dataset/assemble_stamp_dataset.py"],
+      ["Measure 29 features", "Each a question a person would ask the three pictures: does the difference look like a star (correlation with ZTF's blur shape)? was it already in the old picture? is it one hot pixel? is there a dark hole next to it? how big, how stretched, how centred, how round? Plus 6 numbers from the blob finder.", "features/compute_stamp_features.py"],
+      ["Add PCA", "The central 15 x 15 pixels of all three pictures (675 numbers) projected onto the 20 directions in which training stamps vary most (78% of the variance). Unsupervised: PCA never sees a label.", "models/train_realbogus_trees.py"],
+      ["Compare classical models fairly", "Logistic regression, an RBF SVM, a random forest and XGBoost, all on the same balanced training set, every setting chosen on the validation nights, the test night scored once. XGBoost on 29 features + 20 PCA won (AP 0.902). The CNN was scored the same way, as a reference.", "scripts/compare_realbogus_models.py"],
+      ["Cluster the junk", "k-means with 6 clusters on the PCA numbers of the 44,290 junk training stamps, without labels: 93% faint noise, star leftovers, bright stars, and an old-picture-only group.", "scripts/compare_realbogus_models.py"],
+      ["Learn from the model's mistakes", "The first model's most confident 'bogus' blobs were clean point sources, and every one was a known asteroid. The catalogue (SkyBoT) was about 2.9 arcsec off in a constant direction. Switching to JPL Horizons cut the median error from 2.72 to 0.26 px.", "label/refine_known_positions.py, docs/label_quality.md"],
+      ["Cross-fit and hand over", "8 training nights in 4 folds of 2: each fold is scored by a model trained on the other 6 nights, so the track model never sees over-confident scores. The stage-1 cut keeps 99% of real blobs on validation. Saved as bundle v6.", "scripts/train_classical_bundle.py"],
     ],
     results: [
-      ["Validation average precision", "0.899 (CNN) vs 0.780 (baseline)"], ["Precision at 90% recall", "0.522 vs 0.191"],
-      ["False alarms per photo at 90% recall", "176 vs 813 (4.6x fewer)"], ["Test-night average precision", "0.938"],
+      ["Validation average precision", `${OURS["AP validation"].toFixed(3)} (ours) vs ${BASE["AP validation"].toFixed(3)} (old baseline)`],
+      ["False alarms per photo at 90% recall", `${n0(OURS["false alarms per photo @90% validation"])} vs ${n0(BASE["false alarms per photo @90% validation"])}`],
+      ["Precision at 90% recall", `${pct(OURS["precision @90% validation"])} vs ${pct(BASE["precision @90% validation"])}`],
+      ["Test-night average precision", OURS["AP test"].toFixed(3)],
+      ["Deep learning (CNN), comparison only", `AP ${CNN["AP validation"].toFixed(3)} validation, ${CNN["AP test"].toFixed(3)} test: a tie`],
+      ["Whole pipeline, v6 (ours) vs v4 (CNN)", "same known asteroids on every split (test 40/44); depth 21.28 vs 21.34 mag"],
       ["Test night, deployed cut (recall / precision)", `${pct(M.deployed.recall)} / ${pct(M.deployed.precision)}: tuned for recall on purpose`],
-      ["Test night, cut for 90% recall (precision, false alarms per photo)", `${pct(M.at_recall["0.90"].precision)}, ${n0(M.at_recall["0.90"].false_alarms_per_photo)}`],
       ["Catalogue position error", "2.72 px (SkyBoT) → 0.26 px (Horizons)"], ["Fake vs real classifier (realism)", "AUC 0.46-0.48 (0.5 = cannot tell)"],
-      ["Learnable weights", "72,145"],
     ],
-    tables: [["Counting the 72,145 weights", ["Layer", "Formula", "Weights"], [
-      ["conv1 3→16", "(3 x 9 + 1) x 16", "448"], ["conv2 16→16", "(16 x 9 + 1) x 16", "2,320"], ["conv3 16→32", "(16 x 9 + 1) x 32", "4,640"],
-      ["conv4 32→32", "(32 x 9 + 1) x 32", "9,248"], ["conv5 32→64", "(32 x 9 + 1) x 64", "18,496"], ["dense 576→64", "576 x 64 + 64", "36,928"],
-      ["output 64→1", "64 + 1", "65"], ["**Total**", "", "**72,145**"]], [3000, 3800, 2946]], CUT_TABLE],
+    tables: [["Five classical models and the CNN, compared fairly", COMPARISON_TABLE, COMPARISON_ROWS, COMPARISON_W],
+      ["The most useful inputs (from the saved model)", ["Input", "What it measures", "Importance"],
+        NIGHT.stage1_importance.slice(0, 8).map(([n, v]) => [n, ({diff_psf_match: "how much the difference looks like a star", snr: "strength vs the noise", ref_centre: "old picture at the centre", ref_to_sci: "was it already in the old picture?", diff_negative_fraction: "very dark pixels nearby", sci_centre: "tonight at the centre", diff_min: "darkest pixel nearby", sci_peak: "brightest pixel tonight", diff_peak: "brightest pixel in the difference"})[n] ?? (n.startsWith("pca_") ? "a PCA summary of the pixels" : n), v.toFixed(3)]),
+        [2600, 5000, 2146]],
+      CUT_TABLE],
     problems: [
-      ["The labels were wrong in a hidden way", "A systematic offset hid behind chance coincidences. Lesson: check the direction of errors, not only their size, and look at the model's most confident 'mistakes'."],
+      ["Linear models broke on the test night", "Logistic regression fell from 0.887 to 0.655 AP and the SVM from 0.886 to 0.877, because the test night is sharper and deeper than the training nights. Trees treat values beyond their last split like the last split, so XGBoost held (0.938). Lesson: check models on data unlike the training data."],
+      ["The labels were wrong in a hidden way", "A systematic catalogue offset hid behind chance coincidences. Lesson: check the direction of errors, not only their size, and look at the model's most confident 'mistakes'."],
       ["Fakes moved straight in pixels", "Real asteroids move straight on the sky, and the telescope shifts between photos. Fakes are now planned on the sky and converted to each photo's pixels."],
-      ["Saturated stars broke the storage", "Star cores above 65,504 became 'infinity' in float16. Fix: clip before converting."],
-      ["Probabilities are inflated", "Training is 16.7% real but the sky is about 3%, so a score of 0.6 was real only about 30% of the time. Satvik's base-rate adjustment corrects it."],
+      ["Probabilities are inflated", "Training is 16.7% real but the sky is about 3%, so raw scores overstate the chance of being real. We use them only to rank and cut; Satvik's base-rate adjustment converts them when needed."],
     ],
-    handover: "Satvik gets the detections table with a CNN 'score' column (cross-fitted for training nights) and the CNN cut (0.0081 in model v4).",
-    figures: [["01_label_sources.png", "Where labels come from (03_Paras/07_Diagrams/01_label_sources.svg)"], ["02_triplet_stamp.png", "The three channels of a stamp (02_triplet_stamp.svg)"],
-      ["model.png", "The CNN architecture (00_Start_Here/00_How_Our_Model_Works.svg)"], ["04_cnn_results.png", "CNN results (04_cnn_results.svg)"], ["05_cross_fitting.png", "Cross-fitting (05_cross_fitting.svg)"]],
+    handover: `Satvik gets the detections table with a 'score' column from the classical model (cross-fitted for training nights) and the stage-1 cut (${NIGHT.cnn_threshold.toFixed(4)} in bundle v6, 99% recall on validation).`,
+    figures: [["01_label_sources.png", "Where labels come from (03_Paras/07_Diagrams/01_label_sources.svg)"], ["02_triplet_stamp.png", "The three pictures of a stamp (02_triplet_stamp.svg)"],
+      ["model.png", "The deployed classical model (00_Start_Here/00_How_Our_Model_Works.svg)"], ["junk_clusters.png", "k-means clusters of the junk (project/reports/junk_clusters.png)"],
+      ["cnn_comparison.png", "The CNN, kept as a comparison (00_Start_Here/00b_CNN_Comparison.svg)"]],
     viva: [
-      ["Why three channels?", "A real new object appears in science and difference but not in reference; a bad subtraction appears in science and reference. A filter that sees all three learns that difference directly."],
+      ["Why classical ML and not the CNN?", "We were asked to use classical ML, and the evidence agrees: on the same data XGBoost + PCA scored 0.902 validation AP and the CNN 0.898; the whole pipeline finds the same known asteroids with either. A tie goes to the simpler, faster model whose every input has a meaning."],
+      ["Which input matters most, and why?", "How much the difference picture looks like a star: a real point source is star-shaped, a cosmic ray is too sharp, and dipoles and edges are not round."],
+      ["Why does PCA help if it never sees the labels?", "It captures the main ways stamps differ (a bright centre, a dipole, an edge). Real and junk stamps sit in different places along those directions, so the trees can use them; it also catches patterns our hand-made features missed."],
       ["Why balance training but not validation?", "With 3% positives the easy answer 'always bogus' dominates training. Validation must keep the real mix so its precision and false-alarm numbers are honest."],
-      ["Why not judge by training loss?", "Training data is balanced and augmented, so its loss is not comparable. We judge by validation average precision on realistic data."],
-      ["Why add fakes to both science and difference?", "So that reference = science − difference stays unchanged: exactly what a new object looks like."],
-      ["What is cross-fitting?", "Each training night is scored by a CNN that never saw it, so the next model learns from honest scores, like on new data."],
+      ["What does k-means add?", "It is unsupervised: without labels it shows which kinds of junk exist and how common each is. That guides which features to design; a classifier only says real or not."],
     ],
   },
   Satvik: {
     folder: "04_Satvik", role: "Linking, the tracklet classifier (trees) and metrics",
     marks: "Model Development (4, shared with Paras); the evaluation-metrics foundation of Model Evaluation (3, shared with Advik)",
-    summary: "My part turns single blobs into moving objects and decides how we judge every model. I join the CNN's blobs into straight-line tracks, describe each track with 17 numbers, compare four classic ML models to score them, choose the operating point, check which tracks are known asteroids, and define the metrics the whole project uses.",
+    summary: "My part turns single blobs into moving objects and decides how we judge every model. I join the blobs the first model keeps into straight-line tracks, describe each track with 17 numbers, compare four classic ML models to score them, choose the operating point, check which tracks are known asteroids, and define the metrics the whole project uses.",
     steps: [
-      ["Keep the CNN's blobs", "Only blobs above the CNN cut are linked. This removes most junk, so the search is about 15x cheaper (seed pairs fall from 52,000 to 3,500) and a night links in about 0.2 seconds.", "models/predict_realbogus.py"],
+      ["Keep the first model's blobs", "Only blobs above the stage-1 cut are linked. This removes most junk, so the search is about 15x cheaper (seed pairs fall from 52,000 to 3,500) and a night links in about 0.2 seconds.", "models/predict_realbogus.py"],
       ["Put every photo on one sky grid", "The telescope points slightly differently each time (up to 12 px on the test night). Every blob gets x_common, y_common: its sky position projected onto photo 1's pixel grid. Real asteroids' leftover error fell from about 2.5 px to 0.05-0.47 px.", "link/measure_sky_motion.py"],
       ["Link into tracks", "Never try all combinations (about 2 x 10^19). Seed: pairs of blobs in two photos at a plausible speed (KD-tree). Predict: where the object must be in the other photos; look it up (within 2 px). Keep: at least 3 of 5 photos, at most 1.5 px off a straight line, fitted speed at least 8 arcsec/hour. Remove duplicates.", "link/link_detections_into_tracklets.py, configs/link.yaml"],
-      ["Describe each track with 17 numbers", "Motion, brightness, strength, the CNN's opinion, shape, plus (in v4) static neighbours and forced photometry. Each number has a physical reason; the last two groups came from looking at 15 false alarms by eye.", "features/compute_tracklet_features.py"],
+      ["Describe each track with 17 numbers", "Motion, brightness, strength, the first model's opinion, shape, plus (in v4) static neighbours and forced photometry. Each number has a physical reason; the last two groups came from looking at 15 false alarms by eye.", "features/compute_tracklet_features.py"],
       ["Compare four models", "Logistic regression, a decision tree, a random forest and XGBoost (300 trees, depth 3, learning rate 0.05, 80% rows and columns per tree), all cross-validated by night (GroupKFold).", "models/train_tracklet_classifier.py"],
       ["Choose the operating point", "On validation nights only: keep 95% of real tracks. The v4 cut is 0.601.", "evaluate/choose_threshold.py"],
       ["Define the metrics", "Confusion matrix, precision, recall, false-positive rate, average precision, PR vs ROC curves, calibration and base-rate adjustment. I showed why accuracy and ROC AUC mislead when real objects are rare.", "evaluate/compute_classification_metrics.py, docs/metrics_evaluation.md"],
       ["Known or unknown?", "Each blob is matched to the nearest catalogue position in its photo (4 px). A track is 'known' if at least half its blobs match the same asteroid. Every unknown goes through a written checklist, and we always look at the pictures.", "crossmatch/crossmatch_known_asteroids.py"],
     ],
     results: [
-      ["Seed pairs before / after the CNN filter", "52,000 → 3,500 (about 15x cheaper)"], ["Linking time per night", "about 0.2 s"],
+      ["Seed pairs before / after the stage-1 filter", "52,000 → 3,500 (about 15x cheaper)"], ["Linking time per night", "about 0.2 s"],
       ["Leftover error of real asteroids", "about 2.5 px → 0.05-0.47 px after the shared sky grid"],
       ["Track models (cross-validated AP)", "0.999 / 0.983 / 0.999 / 0.999 (LR / tree / forest / XGBoost): saturated, because 96% of tracks are easy planted fakes; not used to judge"],
       ["How versions are judged instead (test, v1 → v4)", "depth 20.53 → 21.34 mag; known found 39/44 → 40/44; unexplained 0.0 → 5.0 per night"],
@@ -582,7 +599,7 @@ const PEOPLE = {
       CUT_TABLE,
       ["The 17 features", ["Group", "Numbers", "Physical idea"], [
         ["Motion", "n_detections, rate, max_residual", "steady straight motion"], ["Brightness", "mag_mean, mag_std", "brightness stays steady"],
-        ["Strength", "snr_mean, snr_min", "one weak point = weak track"], ["CNN opinion", "score_mean, score_min", "what the CNN thought"],
+        ["Strength", "snr_mean, snr_min", "one weak point = weak track"], ["Stage-1 opinion", "score_mean, score_min", "what the first model thought"],
         ["Shape", "npix_std, elongation_mean", "a point stays a point"], ["Static neighbours", "mean, max", "a mover leaves nothing behind"],
         ["Forced photometry", "min, median, std, stack_snr", "faint signal even where missed"]], [2200, 3600, 3946]]],
     problems: [
@@ -607,22 +624,23 @@ const PEOPLE = {
     marks: "Model Evaluation and Performance (3); Documentation and Presentation (2); integration of all parts",
     summary: "My part holds everything together and decides whether the numbers can be believed. I designed the system and the hand-overs, set the testing rules, built the scoreboard every number comes from, found where asteroids were lost, tested bigger ideas fairly, built the deep search that goes 0.7 magnitude fainter, and made the live viewer and web app used in the demo.",
     steps: [
-      ["Design the system", "Four stages with clear hand-overs (Aaryan → Paras → Satvik → me) and one deployed function, run_night_pipeline, used both for evaluation (with fakes) and for the real search (without), so what we test is what we deploy. Model versions are saved as bundles (CNN + track model + thresholds + provenance).", "pipeline/run_night_pipeline.py, models/save_model_bundle.py"],
+      ["Design the system", "Four stages with clear hand-overs (Aaryan → Paras → Satvik → me) and one deployed function, run_night_pipeline, used both for evaluation (with fakes) and for the real search (without), so what we test is what we deploy. Model versions are saved as bundles (stage-1 model + track model + thresholds + provenance).", "pipeline/run_night_pipeline.py, models/save_model_bundle.py"],
       ["Set the testing rules", "Plant 300 fakes per night, run the normal pipeline, count what comes out by brightness (completeness). Only held-out nights count. Compare models at the same false-alarm level. A holdout night (2022-06-17) is opened only by the scoreboard.", "evaluate/measure_completeness.py"],
       ["Build the scoreboard", "One function computes blob AP and recall, junk kept per photo, track AP, depth, known asteroids recovered and unexplained alarms, for every version and split, and writes reports/scoreboard.csv. Before it, the same baseline showed 813 and 804 false alarms in two lessons.", "evaluate/build_scoreboard.py"],
       ["Find where asteroids are lost", "v1 looked perfect (track AP 0.999) but depth was only 20.5. Measuring each stage showed the loss was at linking: 4-of-5 linked 184/294 fakes, 3-of-5 linked 200/294 (v2). Looking at 15 false alarms by eye led to two new feature groups (v4).", "docs/scoreboard.md"],
       ["Test bigger ideas fairly", "A multi-frame CNN tied XGBoost (0.9933 vs 0.9924), so we kept the simple one. Three times more data (v5) looked 0.8 mag worse at its own threshold, but at matched false alarms v4 was equal or slightly better: more data did not help.", "docs/multiframe_model.md, docs/more_data.md"],
+      ["Switch to classical ML only (v6)", "Our faculty asked for classical ML. I built bundle v6, the v4 design with XGBoost on 29 features + PCA instead of the CNN, put it on the scoreboard, and re-ran v4 the same day as a check (its numbers reproduced exactly). v6 ties v4: the same known asteroids on every split (test 40/44), depth 21.28 vs 21.34. v6 is now the deployed system and the live viewer's default.", "scripts/train_classical_bundle.py, scripts/evaluate_bundle.py"],
       ["Build the deep search", "Shift-and-stack over 4,888 trial motions on the GPU. Statistics: 6,179 false peaks per stack at 5σ but 44 at 6σ, so we use 6σ; a null test with shuffled times went from 16 false tracks to 0 after a velocity-consistency cut, keeping 20 of 20 known asteroids. Depth 22.1 vs 21.4.", "deep/stack_and_find_peaks.py, configs/deep.yaml"],
       ["Fast movers and the live monitor", "A trail-shaped filter finds fast near-Earth objects (97% of planted trails, 93% on a later night); the monitor watches the archive and runs every search on new nights.", "fast/, pipeline/run_live_monitor.py"],
-      ["Live viewer and web app", "The live viewer runs the real functions stage by stage and draws each one. The web app (web/) shows the pipeline on a real window of the test night and runs the trained CNN in the browser.", "scripts/live_viewer.py, web/"],
-      ["Make it reproducible", "Settings in config files, git commit in every model bundle, seeded random fakes, a pinned environment, and 166 offline tests (end-to-end, leakage, viewer equals pipeline).", "project/tests/"],
+      ["Live viewer and web app", "The live viewer runs the real functions stage by stage and draws each one. The web app (web/) shows the pipeline on a real window of the test night and runs the deployed classical model (600 trees) in the browser.", "scripts/live_viewer.py, web/"],
+      ["Make it reproducible", "Settings in config files, git commit in every model bundle, seeded random fakes, a pinned environment, and 171 offline tests (end-to-end, leakage, viewer equals pipeline).", "project/tests/"],
     ],
     results: [
       ["Depth on the test night (50% completeness)", "v1 20.5 → v4 21.4 → deep search 22.1"],
       ["Known asteroids, test split (v1 → v4)", "39/44 → 40/44"], ["Real search of the test night", "31 known asteroids recovered, 16.2 to 21.8 mag"],
       ["Deep search false peaks at 5σ / 6σ", "6,179 / 44 per stack"], ["Deep search peaks per stack, first → final", "47,550 → 94"],
       ["Null test false tracks per night", "16 → 0 (20 of 20 known asteroids kept)"], ["Multi-frame CNN vs XGBoost", "AP 0.9933 vs 0.9924: a tie"],
-      ["Offline tests", "166"],
+      ["Offline tests", "171"], ["Classical v6 vs CNN v4 (whole pipeline)", "a tie: 40/44 known asteroids on test for both; depth 21.28 vs 21.34"],
     ],
     tables: [["The scoreboard (project/reports/scoreboard.csv)", SB_HEAD, SCOREBOARD, SB_W]],
     problems: [
@@ -661,9 +679,9 @@ function personReport(name) {
   c.push(table(["What", "Result"], p.results, [4600, 5146]));
 
   c.push(H1("2. Where my part sits in the project"));
-  c.push(P("The project finds moving asteroids in ZTF telescope images. Data flows through four parts, one per person: **Aaryan** (data and preprocessing) → **Paras** (labels and the CNN) → **Satvik** (linking, track model, metrics) → **Advik** (evaluation, deep search, demo). Each part hands a clear result to the next."));
+  c.push(P("The project finds moving asteroids in ZTF telescope images. Data flows through four parts, one per person: **Aaryan** (data and preprocessing) → **Paras** (labels and the classical ML model) → **Satvik** (linking, track model, metrics) → **Advik** (evaluation, deep search, demo). Each part hands a clear result to the next."));
   c.push(...figure("01_system_overview.png", "The whole system (00_Start_Here/11_Diagrams/01_system_overview.svg)."));
-  c.push(P("The one ML architecture at the centre of the project is the real/bogus CNN (00_Start_Here/00_How_Our_Model_Works.svg): it looks at three 31 x 31 pictures of a blob and gives the probability that it is a real moving object (average precision 0.899 on validation nights, 0.938 on the test night, against 0.780 for a simple model)."));
+  c.push(P(`The ML model at the centre of the project is classical: XGBoost on 29 measured numbers plus 20 PCA numbers per blob (00_Start_Here/00_How_Our_Model_Works.svg). It looks at three 31 x 31 pictures of a blob and gives the probability that it is a real moving object (average precision ${OURS["AP validation"].toFixed(3)} on validation nights, ${OURS["AP test"].toFixed(3)} on the test night, against ${BASE["AP validation"].toFixed(3)} for the old baseline; the deep-learning CNN, kept only as a comparison, scored ${CNN["AP validation"].toFixed(3)}).`));
 
   c.push(H1("3. How I did it, step by step"));
   c.push(...figure(`process_${name}.png`, `My process (${p.folder}/00_Process_Diagram_${name}.svg).`));

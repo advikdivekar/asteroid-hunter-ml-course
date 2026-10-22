@@ -1,6 +1,7 @@
 """Draw the project's headline pictures as SVG (and PNG copies for the Word reports).
 
-    00_Start_Here/00_How_Our_Model_Works.svg     the CNN, drawn like the classic "CNN" poster, with real stamps
+    00_Start_Here/00_How_Our_Model_Works.svg     the deployed classical ML model (features + PCA + 600 trees), with a real stamp
+    00_Start_Here/00b_CNN_Comparison.svg         the CNN we tried first, drawn like the classic "CNN" poster (comparison only)
     0X_<Name>/00_Process_Diagram_<Name>.svg      how each person did their part, step by step
 
 Needs: numpy, Pillow (any env) and the exported web data (tools/export_web_data.py) for the real stamps.
@@ -14,6 +15,7 @@ import base64
 import io
 import json
 import subprocess
+import sys
 from html import escape
 from pathlib import Path
 
@@ -63,14 +65,14 @@ def bracket(x1, x2, y, label):
             + text((x1 + x2) / 2, y + 26, label, 17, 600, anchor="middle"))
 
 
-def model_diagram():
+def cnn_diagram():
     meta, values = load_stamps()
-    real = next(i for i, m in enumerate(meta) if m["kind"] == "known" and m["score_python"] > 0.999)
+    real = next(i for i, m in enumerate(meta) if m["kind"] == "known" and m["cnn_score"] > 0.999)
     W, H = 1680, 1010
     s = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">',
          f'<rect width="{W}" height="{H}" fill="{PAPER}"/>',
-         text(W / 2, 58, "How our model works: the real/bogus CNN", 34, 800, anchor="middle"),
-         text(W / 2, 90, "Asteroid Hunter · ZTF difference images · one small convolutional neural network decides if a blob is a real moving object", 16, 400, MUTED, "middle")]
+         text(W / 2, 58, "Comparison only: the deep-learning CNN we tried first", 34, 800, anchor="middle"),
+         text(W / 2, 90, "It scored about the same as our classical model (AP 0.898 vs 0.902 on validation), so the deployed system (v6) uses classical ML only", 16, 400, MUTED, "middle")]
 
     # Input: three stacked stamps (real pixels from the test night)
     s.append(text(70, 150, "Input", 24, 700))
@@ -132,7 +134,7 @@ def model_diagram():
     s.append(text(1190, 580, "64 neurons + ReLU -> 1", 12.5, 400, MUTED, "middle", MONO))
 
     # Output
-    score = meta[real]["score_python"]
+    score = meta[real]["cnn_score"]
     s.append(text(1530, 150, "Output", 24, 700, anchor="middle"))
     s.append(f'<rect x="1430" y="290" width="200" height="130" fill="{EMBER}" rx="3"/>')
     s.append(text(1530, 330, f"Real  {score:.2f}", 22, 700, "#fff", "middle", MONO))
@@ -166,7 +168,158 @@ def model_diagram():
         s.append(text(x + 14, 926, who, 11.5, 600, c if hot else MUTED, family=MONO))
         if i < len(steps) - 1:
             s.append(f'<path d="M{x + bw + 3} 881 H{x + bw + gap - 3}" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
-    s.append(text(W - 40, 995, "72,145 learnable weights · trained on 53,178 stamps · average precision 0.899 (validation) and 0.938 (untouched test night) · baseline 0.780",
+    s.append(text(W - 40, 995, "72,145 learnable weights · same 53,178 training stamps · AP 0.898 (validation), 0.944 (test) · our classical model: 0.902 / 0.938",
+                  12.5, 500, MUTED, "end", MONO))
+    s.append("</svg>")
+    return "\n".join(s)
+
+
+def classical_diagram():
+    """The deployed model: measure 29 numbers + 20 PCA numbers per blob, 600 decision trees vote, sigmoid -> p(real)."""
+    meta, values = load_stamps()
+    known = [i for i, m in enumerate(meta) if m["kind"] == "known" and m["score_python"] > 0.999]
+    real = max(known, key=lambda i: meta[i]["snr"])                 # the clearest known asteroid in the sample
+    model = json.loads((DATA / "trees.json").read_text())
+    sys.path.insert(0, str(ROOT / "project" / "src"))
+    from asthunt.features.compute_stamp_features import compute_stamp_features
+    import pandas as pd
+    blob = pd.DataFrame([{c: meta[real][c] for c in ["snr", "peak", "npix", "a", "b", "flux"]}])
+    feats = compute_stamp_features(values[real:real + 1], blob).iloc[0]
+    pixels = values[real][:, 8:23, 8:23].ravel()
+    pca = (pixels - np.array(model["pca_mean"])) @ np.array(model["pca_components"]).T
+    inputs = np.concatenate([feats.to_numpy(), pca]).astype(np.float32)
+
+    def walk(tree):
+        node, path = 0, []
+        while tree["f"][node] >= 0:
+            yes = inputs[tree["f"][node]] < tree["t"][node]
+            path.append((model["feature_names"][tree["f"][node]], float(inputs[tree["f"][node]]), tree["t"][node], yes))
+            node = tree["y"][node] if yes else tree["n"][node]
+        return path, tree["v"][node]
+    margin = model["base_margin"] + sum(walk(t)[1] for t in model["trees"])
+    probability = 1 / (1 + np.exp(-margin))
+
+    W, H = 1680, 1010
+    s = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">',
+         f'<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="{INK}"/></marker></defs>',
+         f'<rect width="{W}" height="{H}" fill="{PAPER}"/>',
+         text(W / 2, 58, "How our model works: classical machine learning", 34, 800, anchor="middle"),
+         text(W / 2, 90, "Asteroid Hunter · for every blob: measure 49 numbers, then 600 decision trees (XGBoost) vote on whether it is a real moving object", 16, 400, MUTED, "middle")]
+
+    # Input: the three stamps side by side
+    s.append(text(60, 150, "Input", 24, 700))
+    s.append(text(60, 172, "one blob = 3 pictures, 31 x 31 px", 13, 400, MUTED))
+    for c, name in enumerate(["tonight", "old sky", "difference"]):
+        y = 195 + c * 150
+        s.append(f'<image href="{stamp_png(values[real][c])}" x="60" y="{y}" width="124" height="124" style="image-rendering:pixelated"/>')
+        s.append(f'<rect x="60" y="{y}" width="124" height="124" fill="none" stroke="{INK}" stroke-width="1.5"/>')
+        s.append(text(196, y + 66, name, 14, 600))
+    s.append(text(60, 660, f"known asteroid {meta[real]['name']}", 12, 500, MUTED, family=MONO))
+
+    # Step 1: measure (hand-made features)
+    bx = 330
+    s.append(text(bx, 150, "1. Measure 29 numbers", 21, 700))
+    s.append(text(bx, 172, "each one a question a person would ask", 13, 400, MUTED))
+    shown = [("looks like a star?", "diff_psf_match", "{:.2f}"), ("already in the old picture?", "ref_to_sci", "{:.2f}"),
+             ("how strong (SNR)?", "snr", "{:.0f}"), ("one hot pixel? (sharpness)", "diff_sharpness", "{:.2f}"),
+             ("dark hole next to it?", "diff_dipole", "{:.2f}"), ("how stretched?", "diff_elongation", "{:.2f}"),
+             ("how far off-centre (px)?", "diff_offset", "{:.2f}")]
+    s.append(f'<rect x="{bx}" y="190" width="370" height="{len(shown) * 36 + 46}" fill="#fff" stroke="{LINE}"/>')
+    for k, (question, name, fmt) in enumerate(shown):
+        y = 220 + k * 36
+        s.append(text(bx + 16, y, question, 14.5, 500))
+        s.append(text(bx + 354, y, fmt.format(float(feats[name])), 14.5, 700, EMBER, "end", MONO))
+    s.append(text(bx + 16, 220 + len(shown) * 36, "... and 22 more", 13, 400, MUTED))
+
+    # Step 2: PCA
+    py = 535
+    s.append(text(bx, py, "2. PCA: 675 pixels → 20 numbers", 21, 700))
+    s.append(text(bx, py + 22, "unsupervised: the 20 directions in which stamps differ most", 13, 400, MUTED))
+    peak = max(abs(pca).max(), 1e-6)
+    s.append(f'<rect x="{bx}" y="{py + 38}" width="370" height="120" fill="#fff" stroke="{LINE}"/>')
+    s.append(f'<line x1="{bx + 14}" y1="{py + 98}" x2="{bx + 356}" y2="{py + 98}" stroke="{LINE}"/>')
+    for k, v in enumerate(pca):
+        h = 50 * v / peak
+        s.append(f'<rect x="{bx + 18 + k * 17}" y="{py + 98 - max(h, 0)}" width="11" height="{abs(h):.1f}" fill="{STEEL}"/>')
+
+    # The 49 numbers
+    vx = 760
+    for k in range(14):
+        s.append(f'<rect x="{vx}" y="{200 + k * 30}" width="30" height="30" fill="{"#d9c7a8" if k < 9 else "#c9d3df"}" stroke="{INK}"/>')
+    s.append(text(vx + 15, 650, "49 numbers", 15.5, 600, anchor="middle"))
+    s.append(text(vx + 15, 670, "29 + 20 PCA", 12.5, 400, MUTED, "middle", MONO))
+    s.append(f'<path d="M{bx + 372} 330 L{vx - 4} 330" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
+    s.append(f'<path d="M{bx + 372} {py + 98} L{vx - 4} {py + 50}" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
+    s.append(f'<path d="M190 330 L{bx - 6} 330" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
+
+    # Step 3: the trees
+    tx = 860
+    s.append(text(tx, 150, "3. 600 decision trees vote", 21, 700))
+    s.append(text(tx, 172, "gradient boosting: each tree fixes the errors of the ones before", 13, 400, MUTED))
+    path, first_leaf = walk(model["trees"][0])
+
+    def tree_icon(x0, y0, highlight):
+        nodes = [(x0 + 70, y0)] + [(x0 + 30 + 80 * i, y0 + 45) for i in range(2)] + [(x0 + 10 + 40 * i, y0 + 90) for i in range(4)]
+        edges = [(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)]
+        out = []
+        for a, b in edges:
+            hot = highlight and (a, b) in highlight
+            out.append(f'<line x1="{nodes[a][0]}" y1="{nodes[a][1]}" x2="{nodes[b][0]}" y2="{nodes[b][1]}" stroke="{EMBER if hot else INK}" stroke-width="{3 if hot else 1.2}"/>')
+        for k, (x, y) in enumerate(nodes):
+            out.append(f'<circle cx="{x}" cy="{y}" r="{8 if k < 3 else 6}" fill="{"#7fb6e6" if k < 3 else STEEL}"/>')
+        return "".join(out)
+    hot_edges = {(0, 1) if path[0][3] else (0, 2)}
+    second = 1 if path[0][3] else 2
+    hot_edges.add((second, second * 2 + 1) if path[1][3] else (second, second * 2 + 2))
+    for k, x in enumerate([tx, tx + 150, tx + 300]):
+        s.append(tree_icon(x, 210, hot_edges if k == 0 else None))
+        s.append(text(x + 70, 335, f"tree {k + 1}" if k < 2 else "tree 3", 13, 600, anchor="middle", family=MONO))
+    s.append(text(tx + 470, 270, "...", 30, 700, MUTED, "middle"))
+    s.append(text(tx + 470, 335, "tree 600", 13, 600, anchor="middle", family=MONO))
+    s.append(f'<rect x="{tx}" y="360" width="540" height="{len(path) * 30 + 52}" fill="#fff" stroke="{LINE}"/>')
+    s.append(text(tx + 16, 386, "Tree 1 asks this blob:", 14, 700, EMBER))
+    labels = {"diff_psf_match": "looks like a star", "snr": "SNR", "ref_to_sci": "old ÷ tonight", "ref_centre": "old picture at centre",
+              "sci_centre": "tonight at centre", "diff_negative_fraction": "dark pixels nearby", "diff_min": "darkest pixel"}
+    for k, (name, value, split, yes) in enumerate(path):
+        label = labels.get(name, name.replace("_", " "))
+        s.append(text(tx + 16, 414 + k * 30, f"{label} < {split:.3g} ?   it is {value:.3g}  →  {'yes' if yes else 'no'}", 14, 500, INK, family=MONO))
+    s.append(text(tx + 16, 414 + len(path) * 30, f"vote of this tree: {first_leaf:+.3f}", 13.5, 700))
+
+    # Output
+    s.append(f'<path d="M{tx + 520} 300 H1436" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
+    s.append(text(1530, 150, "Output", 24, 700, anchor="middle"))
+    s.append(text(tx + 530, 288, "sum of 600 votes", 12.5, 500, MUTED, family=MONO))
+    s.append(f'<rect x="1440" y="300" width="190" height="130" fill="{EMBER}" rx="3"/>')
+    s.append(text(1535, 345, f"Real  {probability:.2f}", 22, 700, "#fff", "middle", MONO))
+    s.append(text(1535, 385, f"Bogus {1 - probability:.2f}", 22, 700, "#fff", "middle", MONO))
+    s.append(text(1535, 413, f"cut: keep if ≥ {model['threshold']:.3f}", 11, 500, "#fff", "middle", MONO))
+    s.append(text(1535, 470, "Sigmoid", 16, 600, anchor="middle"))
+    s.append(text(1535, 491, "turns the sum into", 13, 400, MUTED, "middle"))
+    s.append(text(1535, 509, "p(real) from 0 to 1", 13, 400, MUTED, "middle"))
+
+    s.append(bracket(40, 820, 700, "Feature Extraction (hand-made + PCA)"))
+    s.append(bracket(850, 1420, 700, "Classification (gradient-boosted trees)"))
+    s.append(bracket(1435, 1640, 700, "Probability"))
+
+    s.append(f'<rect x="40" y="770" width="{W - 80}" height="200" fill="#fff" stroke="{LINE}"/>')
+    s.append(text(64, 802, "WHERE THIS MODEL SITS IN THE WHOLE PIPELINE", 13, 700, MUTED, extra='letter-spacing="1.5"'))
+    steps = [("1", "Photos", "5 frames of one patch", "Aaryan"), ("2", "Difference", "new minus old sky", "Aaryan"),
+             ("3", "Blobs", "41,522 on the test night", "Aaryan"), ("4", "ML model", "p(real) for every blob", "Paras"),
+             ("5", "Link", "straight-line tracks", "Satvik"), ("6", "XGBoost", "17 numbers -> track score", "Satvik"),
+             ("7", "Known?", "catalogue check", "Satvik"), ("8", "Measure", "scoreboard, deep search", "Advik")]
+    bw, gap = 172, 22
+    for i, (n, title, sub, who) in enumerate(steps):
+        x = 64 + i * (bw + gap)
+        hot = title == "ML model"
+        s.append(f'<rect x="{x}" y="822" width="{bw}" height="118" fill="{EMBER if hot else PAPER}" stroke="{EMBER if hot else LINE}"/>')
+        c = "#fff" if hot else INK
+        s.append(text(x + 14, 850, n, 13, 700, c if hot else EMBER, family=MONO))
+        s.append(text(x + 14, 880, title, 20, 700, c))
+        s.append(text(x + 14, 904, sub, 12, 400, c if hot else MUTED))
+        s.append(text(x + 14, 926, who, 11.5, 600, c if hot else MUTED, family=MONO))
+        if i < len(steps) - 1:
+            s.append(f'<path d="M{x + bw + 3} 881 H{x + bw + gap - 3}" stroke="{INK}" stroke-width="1.3" marker-end="url(#arrow)"/>')
+    s.append(text(W - 40, 995, "600 trees, depth 4 · trained on 53,178 stamps in seconds · AP 0.902 (validation), 0.938 (test) · old baseline 0.783 · CNN (deep learning, comparison only) 0.898",
                   12.5, 500, MUTED, "end", MONO))
     s.append("</svg>")
     return "\n".join(s)
@@ -182,21 +335,21 @@ PEOPLE = {
         ("Find the blobs", "2 sigma, 5 px minimum: about 7,800 blobs per frame", "detect/extract_sources.py"),
         ("Audit for leakage", "the first dataset cheated: 100% -> 50% -> 99%; rebuilt", "evaluate/check_split_leakage.py"),
     ], "Hands Paras a clean blob table and a leak-free split by night"),
-    "Paras": ("03_Paras", "Labels, dataset and the CNN", [
+    "Paras": ("03_Paras", "Labels, dataset and the ML model", [
         ("Plant fake asteroids", "draw fakes with ZTF's own blur shape: 300 per night", "simulate/plant_fakes_in_exposure.py"),
         ("Label every blob", "fake or known asteroid within 2 px = real; the rest = bogus", "label/label_detections.py"),
         ("Cut 3 x 31 x 31 stamps", "science, reference and difference around each blob", "detect/cut_triplet_stamps.py"),
-        ("Prepare the data", "normalise, flip/rotate, balance: 53,178 stamps, 16.7% real", "dataset/assemble_stamp_dataset.py"),
-        ("Build + train the CNN", "72,145 weights, Adam lr 0.001, batch 256, early stopping", "models/train_realbogus_cnn.py"),
-        ("Measure it", "AP 0.899 vs 0.780 baseline; 176 vs 813 false alarms per frame", "docs/realbogus_cnn.md"),
-        ("Learn from mistakes", "confident errors were real asteroids: catalogue 2.9\" off -> Horizons", "label/refine_known_positions.py"),
-        ("Cross-fit the scores", "each night scored by a model that never saw it", "models/cross_fit_realbogus_scores.py"),
-    ], "Hands Satvik every blob with a CNN score and a threshold"),
+        ("Prepare the data", "normalise and balance: 53,178 training stamps, 16.7% real", "dataset/assemble_stamp_dataset.py"),
+        ("Measure features + PCA", "29 numbers with a meaning per stamp, plus 20 PCA numbers", "features/compute_stamp_features.py"),
+        ("Compare 5 ML models", "LR, SVM, forest, XGBoost; XGBoost + PCA wins: AP 0.902", "scripts/compare_realbogus_models.py"),
+        ("Cluster the junk", "k-means on PCA: 6 kinds of junk; CNN only as a comparison", "scripts/compare_realbogus_models.py"),
+        ("Cross-fit the scores", "each night scored by a model that never saw it", "scripts/train_classical_bundle.py"),
+    ], "Hands Satvik every blob with a model score and the cut"),
     "Satvik": ("04_Satvik", "Linking, tracklet classifier and metrics", [
-        ("Keep the CNN's blobs", "drop blobs under the CNN cut (set low, so almost no real blob is lost)", "models/predict_realbogus.py"),
+        ("Keep the model's blobs", "drop blobs under the stage-1 cut (set low, so almost no real blob is lost)", "models/predict_realbogus.py"),
         ("One shared sky grid", "the telescope points slightly differently each time: correct for it", "link/measure_sky_motion.py"),
         ("Link into tracks", "pairs + KD-tree look-up + straight-line fit: 52,000 -> 3,500 seeds", "link/link_detections_into_tracklets.py"),
-        ("17 numbers per track", "speed, straightness, steady brightness, CNN opinion, forced photometry", "features/compute_tracklet_features.py"),
+        ("17 numbers per track", "speed, straightness, steady brightness, stage-1 score, forced photometry", "features/compute_tracklet_features.py"),
         ("Compare 4 models", "logistic regression, tree, forest, XGBoost; cross-validated by night", "models/train_tracklet_classifier.py"),
         ("Pick the threshold", "on validation nights only, at a fixed recall", "evaluate/choose_threshold.py"),
         ("Use the right metrics", "accuracy lies (96.8% for 'always bogus'); use precision, recall, AP", "evaluate/compute_classification_metrics.py"),
@@ -205,13 +358,13 @@ PEOPLE = {
     "Advik": ("01_Advik", "System, evaluation, deep search and live viewer (lead)", [
         ("Design the system", "split into 4 stages with clear hand-overs; one deployed code path", "pipeline/run_night_pipeline.py"),
         ("Set the test rules", "plant fakes on nights nobody tuned on; compare at equal false alarms", "evaluate/measure_completeness.py"),
-        ("Build the scoreboard", "one table for every version v1 -> v5; every number comes from here", "evaluate/build_scoreboard.py"),
+        ("Build the scoreboard", "one table for every version v1 -> v6; every number comes from here", "evaluate/build_scoreboard.py"),
         ("Find where we lose", "asteroids were lost at linking, not the classifier: fixed (v2, v4)", "docs/scoreboard.md"),
-        ("Test bigger ideas fairly", "multi-frame CNN tied XGBoost (0.993 vs 0.992); 3x data did not help", "docs/multiframe_model.md"),
+        ("Classical ML only (v6)", "replaced the CNN with XGBoost: same known asteroids, depth within 0.07", "scripts/evaluate_bundle.py"),
         ("Deep search", "add frames along 4,888 trial motions; 6 sigma; null test 0 false: 22.1 mag", "deep/stack_and_find_peaks.py"),
         ("Live viewer + demo", "runs the real pipeline stage by stage in the browser", "scripts/live_viewer.py"),
-        ("Make it reproducible", "versioned model bundles, configs, 166 offline tests", "models/save_model_bundle.py"),
-    ], "Result: depth 20.5 -> 21.4 -> 22.1 mag; 31 known asteroids recovered; no false discovery claimed"),
+        ("Make it reproducible", "versioned model bundles, configs, 171 offline tests", "models/save_model_bundle.py"),
+    ], "Result: depth 20.5 -> 21.3 -> 22.1 mag with classical ML; 40 of 44 known asteroids; no discovery claimed"),
 }
 
 
@@ -315,8 +468,11 @@ def render_team_diagrams():
 def main():
     PNG_DIR.mkdir(exist_ok=True)
     model = ROOT / "00_Start_Here" / "00_How_Our_Model_Works.svg"
-    model.write_text(model_diagram())
+    model.write_text(classical_diagram())
     to_png(model, PNG_DIR / "model.png", 1680, 1010)
+    comparison = ROOT / "00_Start_Here" / "00b_CNN_Comparison.svg"
+    comparison.write_text(cnn_diagram())
+    to_png(comparison, PNG_DIR / "cnn_comparison.png", 1680, 1010)
     for name, (folder, *_rest) in PEOPLE.items():
         svg, w, h = process_diagram(name)
         path = ROOT / folder / f"00_Process_Diagram_{name}.svg"
@@ -324,6 +480,9 @@ def main():
         to_png(path, PNG_DIR / f"process_{name}.png", w, h)
         (ROOT / folder / "README.md").write_text(write_readme(name))
     render_team_diagrams()
+    junk = ROOT / "project" / "reports" / "junk_clusters.png"          # from project/scripts/compare_realbogus_models.py
+    if junk.exists():
+        (PNG_DIR / "junk_clusters.png").write_bytes(junk.read_bytes())
     print("written", model, "and 4 process diagrams; PNGs in", PNG_DIR)
 
 

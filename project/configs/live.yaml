@@ -1,5 +1,5 @@
 # Live monitoring: which sky to watch and how
-bundle: v4                   # model bundle for the point-source search (models/<bundle>/)
+bundle: v6                   # model bundle for the point-source search (models/<bundle>/); v6 = classical ML only (v4 = with the CNN)
 watch:                       # units to watch (field, CCD, quadrant)
   - {field: 618, ccd: 3, quadrant: 4}
 min_frames_for_point_search: 4

@@ -9,13 +9,13 @@ const TEAM = [
     out: "A clean table of blobs and a leak-free split by night",
   },
   {
-    name: "Paras", role: "Labels, dataset and the CNN",
-    steps: ["Plant 300 fake asteroids per night", "Label every blob: fake / known asteroid = real", "Cut 3 x 31 x 31 stamps", "Normalise, augment, balance: 53,178 stamps", "Build and train the CNN: 72,145 weights", "Measure: AP 0.899 vs 0.780; 176 vs 813 false alarms", "Learn from mistakes: catalogue was 2.9″ off", "Cross-fit the scores for the next model"],
-    out: "Every blob with a CNN score, and the cut",
+    name: "Paras", role: "Labels, dataset and the ML model",
+    steps: ["Plant 300 fake asteroids per night", "Label every blob: fake / known asteroid = real", "Cut 3 x 31 x 31 stamps", "Normalise and balance: 53,178 stamps", "Measure 29 features per stamp + 20 PCA numbers", "Compare 5 classical models; XGBoost wins (AP 0.902)", "Cluster the junk with k-means; check against the CNN", "Learn from mistakes: catalogue was 2.9″ off"],
+    out: "Every blob with a model score, and the cut",
   },
   {
     name: "Satvik", role: "Linking, tracklet classifier and metrics",
-    steps: ["Keep the blobs the CNN likes", "Put all photos on one shared sky grid", "Link blobs into straight-line tracks (KD-tree)", "17 numbers per track", "Compare 4 models, cross-validated by night", "Pick the cut on validation nights only", "Use the right metrics: precision, recall, AP", "Check the catalogue; checklist for a human"],
+    steps: ["Keep the blobs the first model likes", "Put all photos on one shared sky grid", "Link blobs into straight-line tracks (KD-tree)", "17 numbers per track", "Compare 4 models, cross-validated by night", "Pick the cut on validation nights only", "Use the right metrics: precision, recall, AP", "Check the catalogue; checklist for a human"],
     out: "Scored tracks, each marked known or unknown",
   },
   {

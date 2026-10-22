@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "npx serve out",
-    "check-cnn": "node scripts/check_cnn.mjs"
+    "check-models": "node scripts/check_models.mjs"
   },
   "dependencies": {
     "next": "15.5.28",

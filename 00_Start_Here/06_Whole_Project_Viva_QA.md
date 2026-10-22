@@ -4,16 +4,16 @@ How to use: take turns asking each other, answer out loud in 30-60 seconds, then
 
 ### The basics
 **Q1. What does the project do, in one sentence?**
-It is an ML pipeline that searches archival ZTF telescope images for moving objects (asteroids), separates real ones from junk with a CNN and a tree model, checks them against the catalogue of known asteroids, and measures honestly how deep and how reliable the search is.
+It is an ML pipeline that searches archival ZTF telescope images for moving objects (asteroids), separates real ones from junk with two classical machine-learning models (gradient-boosted trees), checks them against the catalogue of known asteroids, and measures honestly how deep and how reliable the search is.
 
 **Q2. Why difference images?**
 Subtracting an old reference of the same sky from tonight's picture cancels stars, galaxies and sky glow, so only new or moving things remain. That shrinks the search from about 1,950 sources to a few hundred strong ones per frame.
 
 **Q3. Why does the project need machine learning at all?**
-Most blobs in a difference image are junk, in many shapes (dipoles, cosmic rays, edges, noise); only about 3% are real. Hand-written rules cannot capture all those shapes. A CNN learns them from labelled examples, and gradient-boosted trees combine many weak track-level clues better than a single cut. The rest of the pipeline (matched filtering, linking, shift-and-stack) is physics and search, not learning.
+Most blobs in a difference image are junk, in many shapes (dipoles, cosmic rays, edges, noise); only about 3% are real. Hand-written rules cannot capture all those shapes. So we measure 29 numbers per blob plus 20 PCA numbers and let XGBoost learn the shapes from labelled examples, and a second tree model combines many weak track-level clues better than a single cut. The rest of the pipeline (matched filtering, linking, shift-and-stack) is physics and search, not learning.
 
 **Q4. What are the two ML models, and what are their inputs and outputs?**
-(1) A CNN: input a 3 x 31 x 31 stamp (science, reference, difference), output p(real) for one blob. (2) XGBoost: input 17 numbers describing a track (speed, straightness, brightness steadiness, CNN scores, forced photometry...), output a score for the whole track.
+(1) XGBoost for blobs: input 49 numbers measured from a 3 x 31 x 31 stamp (29 hand-made features such as "looks like a star" and "already in the old picture", plus 20 PCA numbers), output p(real) for one blob. (2) XGBoost for tracks: input 17 numbers describing a track (speed, straightness, brightness steadiness, the first model's scores, forced photometry...), output a score for the whole track. A CNN was tried for (1) and tied (AP 0.898 vs 0.902); it is kept only as a comparison.
 
 **Q5. What is a unit and what is a tracklet?**
 A unit is one field + CCD + quadrant + night. A tracklet is a set of detections in different frames that lie on a straight line at a plausible asteroid speed (at least 3 of 5 frames, within 1.5 px of the line, 8-120 arcsec/hour).
@@ -42,13 +42,13 @@ Only about 3% of blobs are real, so "always bogus" scores 96.8% accuracy while f
 ROC's x-axis divides by all bogus (65,000), so hundreds of false alarms look like a tiny step: ROC AUC was 0.95 while precision at useful recall was under 20%. Precision divides by the number of alerts, so it shows directly how polluted the output is.
 
 **Q13. How did you choose the thresholds?**
-On the validation nights only, never on test: the CNN cut keeps 95% of real detections; the tracklet cut keeps 95% of real tracklets. Fixing recall first and then counting false alarms follows the cost argument: a missed asteroid is a lost discovery, a false alarm costs one minute of a person's time.
+On the validation nights only, never on test: the stage-1 cut keeps 99% of real detections; the tracklet cut keeps 95% of real tracklets. Fixing recall first and then counting false alarms follows the cost argument: a missed asteroid is a lost discovery, a false alarm costs one minute of a person's time.
 
 **Q14. What is cross-fitting and why did you need it?**
-The tracklet model uses the CNN's scores as features. A CNN scoring nights it trained on is over-confident, and the tracklet model would learn that. So training nights are scored by CNNs trained on other nights (4 folds of 2 nights), and validation/test nights by the final CNN. It is stacking without leakage.
+The tracklet model uses the stage-1 scores as features. A model scoring nights it trained on is over-confident, and the tracklet model would learn that. So training nights are scored by models trained on other nights (4 folds of 2 nights), and validation/test nights by the final model. It is stacking without leakage.
 
 **Q15. How do you prevent overfitting?**
-CNN: dropout 0.3, data augmentation (rotations and mirrors), early stopping on validation AP with patience 4. XGBoost: shallow trees (depth 3), small learning rate (0.05), 80% row and column subsampling. Everything is judged on nights the model never saw.
+Stage-1 XGBoost: shallow trees (depth 4), 80% row and column subsampling, settings chosen on validation only; PCA keeps only 20 directions. Tracklet XGBoost: shallow trees (depth 3), small learning rate (0.05), 80% row and column subsampling. Everything is judged on nights the model never saw.
 
 **Q16. The tracklet classifier scores AP 0.999. Is it great?**
 No. That number is saturated: 96% of tracklets in that data are real because we plant 300 fakes per night, the opposite of the real sky. It cannot show improvement. What matters is depth, known asteroids recovered, and bogus tracklets per night on held-out nights.
@@ -80,7 +80,7 @@ No. The system recovers known asteroids reliably to about magnitude 21. One fain
 Depth is capped by single frames (the deep search helps on one quadrant of one night); the training data covers one field mostly; "real" labels come partly from simulation; catalogue positions have errors; the test night is no longer perfectly untouched because real bugs were fixed after looking (so a separate holdout night exists); and "unknown" only means "not in the catalogue we queried".
 
 **Q25. What would you do with more time?**
-Evaluate on more fields and nights; try an SVM and clustering of the "bogus zoo" for the course syllabus; add a learning curve; run the deep search on more nights; get an independent confirmation from another survey.
+Evaluate on more fields and nights; use the k-means junk clusters to build targeted features; add a learning curve; run the deep search on more nights; get an independent confirmation from another survey.
 
 **Q26. How reproducible is it?**
 Configs hold every setting; the night split is in a config; random seeds are `[project seed, night date]`; model versions are bundles with the commit and nights used; archive answers and known-asteroid lookups are cached; about 150 offline tests; `environment.yml` pins the software.
@@ -90,10 +90,10 @@ The project was developed with an AI coding assistant (Claude) under Advik's dir
 
 ### Where the course topics are
 **Q28. Which syllabus topics does the project use?**
-Logistic regression (baseline), gradient descent and backpropagation (from scratch), neural networks/CNN, regularisation (L2, dropout, early stopping), train/validation/test, error analysis and skewed-class metrics, decision trees, bagging, random forests and boosting, ROC. Not used: SVM, PCA, clustering, normal equation (we say so openly).
+Logistic regression (baseline), feature engineering, SVM, decision trees, bagging, random forests and boosting (XGBoost, deployed), PCA, k-means clustering, regularisation, train/validation/test split by night, cross-validation by night, error analysis and skewed-class metrics, ROC vs precision-recall. Neural networks (from-scratch notebook, CNN) only as a comparison. Not used: normal equation, hierarchical clustering (we say so openly).
 
 **Q29. If I gave you 3 minutes and a whiteboard, how would you draw the pipeline?**
-Data (IRSA, split by night) -> difference image -> detect blobs -> stamps -> CNN -> keep blobs above a cut -> link into tracks on the sky grid -> 17 features -> XGBoost -> cross-match with known asteroids -> unknown candidates -> a person. Underneath: planted fakes and held-out nights measure every stage; the deep search adds frames along trial motions for fainter objects.
+Data (IRSA, split by night) -> difference image -> detect blobs -> stamps -> 29 features + PCA -> XGBoost -> keep blobs above a cut -> link into tracks on the sky grid -> 17 features -> XGBoost -> cross-match with known asteroids -> unknown candidates -> a person. Underneath: planted fakes and held-out nights measure every stage; the deep search adds frames along trial motions for fainter objects.
 
 **Q30. What did you personally learn that surprised you?** (prepare your own answer)
 Good examples: a model's most confident "mistakes" revealed a labelling error; a near-perfect AP meant nothing; adding data did not help; the evaluation design mattered more than the model.

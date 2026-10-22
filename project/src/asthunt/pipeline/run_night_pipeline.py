@@ -55,7 +55,7 @@ def run_night_pipeline(unit, metadata, configs, bundle, paths, rng, device="cpu"
     stamps = normalize_stamps(stamps)
 
     # 2. Real/bogus scores
-    detections["score"] = predict_realbogus(bundle["realbogus_model"], stamps, device)
+    detections["score"] = predict_realbogus(bundle["realbogus_model"], stamps, device, detections=detections)
 
     # Known objects in every frame (all brightnesses). SkyBoT alone can be 4-5 px off on a fresh night,
     # which would make known asteroids look new, so get Horizons positions first (nothing to do if done already)

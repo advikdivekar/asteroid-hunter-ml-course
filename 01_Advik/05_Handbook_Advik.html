@@ -22,6 +22,13 @@ figcaption { font-size: 9pt; color: #6b7280; }
 .cover p { font-size: 13pt; color: #4b5563; }
 .toc li { margin: 4px 0; }
 </style></head><body><div class="cover"><h1>Advik: handbook</h1><p>System, evaluation, deep search, live viewer (lead)</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Advik: system architecture, evaluation, deep search, live viewer (LEAD)</h1>
+<blockquote>
+<p><strong>Update: classical ML only (bundle v6).</strong> Our faculty asked for classical ML. The deployed system is now <strong>v6</strong>: the v4 design with
+XGBoost on 29 features + 20 PCA numbers instead of the CNN in stage 1 (<code>project/docs/classical_realbogus.md</code>). You built and scored it:
+<code>scripts/train_classical_bundle.py</code>, <code>scripts/evaluate_bundle.py</code>. On the scoreboard v6 ties v4 (test: 40/44 known asteroids for both,
+depth 21.28 vs 21.34; validation and holdout equal), and re-running v4 the same day reproduced its stored row exactly. The live viewer
+now uses v6 (<code>configs/live.yaml</code>). Wherever this folder says &quot;CNN&quot; for stage 1, read &quot;the stage-1 model&quot;; the CNN is the comparison.</p>
+</blockquote>
 <p><strong>Marks this part carries:</strong> Model Evaluation and Performance (3), Documentation and Presentation (2), and the integration that makes the other parts one system.
 <strong>Why it is the most important part:</strong> every number the team quotes comes from the evaluation you own; it contains the main new method (the deep search); and it holds the pieces together. You also open and close the presentation.</p>
 <h2>Your four jobs</h2>
@@ -466,7 +473,7 @@ Evaluate the deep search on more fields; add the SVM and clustering experiments 
 <rect x="800" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 03</text>
 <text x="824" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Build the scoreboard</text>
-<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >one table for every version v1 -&gt; v5;</text>
+<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >one table for every version v1 -&gt; v6;</text>
 <text x="824" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >every number comes from here</text>
 <text x="824" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/build_scoreboard.py</text>
 <rect x="1170" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
@@ -479,10 +486,10 @@ Evaluate the deep search on more fields; add the SVM and clustering experiments 
 <rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
-<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Test bigger ideas fairly</text>
-<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >multi-frame CNN tied XGBoost (0.993</text>
-<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >vs 0.992); 3x data did not help</text>
-<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/multiframe_model.md</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Classical ML only (v6)</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >replaced the CNN with XGBoost: same</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >known asteroids, depth within 0.07</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/evaluate_bundle.py</text>
 <rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
@@ -501,7 +508,7 @@ Evaluate the deep search on more fields; add the SVM and clustering experiments 
 <rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
 <text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Make it reproducible</text>
-<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >versioned model bundles, configs, 166</text>
+<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >versioned model bundles, configs, 171</text>
 <text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >offline tests</text>
 <text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/save_model_bundle.py</text>
 <path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -513,7 +520,7 @@ Evaluate the deep search on more fields; add the SVM and clustering experiments 
 <path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
 <text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
-<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Result: depth 20.5 -&gt; 21.4 -&gt; 22.1 mag; 31 known asteroids recovered; no false discovery claimed</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Result: depth 20.5 -&gt; 21.3 -&gt; 22.1 mag with classical ML; 40 of 44 known asteroids; no discovery claimed</text>
 </svg><figcaption>00 Process Diagram Advik</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 760" width="1300" height="760"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
 <text x="650.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Advik: the architecture in code (one purpose per file)</text>
 <rect x="30" y="70" width="196" height="200" rx="10" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6"/>

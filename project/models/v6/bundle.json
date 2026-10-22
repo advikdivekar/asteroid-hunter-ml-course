@@ -1,0 +1,54 @@
+{
+ "version": "v6",
+ "created": "2026-10-22",
+ "git_commit": "2e73797",
+ "description": "v6: classical ML only. Stage 1 = XGBoost on 29 stamp features + 20 PCA components (no CNN); stage 2 = the v4 tracklet XGBoost (17 features), retrained on the new stage-1 scores",
+ "realbogus_model": "xgboost + pca",
+ "realbogus_settings": {
+  "n_estimators": 600,
+  "max_depth": 4,
+  "learning_rate": 0.05,
+  "subsample": 0.8,
+  "colsample_bytree": 0.8
+ },
+ "feature_columns": [
+  "n_detections",
+  "rate_arcsec_per_hour",
+  "max_residual",
+  "mag_mean",
+  "mag_std",
+  "snr_mean",
+  "snr_min",
+  "score_mean",
+  "score_min",
+  "npix_std",
+  "elongation_mean",
+  "static_neighbours_mean",
+  "static_neighbours_max",
+  "forced_snr_min",
+  "forced_snr_median",
+  "forced_snr_std",
+  "stack_snr"
+ ],
+ "train_nights": [
+  "2020-09-19",
+  "2020-09-21",
+  "2020-09-23",
+  "2021-09-11",
+  "2022-09-22",
+  "2022-09-24",
+  "2023-09-20",
+  "2023-09-25"
+ ],
+ "validation_nights": [
+  "2021-09-12",
+  "2023-09-15"
+ ],
+ "quadrants": [
+  [
+   3,
+   4
+  ]
+ ],
+ "stage1_validation_ap": 0.9023826285024721
+}

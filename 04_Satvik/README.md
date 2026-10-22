@@ -4,10 +4,10 @@
 
 | Step | What | How, in one line | Main code |
 |---|---|---|---|
-| 1 | **Keep the CNN's blobs** | drop blobs under the CNN cut (set low, so almost no real blob is lost) | `project/src/asthunt/models/predict_realbogus.py` |
+| 1 | **Keep the model's blobs** | drop blobs under the stage-1 cut (set low, so almost no real blob is lost) | `project/src/asthunt/models/predict_realbogus.py` |
 | 2 | **One shared sky grid** | the telescope points slightly differently each time: correct for it | `project/src/asthunt/link/measure_sky_motion.py` |
 | 3 | **Link into tracks** | pairs + KD-tree look-up + straight-line fit: 52,000 -> 3,500 seeds | `project/src/asthunt/link/link_detections_into_tracklets.py` |
-| 4 | **17 numbers per track** | speed, straightness, steady brightness, CNN opinion, forced photometry | `project/src/asthunt/features/compute_tracklet_features.py` |
+| 4 | **17 numbers per track** | speed, straightness, steady brightness, stage-1 score, forced photometry | `project/src/asthunt/features/compute_tracklet_features.py` |
 | 5 | **Compare 4 models** | logistic regression, tree, forest, XGBoost; cross-validated by night | `project/src/asthunt/models/train_tracklet_classifier.py` |
 | 6 | **Pick the threshold** | on validation nights only, at a fixed recall | `project/src/asthunt/evaluate/choose_threshold.py` |
 | 7 | **Use the right metrics** | accuracy lies (96.8% for 'always bogus'); use precision, recall, AP | `project/src/asthunt/evaluate/compute_classification_metrics.py` |

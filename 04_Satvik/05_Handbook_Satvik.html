@@ -22,6 +22,12 @@ figcaption { font-size: 9pt; color: #6b7280; }
 .cover p { font-size: 13pt; color: #4b5563; }
 .toc li { margin: 4px 0; }
 </style></head><body><div class="cover"><h1>Satvik: handbook</h1><p>Linking, tree models and metrics</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Satvik: linking, the tracklet classifier (trees) and metrics</h1>
+<blockquote>
+<p><strong>Update: classical ML only (bundle v6).</strong> Stage 1 is now XGBoost on 29 stamp features + PCA instead of the CNN
+(<code>project/docs/classical_realbogus.md</code>). Your part is unchanged: you consume its <code>score</code> column and threshold (v6: 0.0052, 99% recall
+on validation); the tracklet model was retrained on those scores (v6 tracklet cut 0.533). Where this folder says &quot;CNN score&quot;, read
+&quot;stage-1 score&quot;.</p>
+</blockquote>
 <p><strong>Marks this part carries:</strong> Model Development (4, shared with Paras) and the evaluation-metrics foundation of Model Evaluation (3, shared with Advik).
 <strong>Why it matters:</strong> this is the classical-ML half of the project (logistic regression, trees, forests, boosting, cross-validation) and the metric thinking that every model in the project is judged by.</p>
 <h2>Your four jobs</h2>
@@ -480,8 +486,8 @@ OBSJD is the shutter-open time; the object was at its recorded position on avera
 <rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
-<text x="84" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Keep the CNN&#x27;s blobs</text>
-<text x="84" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >drop blobs under the CNN cut (set</text>
+<text x="84" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Keep the model&#x27;s blobs</text>
+<text x="84" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >drop blobs under the stage-1 cut (set</text>
 <text x="84" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >low, so almost no real blob is lost)</text>
 <text x="84" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/predict_realbogus.py</text>
 <rect x="430" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
@@ -504,7 +510,7 @@ OBSJD is the shutter-open time; the object was at its recorded position on avera
 <text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
 <text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >17 numbers per track</text>
 <text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >speed, straightness, steady</text>
-<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >brightness, CNN opinion, forced</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >brightness, stage-1 score, forced</text>
 <text x="1194" y="274" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >photometry</text>
 <text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >features/compute_tracklet_features.py</text>
 <rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>

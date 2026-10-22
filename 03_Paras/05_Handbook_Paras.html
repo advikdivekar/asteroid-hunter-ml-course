@@ -21,18 +21,25 @@ figcaption { font-size: 9pt; color: #6b7280; }
 .cover h1 { border: 0; font-size: 28pt; }
 .cover p { font-size: 13pt; color: #4b5563; }
 .toc li { margin: 4px 0; }
-</style></head><body><div class="cover"><h1>Paras: handbook</h1><p>Labels, dataset and the neural network (CNN)</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Paras: labels, dataset building and the neural network (CNN)</h1>
+</style></head><body><div class="cover"><h1>Paras: handbook</h1><p>Labels, dataset and the neural network (CNN)</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Paras: labels, dataset building and the classical ML model</h1>
 <p><strong>Marks this part carries:</strong> Model Development (4, shared with Satvik) and the model-ready data part of Data Preprocessing (3, shared with Aaryan).
-<strong>Why it matters:</strong> this is the deep-learning part of the project, and the part where &quot;garbage labels in, garbage model out&quot; is most visible. It also contains the best data-centric story: the model found a labelling error.</p>
+<strong>Why it matters:</strong> this is the stage-1 machine-learning model, the one that decides for every blob whether it is real. It is also where
+&quot;garbage labels in, garbage model out&quot; is most visible, and where the course's classical topics meet: feature engineering, SVM,
+trees and boosting, PCA and k-means.</p>
+<blockquote>
+<p><strong>Classical ML only.</strong> Our faculty asked for classical machine learning. The deployed model (bundle <strong>v6</strong>) is XGBoost on 29 measured
+features plus 20 PCA numbers. The CNN we built first is kept <strong>only as a comparison</strong>: it tied (AP 0.898 vs 0.902), so the simpler,
+explainable model is the one we use. Lesson: <code>project/docs/classical_realbogus.md</code>.</p>
+</blockquote>
 <h2>Your four jobs</h2>
 <ol>
 <li><strong>Where labels come from:</strong> injection-recovery (planted fakes), known asteroids from catalogues, and &quot;everything else is bogus&quot;, with the label-noise caveats and the quality checks.</li>
-<li><strong>Building the dataset:</strong> cutting 3 x 31 x 31 stamps, normalising, augmenting, balancing classes, assembling train/validation sets without leakage.</li>
-<li><strong>The neural network:</strong> from &quot;a neuron&quot; to backpropagation (the from-scratch notebook), then the real CNN: architecture, training loop, regularisation, results versus the baseline.</li>
-<li><strong>Error analysis and cross-fitting:</strong> what the model's most confident mistakes revealed, and how its scores are produced without leakage for the next stage.</li>
+<li><strong>Building the dataset:</strong> cutting 3 x 31 x 31 stamps, normalising, balancing classes, assembling train/validation sets without leakage.</li>
+<li><strong>The classical model:</strong> 29 hand-made features with a physical meaning, 20 PCA numbers, then a fair comparison of logistic regression, an SVM, a random forest and XGBoost (and the CNN as a reference); XGBoost + PCA is deployed.</li>
+<li><strong>Unsupervised learning and error analysis:</strong> k-means clusters of the junk, the label bug the first model exposed, and cross-fitting so the next stage gets honest scores.</li>
 </ol>
 <h2>What is NOT yours</h2>
-<p>Downloads and the first detection step: Aaryan. Linking, tracklet features, trees and the metric definitions: Satvik. Scoreboard, deep search and viewer: Advik. You hand Satvik a <code>detections</code> table with a <code>score</code> column and a threshold.</p>
+<p>Downloads and the first detection step: Aaryan. Linking, tracklet features, the tracklet trees and the metric definitions: Satvik. Scoreboard, deep search and viewer: Advik. You hand Satvik a <code>detections</code> table with a <code>score</code> column and a threshold.</p>
 <h2>Where your code is (in <code>project/</code>)</h2>
 <table>
 <thead>
@@ -45,17 +52,17 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <tbody>
 <tr>
 <td>Simulate</td>
-<td><code>src/asthunt/simulate/render_point_source.py</code>, <code>plan_injections.py</code>, <code>inject_point_source.py</code>, <code>plant_fakes_in_exposure.py</code> (+ trailed versions)</td>
+<td><code>src/asthunt/simulate/render_point_source.py</code>, <code>plan_injections.py</code>, <code>inject_point_source.py</code>, <code>plant_fakes_in_exposure.py</code></td>
 <td>draw a fake from ZTF's own PSF, choose brightness/speed/position, add it to science and difference</td>
 </tr>
 <tr>
 <td>Label</td>
-<td><code>src/asthunt/label/match_detections_to_positions.py</code> (KD-tree), <code>query_known_asteroids.py</code>, <code>query_horizons_positions.py</code>, <code>refine_known_positions.py</code>, <code>load_known_asteroids.py</code>, <code>label_detections.py</code></td>
+<td><code>src/asthunt/label/match_detections_to_positions.py</code> (KD-tree), <code>query_known_asteroids.py</code>, <code>refine_known_positions.py</code>, <code>label_detections.py</code></td>
 <td>decide real or bogus for each blob</td>
 </tr>
 <tr>
 <td>Dataset</td>
-<td><code>src/asthunt/dataset/build_night_detections.py</code>, <code>normalize_stamps.py</code>, <code>augment_stamps.py</code>, <code>balance_classes.py</code>, <code>assemble_stamp_dataset.py</code>, <code>relabel_night_detections.py</code>, <code>make_unit_tag.py</code>, <code>make_unit_rng.py</code></td>
+<td><code>src/asthunt/dataset/build_night_detections.py</code>, <code>normalize_stamps.py</code>, <code>balance_classes.py</code>, <code>assemble_stamp_dataset.py</code></td>
 <td>one night -&gt; detections + stamps; model-ready arrays</td>
 </tr>
 <tr>
@@ -64,9 +71,29 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <td>31x31 science / reference / difference cut-outs</td>
 </tr>
 <tr>
-<td>Models</td>
-<td><code>src/asthunt/models/define_realbogus_cnn.py</code>, <code>train_realbogus_cnn.py</code>, <code>predict_realbogus.py</code>, <code>cross_fit_realbogus_scores.py</code></td>
-<td>the CNN: define, train, score, cross-fit</td>
+<td><strong>Features</strong></td>
+<td><code>src/asthunt/features/compute_stamp_features.py</code></td>
+<td>the 29 numbers per stamp</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td><code>src/asthunt/models/train_realbogus_trees.py</code>, <code>predict_realbogus_trees.py</code>, <code>predict_realbogus.py</code></td>
+<td>PCA + XGBoost: train, score</td>
+</tr>
+<tr>
+<td><strong>Comparison and clustering</strong></td>
+<td><code>scripts/compare_realbogus_models.py</code> -&gt; <code>reports/realbogus_comparison.csv</code>, <code>junk_clusters.png</code></td>
+<td>LR, SVM, forest, XGBoost, CNN; k-means on junk</td>
+</tr>
+<tr>
+<td><strong>Bundle</strong></td>
+<td><code>scripts/train_classical_bundle.py</code> -&gt; <code>models/v6/</code></td>
+<td>cross-fitting by night, the stage-1 cut, the deployed bundle</td>
+</tr>
+<tr>
+<td>CNN (comparison only)</td>
+<td><code>src/asthunt/models/define_realbogus_cnn.py</code>, <code>train_realbogus_cnn.py</code>; <code>models/v4/</code></td>
+<td>the deep-learning reference</td>
 </tr>
 <tr>
 <td>Realism check</td>
@@ -74,37 +101,32 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <td>adversarial validation of fakes vs real asteroids</td>
 </tr>
 <tr>
-<td>Config</td>
-<td><code>configs/inject.yaml</code>, <code>dataset.yaml</code>, <code>train.yaml</code></td>
-<td>all the settings</td>
-</tr>
-<tr>
 <td>Tests</td>
-<td><code>tests/simulate</code>, <code>tests/label</code>, <code>tests/dataset</code>, <code>tests/models</code></td>
-<td>includes a tiny CNN that must learn &quot;blob in the centre = real&quot;</td>
+<td><code>tests/features/test_compute_stamp_features.py</code>, <code>tests/models/test_realbogus_trees.py</code>, <code>tests/simulate</code>, <code>tests/label</code>, <code>tests/dataset</code></td>
+<td>the features tell a new object, a dipole, a cosmic ray and noise apart; the model learns &quot;star in the centre = real&quot;</td>
 </tr>
 <tr>
-<td>Lessons and notebooks</td>
-<td><code>docs/injection_labelling.md</code>, <code>label_quality.md</code>, <code>dataset_building.md</code>, <code>neural_networks.md</code>, <code>realbogus_cnn.md</code>; notebooks with the same names</td>
+<td>Lessons</td>
+<td><code>docs/injection_labelling.md</code>, <code>label_quality.md</code>, <code>dataset_building.md</code>, <strong><code>classical_realbogus.md</code></strong>; <code>realbogus_cnn.md</code> for the comparison</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <h2>What you hand over</h2>
 <ul>
-<li>The model and its numbers for the report: architecture, training recipe, results versus baseline, error analysis, cross-fitting.</li>
-<li>Figures: the triplet picture, the CNN architecture, the training/validation curves, a few correct and wrong predictions (from the notebook).</li>
+<li>The model and its numbers for the report: features, PCA, the model comparison, the deployed settings, error analysis, cross-fitting.</li>
+<li>Figures: the triplet picture, <code>00_Start_Here/00_How_Our_Model_Works.svg</code>, the comparison table, the junk clusters.</li>
 <li>A clear statement of label sources and their weaknesses (this is critical for the evaluation chapter).</li>
 </ul>
 <h2>Your seven key messages</h2>
 <ol>
 <li><strong>The sky is not labelled, so we make labels</strong> (planted fakes + known asteroids + &quot;the rest&quot;), and we say honestly where each one is weak.</li>
-<li><strong>A real asteroid shows in science and difference but not in the reference</strong>, which is why the CNN gets all three pictures at once.</li>
-<li><strong>A small CNN is enough:</strong> 31x31 stamps, local patterns, 72,145 weights; fast on a laptop GPU and hard to overfit.</li>
-<li><strong>We judge by validation average precision on realistic (imbalanced) data, not by training loss.</strong> Training is balanced and augmented; validation keeps the true 1:33.</li>
-<li><strong>CNN vs baseline:</strong> AP 0.899 vs 0.780; at 90% recall false alarms fall from 813 to 176 per frame (4.6x); on the untouched test night AP 0.938.</li>
-<li><strong>The CNN found a labelling bug:</strong> its most confident &quot;bogus&quot; detections were known asteroids; the catalogue positions (SkyBoT) were about 2.9 arcsec off. Fixed by using JPL Horizons.</li>
-<li><strong>Cross-fitting</strong> stops the next model from learning over-confident scores.</li>
+<li><strong>A real asteroid shows in science and difference but not in the reference</strong>, so our features ask exactly that (&quot;already in the old picture?&quot;, &quot;looks like a star in the difference?&quot;).</li>
+<li><strong>Feature engineering does most of the work:</strong> 29 numbers lifted logistic regression from 0.783 to 0.887 AP; trees and 20 PCA numbers take it to 0.902.</li>
+<li><strong>We compared five classical models fairly</strong> (same nights, cut chosen on validation, test scored once): XGBoost + PCA won, 158 false alarms per photo at 90% recall vs 806 for the old baseline.</li>
+<li><strong>Deep learning did not beat it:</strong> the CNN scored 0.898; the whole pipeline with either model finds the same known asteroids. Simpler and explainable wins a tie.</li>
+<li><strong>k-means shows the kinds of junk without labels:</strong> 93% faint noise, star leftovers with a dark hole, bright stars, old-picture-only.</li>
+<li><strong>The first model found a labelling bug:</strong> its most confident &quot;bogus&quot; were known asteroids; the catalogue was 2.9 arcsec off. Fixed with JPL Horizons.</li>
 </ol>
 <h2>Numbers you must know by heart</h2>
 <table>
@@ -122,33 +144,38 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <td><code>configs/detect.yaml</code></td>
 </tr>
 <tr>
-<td>72,145</td>
-<td>learnable weights in the CNN</td>
-<td><code>docs/realbogus_cnn.md</code> (derivation in your knowledge pack)</td>
+<td>29 + 20 = 49</td>
+<td>hand-made features + PCA numbers per blob</td>
+<td><code>compute_stamp_features.py</code>, <code>train_realbogus_trees.py</code></td>
 </tr>
 <tr>
-<td>31 -&gt; 15 -&gt; 7 -&gt; 3</td>
-<td>spatial size after the three max-pools</td>
-<td><code>define_realbogus_cnn.py</code></td>
+<td>78%</td>
+<td>pixel variance kept by 20 PCA components (of 675)</td>
+<td><code>classical_realbogus.md</code></td>
 </tr>
 <tr>
-<td>0.001 / 256 / 25 / 4</td>
-<td>learning rate / batch / max epochs / patience</td>
-<td><code>configs/train.yaml</code></td>
+<td>600 trees, depth 4, lr 0.05, 80% / 80%</td>
+<td>XGBoost settings, chosen on validation</td>
+<td><code>train_realbogus_trees.py</code></td>
 </tr>
 <tr>
-<td>0.3</td>
-<td>dropout</td>
-<td><code>define_realbogus_cnn.py</code></td>
+<td>0.783 / 0.887 / 0.886 / 0.895 / <strong>0.902</strong></td>
+<td>validation AP: baseline, LR 29 features, SVM, forest, <strong>XGBoost + PCA</strong></td>
+<td><code>reports/realbogus_comparison.csv</code></td>
 </tr>
 <tr>
-<td>0.780 -&gt; 0.899 -&gt; 0.938</td>
-<td>AP: baseline (val), CNN (val), CNN (test night)</td>
-<td><code>docs/realbogus_cnn.md</code></td>
+<td>0.938</td>
+<td>test-night AP of the deployed model</td>
+<td>same</td>
 </tr>
 <tr>
-<td>813 -&gt; 176</td>
-<td>false positives per frame at 90% recall</td>
+<td>806 -&gt; 158</td>
+<td>false alarms per photo at 90% recall, baseline -&gt; ours</td>
+<td>same</td>
+</tr>
+<tr>
+<td>0.898 / 0.944</td>
+<td>the CNN (comparison): validation / test AP</td>
 <td>same</td>
 </tr>
 <tr>
@@ -176,30 +203,97 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <td>AUC of &quot;fake vs real&quot; classifier (0.5 = indistinguishable)</td>
 <td>same</td>
 </tr>
-<tr>
-<td>1.15% and 1.3</td>
-<td>chance of a random point landing within 2 px of a detection; expected chance matches per frame</td>
-<td><code>docs/injection_labelling.md</code></td>
-</tr>
 </tbody>
 </table>
 <h2>Hands-on tasks (do these yourself)</h2>
 <ol>
-<li><code>cd project &amp;&amp; pytest tests/simulate tests/label tests/dataset tests/models -q</code>.</li>
-<li>Re-run <code>notebooks/neural_networks.ipynb</code> end to end; reproduce the gradient check; change the learning rate to 5.0 and describe what you see.</li>
-<li>Re-run <code>notebooks/realbogus_cnn.ipynb</code> (about 7 minutes on an M3); look at the 12 most confident mistakes yourself and say what each one is.</li>
-<li>Do the parameter-count derivation by hand (knowledge pack, section 4.2) and check it equals 72,145.</li>
-<li>Change <code>dropout</code> from 0.3 to 0.0 in a copy and predict (then observe) the effect on the gap between training and validation.</li>
+<li><code>cd project &amp;&amp; pytest tests/features tests/models -q</code>.</li>
+<li><code>python scripts/compare_realbogus_models.py</code> (about 2 minutes): reproduce the comparison table and the junk clusters.</li>
+<li>Remove <code>diff_psf_match</code> from the feature list in a copy and re-run: how much does XGBoost lose? Why is that feature so useful?</li>
+<li>Change k-means from 6 to 4 clusters: which kinds of junk merge?</li>
+<li>Open the web app's &quot;The model&quot; page, pick a junk blob that scored high, and say from its numbers why the trees were fooled.</li>
 </ol>
 <h2>Pitfalls</h2>
 <ul>
-<li>Saying &quot;the CNN is 99% accurate&quot;: accuracy is meaningless at 3% positives; use AP and false alarms at fixed recall.</li>
+<li>Saying &quot;the model is 99% accurate&quot;: accuracy is meaningless at 3% positives; use AP and false alarms at fixed recall.</li>
 <li>Forgetting that training is balanced (16.7% real) while the real sky is about 3%: raw probabilities are inflated.</li>
 <li>Calling labels &quot;ground truth&quot;: they are &quot;best available&quot;, with known noise.</li>
-<li>Calling <code>.numpy()</code> on a tensor with gradients, or forgetting <code>model.eval()</code> when scoring (dropout must be off).</li>
-<li>Comparing models at different thresholds instead of at fixed recall.</li>
+<li>Using a feature that only exists for planted fakes (true magnitude, true speed): that is target leakage. Every feature here is measured on the stamp.</li>
+<li>Choosing settings on the test night. Everything was chosen on validation.</li>
 </ul>
 </div><div class="doc"><h1>Paras: knowledge pack</h1>
+<h2>READ FIRST: the deployed model is classical ML (bundle v6)</h2>
+<p>Our faculty asked for classical machine learning, so the stage-1 model is now <strong>XGBoost on 49 numbers per blob</strong>. Everything below
+about labels, stamps and the dataset is unchanged. The neural-network and CNN sections further down are now <strong>background and the
+comparison</strong>: be able to explain them, but present the classical model as yours. Full lesson: <code>project/docs/classical_realbogus.md</code>.</p>
+<p><strong>The 29 hand-made features</strong> (<code>features/compute_stamp_features.py</code>), each a question a person would ask the three pictures:</p>
+<ul>
+<li>6 from the blob finder: <code>snr</code>, <code>peak</code>, <code>npix</code>, <code>a</code>, <code>b</code>, <code>flux</code>.</li>
+<li>brightness at the centre and peak in science, reference and difference, and in a ring around the blob (8).</li>
+<li>old vs new: <code>ref_to_sci</code> (was it already in the old picture?), <code>diff_to_sci</code> (how much of tonight's light is new?).</li>
+<li>shape: <code>diff_psf_match</code> (correlation with a round star of ZTF's blur: the most important input), sharpness (cosmic rays are one hot pixel), concentration, size, elongation, offset from centre, symmetry, roughness.</li>
+<li>bad subtraction: darkest pixel, share of very dark pixels, <code>diff_dipole</code> (dark hole next to the bright spot); <code>ref_psf_match</code> (a star in the old picture).</li>
+</ul>
+<p><strong>PCA</strong> (<code>models/train_realbogus_trees.py</code>): the central 15 x 15 pixels of all three channels (675 numbers) projected onto the 20
+directions in which training stamps vary most; they keep 78% of the variance. Unsupervised: PCA never sees a label.</p>
+<p><strong>XGBoost</strong> (600 trees, depth 4, learning rate 0.05, 80% of rows and columns per tree): each tree asks up to 4 yes/no questions such
+as &quot;is <code>diff_psf_match</code> below 0.46?&quot; and adds a small vote; the sum through a sigmoid is p(real). Boosting = each new tree is fitted
+to the errors of the trees so far. Settings chosen on the validation nights only (depth 4 beat 5 and 6).</p>
+<p><strong>The comparison</strong> (same training set as the CNN; validation nights; test scored once):</p>
+<table>
+<thead>
+<tr>
+<th>model</th>
+<th>AP validation</th>
+<th>AP test</th>
+<th>false alarms / photo @90% recall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>logistic regression, 6 numbers (old baseline)</td>
+<td>0.783</td>
+<td>0.508</td>
+<td>806</td>
+</tr>
+<tr>
+<td>logistic regression, 29 features</td>
+<td>0.887</td>
+<td>0.655</td>
+<td>269</td>
+</tr>
+<tr>
+<td>SVM (RBF), 29 features</td>
+<td>0.886</td>
+<td>0.877</td>
+<td>277</td>
+</tr>
+<tr>
+<td>random forest, 29 features</td>
+<td>0.895</td>
+<td>0.930</td>
+<td>236</td>
+</tr>
+<tr>
+<td><strong>XGBoost, 29 features + 20 PCA (deployed)</strong></td>
+<td><strong>0.902</strong></td>
+<td><strong>0.938</strong></td>
+<td><strong>158</strong></td>
+</tr>
+<tr>
+<td>CNN (deep learning, comparison only)</td>
+<td>0.898</td>
+<td>0.944</td>
+<td>181</td>
+</tr>
+</tbody>
+</table>
+<p>Why LR and SVM drop on the test night: it is sharper and deeper than the training nights (distribution shift); linear and kernel
+boundaries extrapolate badly, trees saturate gracefully. End to end (scoreboard), v6 finds the same known asteroids as the CNN
+version v4 on every split (test 40/44), depth 21.28 vs 21.34.</p>
+<p><strong>k-means on the junk</strong> (<code>scripts/compare_realbogus_models.py</code>): 44,290 junk training stamps -&gt; PCA -&gt; 6 clusters: 93% faint noise,
+about 5% star leftovers (in science and reference, dark hole in the difference), 1% bright stars, and a small old-picture-only group.</p>
+<hr />
 <h2>0. Read first (in this order)</h2>
 <p><code>00_Start_Here/01_Project_Overview</code> -&gt; <code>02_Domain_Primer</code> (sections 3-6, 11) -&gt; <code>03_ML_Primer</code> (sections A, B, C) -&gt; then <code>project/docs/ml_basics.md</code> (logistic regression, features, labels), <code>injection_labelling.md</code>, <code>label_quality.md</code>, <code>dataset_building.md</code>, <code>neural_networks.md</code>, <code>realbogus_cnn.md</code>.</p>
 <hr />
@@ -358,6 +452,23 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <li>Why <code>BCEWithLogitsLoss</code>? 8. Why not augment validation data? 9. Why do we add the fake to both science and difference images? 10. Why are fake magnitudes drawn uniformly?</li>
 </ol>
 </div><div class="doc"><h1>Paras: presentation guide</h1>
+<blockquote>
+<p><strong>Updated slide plan (classical ML only).</strong> Keep slides 1, 2 and 5 below. Replace slides 3 and 4 with these two. The CNN appears
+only as one row of the comparison table.</p>
+</blockquote>
+<h3>NEW Slide 3: &quot;Measure, then let the trees vote&quot; (1 min 30 s)</h3>
+<p><strong>On the slide:</strong> <code>00_Start_Here/00_How_Our_Model_Works.svg</code>.
+<strong>Say:</strong> &quot;For every blob we measure 29 numbers that a person would look at: does the difference picture look like a star, was the spot
+already there in the old picture, is it one hot pixel like a cosmic ray, is there a dark hole next to it like a misaligned star. PCA adds
+20 more numbers that summarise the pixels without looking at any labels. Then XGBoost, 600 small decision trees, each fixing the errors
+of the ones before, turns those 49 numbers into one probability. The most useful number by far is 'looks like a star'.&quot;</p>
+<h3>NEW Slide 4: &quot;Five classical models, one fair comparison&quot; (1 min)</h3>
+<p><strong>On the slide:</strong> the comparison table from <code>project/docs/classical_realbogus.md</code> (or the web app's model page) and the junk clusters picture.
+<strong>Say:</strong> &quot;We trained logistic regression, an SVM, a random forest and XGBoost on exactly the same nights, chose every setting on validation
+and scored the test night once. XGBoost with PCA wins: average precision 0.902, and at 90% recall it lets through 158 junk blobs per photo
+against 806 for the old baseline. We had also built a neural network first; it scored 0.898, a tie, so we deploy the simpler model whose
+every input we can explain. And k-means on the junk, with no labels, finds the kinds of junk by itself: mostly faint noise, then leftovers of stars.&quot;</p>
+<hr />
 <p><strong>Your slot: 5 minutes, 5 slides.</strong> (In the 12-minute plan: 3 minutes, slides 2, 3 and 5.) Pictures are in <code>07_Diagrams/</code>.</p>
 <hr />
 <h3>Slide 1: &quot;Where do the labels come from?&quot; (1 min)</h3>
@@ -389,6 +500,16 @@ figcaption { font-size: 9pt; color: #6b7280; }
 <li>&quot;Why a CNN and not just the six numbers?&quot; -&gt; pixels carry shape information numbers do not; AP 0.899 vs 0.780. 2. &quot;Why 31 x 31?&quot; -&gt; blur is about 2 px; 15 px of context shows edges and neighbours; small = fast. 3. &quot;How did you avoid overfitting?&quot; -&gt; dropout, augmentation, early stopping, validation on other nights. 4. &quot;Are your labels correct?&quot; -&gt; best available; noise sources named; two bugs found and fixed. 5. &quot;What is cross-fitting?&quot; -&gt; see slide 5.</li>
 </ol>
 </div><div class="doc"><h1>Paras: viva questions and model answers</h1>
+<h2>0. The deployed classical model (read first)</h2>
+<p><strong>Q. Why classical ML and not the CNN?</strong> Our faculty asked for classical ML, and the evidence agrees: on the same data XGBoost + PCA scored 0.902 validation AP and the CNN 0.898; on the whole pipeline both find the same known asteroids. A tie goes to the simpler, faster, explainable model.</p>
+<p><strong>Q. What are the 49 inputs?</strong> 29 hand-made features (6 from the blob finder, 23 measured on the three stamps: centre brightness, &quot;already in the old picture?&quot;, star-shape correlation, sharpness, dark hole, size, elongation, symmetry...) and 20 PCA numbers of the central pixels.</p>
+<p><strong>Q. Why does PCA help if it never sees the labels?</strong> It finds the main ways stamps differ (a bright centre, a dipole, an edge); real and junk stamps sit in different places along those directions, so the trees can use them. It also adds information our hand-made features missed.</p>
+<p><strong>Q. Why did logistic regression and the SVM drop on the test night (0.655, 0.877) while XGBoost held (0.938)?</strong> The test night is sharper and deeper than training (distribution shift). Linear and kernel boundaries extrapolate to feature values they never saw; trees treat values beyond the last split like the last split, so they degrade gracefully.</p>
+<p><strong>Q. Which input matters most and why?</strong> <code>diff_psf_match</code>, the correlation of the difference patch with a round star of ZTF's blur: a real point source is star-shaped, cosmic rays are too sharp, dipoles and edges are not round.</p>
+<p><strong>Q. How were the settings chosen?</strong> On validation only: depth 4 (0.9034) beat 5 and 6 (0.9025); adding PCA raised AP by about 0.005; training on all 305,463 blobs instead of the balanced 53,178 did not help.</p>
+<p><strong>Q. What does k-means add?</strong> It is unsupervised: without labels it groups the 44,290 junk stamps into kinds (93% faint noise, star leftovers, bright stars, old-picture-only). That tells us what junk to design features for; a classifier only says real or not.</p>
+<p><strong>Q. Is p(real) a true probability?</strong> No: training is 16.7% real, the sky 3%, so scores are inflated; we only use them to rank and cut, and Satvik's base-rate adjustment converts them if needed.</p>
+<hr />
 <h2>A. Labels and data preparation</h2>
 <p><strong>1. Where do your labels come from?</strong>
 Three sources: planted fake asteroids (perfect labels), known asteroids from catalogues (real labels, positions from JPL Horizons), and everything else called bogus (some label noise). The sky itself is not labelled.</p>
@@ -462,7 +583,7 @@ Human-labelled real/bogus examples to complement injections (as ZTF's own classi
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
 <rect width="1560" height="712" fill="#f1efea"/>
 <text x="60" y="64" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="800" fill="#0e0e10" text-anchor="start" >Paras: how I did my part</text>
-<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Labels, dataset and the CNN · follow the arrows</text>
+<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Labels, dataset and the ML model · follow the arrows</text>
 <rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
@@ -488,37 +609,37 @@ Human-labelled real/bogus examples to complement injections (as ZTF's own classi
 <rect x="1170" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
 <text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Prepare the data</text>
-<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >normalise, flip/rotate, balance:</text>
-<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >53,178 stamps, 16.7% real</text>
+<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >normalise and balance: 53,178</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >training stamps, 16.7% real</text>
 <text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >dataset/assemble_stamp_dataset.py</text>
 <rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
-<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Build + train the CNN</text>
-<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >72,145 weights, Adam lr 0.001, batch</text>
-<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >256, early stopping</text>
-<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/train_realbogus_cnn.py</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Measure features + PCA</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >29 numbers with a meaning per stamp,</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >plus 20 PCA numbers</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >features/compute_stamp_features.py</text>
 <rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
-<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Measure it</text>
-<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >AP 0.899 vs 0.780 baseline; 176 vs</text>
-<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >813 false alarms per frame</text>
-<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/realbogus_cnn.md</text>
+<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Compare 5 ML models</text>
+<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >LR, SVM, forest, XGBoost; XGBoost +</text>
+<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >PCA wins: AP 0.902</text>
+<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/compare_realbogus_models.py</text>
 <rect x="430" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="430" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="454" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 07</text>
-<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Learn from mistakes</text>
-<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >confident errors were real asteroids:</text>
-<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >catalogue 2.9&quot; off -&gt; Horizons</text>
-<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >label/refine_known_positions.py</text>
+<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Cluster the junk</text>
+<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >k-means on PCA: 6 kinds of junk; CNN</text>
+<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >only as a comparison</text>
+<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/compare_realbogus_models.py</text>
 <rect x="60" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
 <text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Cross-fit the scores</text>
 <text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >each night scored by a model that</text>
 <text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >never saw it</text>
-<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/cross_fit_realbogus_scores.py</text>
+<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/train_classical_bundle.py</text>
 <path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <path d="M764 224.0 H796" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <path d="M1134 224.0 H1166" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -528,7 +649,7 @@ Human-labelled real/bogus examples to complement injections (as ZTF's own classi
 <path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
 <text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
-<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Satvik every blob with a CNN score and a threshold</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Satvik every blob with a model score and the cut</text>
 </svg><figcaption>00 Process Diagram Paras</figcaption></figure><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" width="1180" height="470"><defs><marker id="head" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#6b7280"/></marker></defs><rect width="100%" height="100%" fill="white"/>
 <text x="590.0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937" text-anchor="middle">Paras: where the labels come from (the sky is not labelled)</text>
 <rect x="40" y="70" width="340" height="190" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>

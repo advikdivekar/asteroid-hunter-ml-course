@@ -21,7 +21,7 @@
 <rect x="800" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 03</text>
 <text x="824" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Build the scoreboard</text>
-<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >one table for every version v1 -&gt; v5;</text>
+<text x="824" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >one table for every version v1 -&gt; v6;</text>
 <text x="824" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >every number comes from here</text>
 <text x="824" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >evaluate/build_scoreboard.py</text>
 <rect x="1170" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
@@ -34,10 +34,10 @@
 <rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
-<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Test bigger ideas fairly</text>
-<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >multi-frame CNN tied XGBoost (0.993</text>
-<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >vs 0.992); 3x data did not help</text>
-<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/multiframe_model.md</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Classical ML only (v6)</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >replaced the CNN with XGBoost: same</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >known asteroids, depth within 0.07</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/evaluate_bundle.py</text>
 <rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
@@ -56,7 +56,7 @@
 <rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
 <text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Make it reproducible</text>
-<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >versioned model bundles, configs, 166</text>
+<text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >versioned model bundles, configs, 171</text>
 <text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >offline tests</text>
 <text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/save_model_bundle.py</text>
 <path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -68,5 +68,5 @@
 <path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
 <text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
-<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Result: depth 20.5 -&gt; 21.4 -&gt; 22.1 mag; 31 known asteroids recovered; no false discovery claimed</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Result: depth 20.5 -&gt; 21.3 -&gt; 22.1 mag with classical ML; 40 of 44 known asteroids; no discovery claimed</text>
 </svg>

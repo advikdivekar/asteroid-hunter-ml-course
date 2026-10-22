@@ -22,6 +22,10 @@ figcaption { font-size: 9pt; color: #6b7280; }
 .cover p { font-size: 13pt; color: #4b5563; }
 .toc li { margin: 4px 0; }
 </style></head><body><div class="cover"><h1>Aaryan: handbook</h1><p>Problem, domain, data and preprocessing</p><p>Read 00_Start_Here first; then this handbook.</p><p>Machine Learning (702DB0C015), B.Tech CSE (Data Science), Semester V, 2026-27</p><h2>Contents</h2><ol class="toc" style="display:inline-block;text-align:left"><li>Part brief</li><li>Knowledge pack</li><li>Presentation guide</li><li>Viva questions and answers</li><li>Diagrams</li></ol></div><div class="doc"><h1>Aaryan: problem, domain, data and preprocessing</h1>
+<blockquote>
+<p><strong>Update: classical ML only (bundle v6).</strong> Paras's stage-1 model is now XGBoost on 29 measured features + PCA (no neural network).
+Your part is unchanged; the blob table you hand over now also feeds those features (<code>snr</code>, <code>peak</code>, <code>npix</code>, <code>a</code>, <code>b</code>, <code>flux</code> are 6 of the 29).</p>
+</blockquote>
 <p><strong>Marks this part carries:</strong> Problem Understanding and Formulation (3), Data Preprocessing and Exploration (3, shared with Paras for the stamp-level preparation).
 <strong>Why it matters:</strong> if the data is wrong or leaks, every model and metric downstream is wrong. This is where the project learned its most expensive lessons (leakage, label and coordinate errors started here).</p>
 <h2>Your four jobs</h2>

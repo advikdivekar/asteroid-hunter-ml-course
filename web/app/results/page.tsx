@@ -40,10 +40,10 @@ export default function Results() {
           </p>
           <div className="facts">
             {[
-              ["0.899", "CNN average precision on validation nights (simple model: 0.780).", "detection · validation"],
-              ["0.938", "CNN average precision on the untouched test night.", "detection · test"],
-              ["176", "False alarms per photo at 90% recall, vs 813 for the simple model.", "4.6x fewer"],
-              ["22.1", "Magnitude where half the planted fakes are found, with the deep search (single photos: 21.4).", "depth · test night"],
+              ["0.902", "Average precision of our XGBoost model on validation nights (old 6-number baseline: 0.783).", "blob model · validation"],
+              ["0.938", "Average precision on the untouched test night.", "blob model · test"],
+              ["158", "False alarms per photo at 90% recall, vs 806 for the old baseline.", "5.1x fewer"],
+              ["22.1", "Magnitude where half the planted fakes are found, with the deep search (single photos: 21.3).", "depth · test night"],
             ].map(([n, p, s], i) => (
               <div className="fact" key={n}>
                 {i === 0 && <span className="cross tl" />}
@@ -57,18 +57,18 @@ export default function Results() {
 
           <div className="grid-2" style={{ marginTop: 48 }}>
             <div className="panel">
-              <div className="panel-head"><span>CNN vs simple model · validation nights</span><span>67,041 blobs, 3.2% real</span></div>
+              <div className="panel-head"><span>Our model vs the old baseline · validation nights</span><span>67,041 blobs, 3.2% real</span></div>
               <p className="kicker">Average precision (higher is better)</p>
-              <Bars max={1} rows={[["CNN (ours)", 0.899, OURS, "CNN average precision 0.899"], ["Logistic regression", 0.78, OTHER, "baseline average precision 0.780"]]} />
+              <Bars max={1} rows={[["XGBoost + PCA (ours)", 0.902, OURS, "average precision 0.902"], ["Logistic regression, 6 numbers", 0.783, OTHER, "baseline average precision 0.783"]]} />
               <p className="kicker" style={{ marginTop: 22 }}>False alarms per photo at 90% recall (lower is better)</p>
-              <Bars max={813} rows={[["CNN (ours)", 176, OURS, "176 junk blobs kept per photo"], ["Logistic regression", 813, OTHER, "813 junk blobs kept per photo"]]} />
+              <Bars max={806} rows={[["XGBoost + PCA (ours)", 158, OURS, "158 junk blobs kept per photo"], ["Logistic regression, 6 numbers", 806, OTHER, "806 junk blobs kept per photo"]]} />
               <p className="caption">Both models must find 90% of the real blobs; then we count how much junk each lets through. Comparing at the same recall is the fair way.</p>
             </div>
             <div className="panel">
               <div className="panel-head"><span>Depth: how faint can we go?</span><span>test night 2019-02-08</span></div>
               <p className="kicker">Magnitude at 50% completeness (bigger = fainter = better)</p>
               <div className="bars">
-                {[["v1: first pipeline", 20.5, OTHER], ["v4: fixed linking + 17 features", 21.4, OTHER], ["Deep search (adds photos)", 22.1, OURS]].map(([l, v, c]) => (
+                {[["v1: first pipeline", 20.5, OTHER], ["v6: classical ML (deployed)", 21.3, OTHER], ["Deep search (adds photos)", 22.1, OURS]].map(([l, v, c]) => (
                   <div className="bar-row" key={l as string} data-tip={`${l}: magnitude ${v}`}>
                     <span>{l}</span>
                     <span className="track"><span className="fillbar" style={{ width: `${((Number(v) - 19.5) / 3) * 100}%`, background: c as string }} /></span>
@@ -138,8 +138,8 @@ export default function Results() {
               </thead>
               <tbody>
                 {board.map((r) => (
-                  <tr key={r.version}>
-                    <td>{r.version}</td>
+                  <tr key={r.version} style={r.version === "v6" ? { background: "rgba(255,90,31,.10)" } : undefined}>
+                    <td>{r.version === "v6" ? <b>v6 · classical ML (deployed)</b> : r.version === "v4" ? "v4 · with CNN (comparison)" : r.version}</td>
                     <td className="num"><b>{r.mag_at_50_completeness.toFixed(2)}</b></td>
                     <td className="num"><b>{r.known_recovered}</b></td>
                     <td className="num"><b>{r.unexplained_per_night.toFixed(1)}</b></td>
@@ -156,14 +156,15 @@ export default function Results() {
             The first three columns are how we judge a version: they reflect the whole pipeline and have room to improve. Stage-1 recall is about 99% by
             design and must always be read with the junk it lets through (next column); track AP is saturated (grey).
             Planted-fake runs over {board[0]?.nights ?? "…"} quadrant-nights ({board[0]?.frames ?? "…"} photos). v1: first system · v2: relaxed linking (finds more,
-            but more chance tracks) · v4: v2 + 2 extra feature groups (17 features) · v5: v4 trained on 3x more data, which did not help at equal false alarms.
-            On the test night v2–v4 reach 21.3–21.4 (v3, run on one quadrant only, is left out of this table); the team quotes 21.4.
+            but more chance tracks) · v4: v2 + 2 extra feature groups (17 features), with the CNN · v5: v4 trained on 3x more data, which did not help at
+            equal false alarms · <b>v6: the v4 design with classical ML only</b> (XGBoost on 29 features + PCA instead of the CNN). v6 ties v4: the same known
+            asteroids on every split, depth within 0.07 mag, and fewer junk blobs kept per photo. (v3, run on one quadrant only, is left out.)
           </p>
 
           <div className="grid-3" style={{ marginTop: 40 }}>
             {[
               ["What worked", "Finding where asteroids were lost (at linking, not at the classifier) and fixing it; correcting for the telescope's pointing shifts; a better catalogue (JPL Horizons, 2.72 px → 0.26 px error); adding photos together (deep search, +0.7 mag)."],
-              ["What did not", "A bigger multi-frame CNN only tied the simple XGBoost model. Three times more training data (v5) did not help, because one 30-second photo only holds so much light."],
+              ["What did not", "Deep learning did not beat classical ML: our CNN and a bigger multi-frame CNN both tied XGBoost, so the deployed system (v6) uses classical ML only. Three times more training data (v5) did not help, because one 30-second photo only holds so much light."],
               ["Statistics, not just code", "The deep search tries 4,888 motions, so pure noise reaches 5 sigma by chance. We require 6 sigma, and a test with shuffled times gave 0 false tracks (down from 16), while all 20 known asteroids were kept."],
             ].map(([t, d]) => (
               <div className="panel" key={t}>
@@ -185,7 +186,7 @@ function TestNight({ night }: { night: Night }) {
   return (
     <div className="grid-2" style={{ marginTop: 24 }}>
       <div className="panel">
-        <div className="panel-head"><span>Our CNN · whole test night, one quadrant</span><span>{night.blobs.toLocaleString("en-US")} blobs · {pct(night.blobs_real / night.blobs)} real</span></div>
+        <div className="panel-head"><span>Our model (XGBoost + PCA) · whole test night, one quadrant</span><span>{night.blobs.toLocaleString("en-US")} blobs · {pct(night.blobs_real / night.blobs)} real</span></div>
         <div className="t-scroll">
           <table className="t">
             <thead><tr><th>cut</th><th>recall</th><th>precision</th><th>F1</th><th>false alarms / photo</th></tr></thead>
@@ -203,11 +204,12 @@ function TestNight({ night }: { night: Night }) {
           Average precision {m.average_precision.toFixed(3)} (random guessing: {(night.blobs_real / night.blobs).toFixed(3)}). Recall and precision trade
           against each other: the deployed cut keeps {pct(d.recall)} of real blobs but only {pct(d.precision)} of what it keeps is real; demanding
           90% recall instead gives {pct(m.at_recall["0.90"].precision)} precision. We deploy the high-recall cut on purpose because linking and the track
-          model remove the junk later, while a dropped asteroid is lost for good.
+          model remove the junk later, while a dropped asteroid is lost for good. For comparison, the deep-learning CNN scores AP{" "}
+          {night.cnn_metrics.average_precision.toFixed(3)} on the same night, and {pct(night.cnn_metrics.at_recall["0.90"].precision)} precision at 90% recall.
         </p>
       </div>
       <div className="panel">
-        <div className="panel-head"><span>Confusion matrix · CNN at the deployed cut</span><span>test night</span></div>
+        <div className="panel-head"><span>Confusion matrix · our model at the deployed cut</span><span>test night</span></div>
         <div className="cm">
           <div className="h" />
           <div className="h">kept (predicted real)</div>

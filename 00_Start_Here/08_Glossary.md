@@ -17,11 +17,15 @@
 | **Bleed trail** | charge from a saturated star spilling along a CCD column; causes false fast tracks |
 | **Boosting** | trees built one after another, each fixing the previous errors (XGBoost) |
 | **Bogus** | a detection that is not a real moving object (artifact, noise...) |
-| **Bundle (model)** | a saved version: CNN + tracklet model + thresholds + provenance (`models/v4`) |
+| **Bundle (model)** | a saved version: stage-1 model + tracklet model + thresholds + provenance (`models/v6` is deployed: classical ML; `models/v4` has the CNN) |
 | **Calibration** | making scores mean real probabilities (reliability plot, isotonic regression) |
 | **CCD / quadrant** | a camera chip / one quarter of a chip (about 3072 x 3080 px) |
 | **Class imbalance** | one class is much rarer than the other |
-| **CNN** | convolutional neural network: filters slide over an image to find local patterns |
+| **CNN** | convolutional neural network: filters slide over an image to find local patterns (we keep it only as a comparison) |
+| **Feature engineering** | measuring numbers with a meaning from raw data (29 per stamp here) |
+| **PCA** | principal component analysis: keeps the few directions in which the data vary most (675 pixels -> 20 numbers) |
+| **k-means** | clustering: groups points around k centres, without labels (6 kinds of junk) |
+| **SVM** | support vector machine: the widest-margin boundary between classes |
 | **Common grid** | frame 1's pixel grid; every blob is projected onto it before linking |
 | **Completeness** | fraction of planted fakes recovered (recall by brightness) |
 | **Confusion matrix** | counts of true/false positives and negatives |

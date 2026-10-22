@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadWeights, runCnn, stampAt, type Weights } from "@/lib/cnn";
+import { loadTrees, runTrees, stampOf, type TreeModel } from "@/lib/trees";
 import { FRAME_COLORS, KIND_COLOR, KIND_LABEL, drawChannel, floats, json, pct, type Night, type Scene } from "@/lib/data";
 
 const STEPS = [
@@ -10,9 +10,9 @@ const STEPS = [
   ["Subtract the old sky", "For every photo ZTF also gives a REFERENCE: a very deep old picture of the same sky. DIFFERENCE = tonight minus reference. Stars are in both, so they cancel. What is left is what changed: the asteroid, plus noise and junk."],
   ["Circle every blob", "A program circles every spot brighter than 2x the noise in the difference photo. The cut is low on purpose so nothing real is missed. Most circles are junk; that is fine, the next step sorts them."],
   ["Cut a small picture of each blob", "Around each blob we cut a 31x31 pixel square from all three photos: science, reference, difference. A real moving object shows in science and difference but NOT in the reference. Click any circle to see its three pictures."],
-  ["The neural network decides: real or junk?", "Our CNN looks at the three pictures of every blob and gives a score from 0 (junk) to 1 (real). Press the button: the real trained model runs right here in your browser. Blobs above the cut go on. The cut is set low on purpose, so almost no real object is lost."],
+  ["A machine-learning model decides: real or junk?", "For every blob the computer measures 29 numbers from its three pictures (is it star-shaped? was it already in the old picture? is it one hot pixel?) plus 20 PCA numbers that summarise the pixels. Then XGBoost, 600 small decision trees, gives a score from 0 (junk) to 1 (real). Press the button: the real trained model runs right here in your browser. Blobs above the cut go on. The cut is set low on purpose, so almost no real object is lost."],
   ["Join blobs into straight-line tracks", "An asteroid moves in a straight line at a steady speed. We look for kept blobs in different photos that line up like that and join them into a track. Each colour is one photo."],
-  ["Score each track and check the catalogue", "Each track gets 17 numbers (speed, straightness, steady brightness, the CNN's opinion...). A second model, XGBoost (many small decision trees), turns them into one track score. Then we compare with the list of known asteroids."],
+  ["Score each track and check the catalogue", "Each track gets 17 numbers (speed, straightness, steady brightness, the first model's opinion...). A second model, XGBoost (many small decision trees), turns them into one track score. Then we compare with the list of known asteroids."],
   ["The result for the whole night", "The same steps run on the full photo (3072 x 3080 pixels), not just this small window. Here is what happened on the whole test night, with 300 fake asteroids planted so we know the right answer."],
 ] as const;
 
@@ -23,7 +23,7 @@ export default function Pipeline() {
   const [scene, setScene] = useState<Scene | null>(null);
   const [night, setNight] = useState<Night | null>(null);
   const [stamps, setStamps] = useState<Float32Array | null>(null);
-  const [weights, setWeights] = useState<Weights | null>(null);
+  const [model, setModel] = useState<TreeModel | null>(null);
   const [frame, setFrame] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [view, setView] = useState<"science" | "reference" | "difference">("science");
@@ -37,15 +37,15 @@ export default function Pipeline() {
     json<Scene>("/data/scene.json").then(setScene);
     json<Night>("/data/night.json").then((n) => { setNight(n); setCut(n.cnn_threshold); });
     floats("/data/window_stamps.bin").then(setStamps);
-    loadWeights().then(setWeights);
+    loadTrees().then(setModel);
     const asked = Number(new URLSearchParams(window.location.search).get("step"));   // deep link, e.g. /pipeline/?step=5
     if (asked >= 1 && asked <= STEPS.length) setStep(asked - 1);
   }, []);
 
   useEffect(() => {
-    if (step === 4 && !scores && weights && stamps && scene && new URLSearchParams(window.location.search).has("run")) runModel();
+    if (step === 4 && !scores && model && stamps && scene && new URLSearchParams(window.location.search).has("run")) runModel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, weights, stamps, scene]);
+  }, [step, model, stamps, scene]);
 
   useEffect(() => {
     if (!playing) return;
@@ -69,12 +69,12 @@ export default function Pipeline() {
   }, [step, picked, scene, frame]);
 
   const runModel = () => {
-    if (!weights || !stamps || !scene) return;
+    if (!model || !stamps || !scene) return;
     setRunning(true);
     setTimeout(() => {
       const t0 = performance.now();
       const out = new Float32Array(scene.blobs.length);
-      scene.blobs.forEach((_, i) => (out[i] = runCnn(weights, stampAt(stamps, i)).probability));
+      scene.blobs.forEach((b, i) => (out[i] = runTrees(model, stampOf(stamps, i), b).probability));
       setRunMs(performance.now() - t0);
       setScores(out);
       setRunning(false);
@@ -191,7 +191,7 @@ export default function Pipeline() {
                               strokeDasharray={on ? undefined : "1.5 1.5"}
                               onClick={() => { setPicked(b.i); if (step !== 4) setStep(3); }}
                             >
-                              <title>{`blob in photo ${b.frame} · SNR ${b.snr}${score !== null ? ` · CNN ${score.toFixed(3)}` : ""} · label: ${KIND_LABEL[b.kind]}${b.name ? ` ${b.name}` : ""}`}</title>
+                              <title>{`blob in photo ${b.frame} · SNR ${b.snr}${score !== null ? ` · model ${score.toFixed(3)}` : ""} · label: ${KIND_LABEL[b.kind]}${b.name ? ` ${b.name}` : ""}`}</title>
                             </circle>
                           );
                         })}
@@ -200,17 +200,25 @@ export default function Pipeline() {
                           {scene.blobs.map((b, i) =>
                             kept(i) ? <circle key={i} cx={b.x + 0.5} cy={b.y + 0.5} r={0.9} fill={FRAME_COLORS[b.frame - 1]} opacity={0.55} /> : null,
                           )}
-                          {scene.tracks.map((t) => (
-                            <g key={t.id}>
-                              <polyline points={t.points.map((p) => `${p.x + 0.5},${p.y + 0.5}`).join(" ")} fill="none" stroke={t.known_name ? "#4f7fe0" : "#ffffff"} strokeWidth={0.6} />
-                              {t.points.map((p) => (
-                                <circle key={p.frame} cx={p.x + 0.5} cy={p.y + 0.5} r={2} fill={FRAME_COLORS[p.frame - 1]} stroke="#000" strokeWidth={0.4} />
-                              ))}
-                              <text x={t.points[0].x - 6} y={t.points[0].y + 9} fill="#fff" fontSize={4.5} fontFamily="JetBrains Mono, monospace" stroke="#000" strokeWidth={1.2} paintOrder="stroke">
-                                {t.known_name || `track ${t.id}`}
-                              </text>
-                            </g>
-                          ))}
+                          {scene.tracks.map((t) => {
+                            const dim = step === 6 && !t.accepted;               // after scoring: dropped chance tracks fade out
+                            const start = t.points[0];
+                            const labelY = start.y + 9 > size - 3 ? start.y - 5 : start.y + 9;
+                            const labelX = Math.min(Math.max(start.x - 6, 2), size - 42);
+                            return (
+                              <g key={t.id} opacity={dim ? 0.3 : 1}>
+                                <polyline points={t.points.map((p) => `${p.x + 0.5},${p.y + 0.5}`).join(" ")} fill="none" stroke={t.known_name ? "#4f7fe0" : "#ffffff"} strokeWidth={0.6} strokeDasharray={dim ? "1.5 1.5" : undefined} />
+                                {t.points.map((p) => (
+                                  <circle key={p.frame} cx={p.x + 0.5} cy={p.y + 0.5} r={2} fill={FRAME_COLORS[p.frame - 1]} stroke="#000" strokeWidth={0.4} />
+                                ))}
+                                {(step === 5 || t.accepted) && (
+                                  <text x={labelX} y={labelY} fill="#fff" fontSize={4.5} fontFamily="JetBrains Mono, monospace" stroke="#000" strokeWidth={1.2} paintOrder="stroke">
+                                    {t.known_name || `track ${t.id}`}
+                                  </text>
+                                )}
+                              </g>
+                            );
+                          })}
                         </>
                       )}
                     </svg>
@@ -241,8 +249,8 @@ export default function Pipeline() {
                 {step === 4 && (
                   <div style={{ marginTop: 16 }}>
                     <div className="row" style={{ justifyContent: "space-between" }}>
-                      <button className="cta fire" onClick={runModel} disabled={!weights || !stamps || running}>
-                        <span>{running ? "Running…" : scores ? "Run again" : `Run the CNN on all ${scene?.blobs.length ?? ""} blobs`}</span>
+                      <button className="cta fire" onClick={runModel} disabled={!model || !stamps || running}>
+                        <span>{running ? "Running…" : scores ? "Run again" : `Run the model on all ${scene?.blobs.length ?? ""} blobs`}</span>
                         <b>▶</b>
                       </button>
                       {scores && <span className="mono" style={{ fontSize: 12, color: "var(--text-2)" }}>done in {runMs.toFixed(0)} ms, in your browser</span>}
@@ -264,7 +272,7 @@ export default function Pipeline() {
                           Solid orange = kept, dashed grey = dropped. Hover a circle for its score. Always read recall and precision together:
                           at the cut we use, almost every real blob survives (high recall) but most kept blobs are still junk (low precision), because a
                           missed asteroid can never be recovered later while junk is removed by the next steps. Move the cut up and precision rises
-                          while recall falls. The scores match the Python model to within {stats.maxDiff.toExponential(1)}.
+                          while recall falls. Every keep/drop decision matches the Python model.
                         </p>
                       </>
                     )}
@@ -291,7 +299,7 @@ export default function Pipeline() {
                 </button>
               ) : (
                 <Link href="/model/" className="cta fire">
-                  <span>Look inside the CNN</span>
+                  <span>Look inside the model</span>
                   <b>→</b>
                 </Link>
               )}
@@ -324,7 +332,7 @@ function Triplet({ stamps, scene, picked, score }: { stamps: Float32Array | null
       </div>
       <p className="caption">
         Blob in photo {b.frame} · strength (SNR) {b.snr} · our label: <b style={{ color: KIND_COLOR[b.kind] }}>{KIND_LABEL[b.kind]}{b.name ? ` ${b.name}` : ""}</b>
-        {score !== null ? ` · CNN score ${score.toFixed(3)}` : " · go to step 5 to score it"}. These three 31 x 31 pictures (2,883 numbers) are all the CNN sees.
+        {score !== null ? ` · model score ${score.toFixed(3)}` : " · go to step 5 to score it"}. From these three 31 x 31 pictures the model measures its 29 numbers and 20 PCA numbers.
       </p>
     </div>
   );
@@ -341,7 +349,7 @@ function TrackTable({ scene }: { scene: Scene }) {
       <div className="t-scroll" style={{ marginTop: 12 }}>
         <table className="t">
           <thead>
-            <tr><th>track</th><th>photos</th><th>speed</th><th>off the line</th><th>brightness</th><th>CNN (mean)</th></tr>
+            <tr><th>track</th><th>photos</th><th>speed</th><th>off the line</th><th>brightness</th><th>model score (mean)</th></tr>
           </thead>
           <tbody>
             {scene.tracks.map((t) => (
@@ -358,6 +366,7 @@ function TrackTable({ scene }: { scene: Scene }) {
         </table>
       </div>
       <p className="caption">
+        Most of these are chance alignments of junk that happen to line up; the next step (the track model) sorts them out.
         &quot;Off the line&quot; is how far the worst point is from a perfect straight line: real asteroids are within a fraction of a pixel.
         We never try every combination (about 2 x 10^19 on a night); a pair of blobs predicts where the others should be, and a fast look-up (KD-tree) checks.
       </p>
@@ -369,23 +378,29 @@ function Verdicts({ scene, night }: { scene: Scene; night: Night }) {
   const top = night.feature_importance.slice(0, 7);
   const max = top[0][1];
   const names: Record<string, string> = {
-    n_detections: "number of photos it appears in", score_mean: "CNN score (average)", stack_snr: "strength when photos are added up",
-    forced_snr_min: "faintest measured point on the path", static_neighbours_mean: "stars sitting nearby", score_min: "CNN score (lowest)",
+    n_detections: "number of photos it appears in", score_mean: "first model score (average)", stack_snr: "strength when photos are added up",
+    forced_snr_min: "faintest measured point on the path", static_neighbours_mean: "stars sitting nearby", score_min: "first model score (lowest)",
     elongation_mean: "how stretched the blobs are", mag_std: "how steady the brightness is", max_residual: "distance off a straight line",
   };
   return (
     <div style={{ marginTop: 16 }}>
-      {scene.tracks.map((t) => (
-        <div key={t.id} className="row" style={{ justifyContent: "space-between", borderBottom: "1px solid var(--rule)", padding: "12px 0" }}>
-          <span style={{ fontWeight: 600 }}>{t.known_name || `track ${t.id}`}</span>
-          {t.known_name ? (
-            <span className="chip" style={{ color: "#8fb0f0" }}>known asteroid · matches the catalogue</span>
-          ) : (
-            <span className="chip" style={{ color: "var(--text-2)" }}>not in the catalogue, not a fake → track model, then a human</span>
-          )}
-        </div>
-      ))}
-      <p className="kicker" style={{ marginTop: 22 }}>What the track model (XGBoost, v4) relies on most</p>
+      <div className="t-scroll">
+        <table className="t">
+          <thead><tr><th>track</th><th>track score</th><th>decision (cut {night.tracklet_threshold.toFixed(2)})</th><th>catalogue check</th></tr></thead>
+          <tbody>
+            {[...scene.tracks].sort((a, b) => b.track_score - a.track_score).map((t) => (
+              <tr key={t.id}>
+                <td>{t.known_name || `track ${t.id}`}</td>
+                <td className="num">{t.track_score.toFixed(3)}</td>
+                <td>{t.accepted ? <b style={{ color: "var(--ember)" }}>kept</b> : <span style={{ color: "var(--text-3)" }}>dropped as a chance alignment</span>}</td>
+                <td>{t.known_name ? <span style={{ color: "#8fb0f0" }}>known asteroid</span> : t.fake ? "our planted fake" : t.accepted ? "unknown → a human checks it" : "–"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="caption">Scores from the deployed track model (XGBoost, bundle v6). 1996 XG5 is bright and clean; 2006 DU133 is a fainter known asteroid, just above the cut.</p>
+      <p className="kicker" style={{ marginTop: 22 }}>What the track model relies on most</p>
       <div className="bars" style={{ marginTop: 10 }}>
         {top.map(([f, v]) => (
           <div className="bar-row" key={f} data-tip={`${f}: importance ${v.toFixed(3)}`}>
@@ -410,8 +425,9 @@ function Funnel({ night }: { night: Night }) {
   const d = m.deployed;
   const rows: [string, number, string][] = [
     ["blobs found in 5 photos", night.blobs, `${pct(night.blobs_real / night.blobs)} are real (fakes + known asteroids): the base rate`],
-    ["kept by the CNN", night.kept_by_cnn, `recall ${pct(d.recall)} · precision ${pct(d.precision)} · ${fmt(Math.round(d.false_alarms_per_photo))} junk blobs per photo still kept`],
-    ["joined into tracks", night.tracklets, `${night.tracklets_fake} contain planted fakes, ${night.tracklets_known} are known asteroids`],
+    ["kept by the first model", night.kept_by_cnn, `recall ${pct(d.recall)} · precision ${pct(d.precision)} · ${fmt(Math.round(d.false_alarms_per_photo))} junk blobs per photo still kept`],
+    ["joined into tracks", night.tracklets, "most are chance alignments of junk: 3 of 5 photos is a loose rule on purpose"],
+    ["kept by the track model", night.accepted, `${night.accepted_fake} planted fakes · ${night.accepted_known} known asteroids · ${night.accepted_unexplained} unexplained, for a human to check`],
   ];
   const ops: [string, typeof d][] = [["the cut we use (stage 1)", d], ["cut for 95% recall", m.at_recall["0.95"]], ["cut for 90% recall", m.at_recall["0.90"]]];
   return (
@@ -432,7 +448,7 @@ function Funnel({ night }: { night: Night }) {
         ))}
       </div>
 
-      <p className="kicker" style={{ marginTop: 24 }}>The CNN on this whole night: recall and precision at three cuts</p>
+      <p className="kicker" style={{ marginTop: 24 }}>The first model on this whole night: recall and precision at three cuts</p>
       <div className="t-scroll">
         <table className="t">
           <thead><tr><th>cut</th><th>recall</th><th>precision</th><th>F1</th><th>junk kept / photo</th></tr></thead>
@@ -454,9 +470,8 @@ function Funnel({ night }: { night: Night }) {
       <div className="note" style={{ marginTop: 10 }}>
         <b>Why keep 99% of real blobs at only {pct(d.precision, 0)} precision?</b> A real asteroid dropped here is lost for good, but junk is cheap
         to remove later: it does not line up across photos, and the track model filters what does. So stage 1 is tuned for recall, and the whole
-        pipeline is judged at the end by metrics that cannot be gamed by one cut: <b>depth</b> (half of fakes found down to magnitude 21.3–21.4 on this
-        night, 22.1 with the deep search), <b>known asteroids recovered</b> (40 of 44) and <b>unexplained alarms per night</b>. On the real search of this
-        night the pipeline found 31 known asteroids by itself.
+        pipeline is judged at the end by metrics that cannot be gamed by one cut: <b>depth</b> (half of the fakes found down to magnitude 21.3 on the test
+        night, 22.1 with the deep search), <b>known asteroids recovered</b> (40 of 44) and <b>unexplained alarms per night</b>; see the Results page.
       </div>
     </div>
   );

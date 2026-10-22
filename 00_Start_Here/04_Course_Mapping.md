@@ -39,36 +39,36 @@ The document requires a paper. Our project was inspired by a post, not by a sing
 
 | Syllabus topic (session) | Status | Where / note |
 |---|---|---|
-| Supervised vs unsupervised learning | Supervised: used. Unsupervised: not used | CNN, XGBoost are supervised |
+| Supervised vs unsupervised learning | **Used** | supervised: XGBoost, SVM, forest, logistic regression; unsupervised: PCA and k-means (`docs/classical_realbogus.md`) |
 | Linear regression, multiple, polynomial | Partly | one linear fit (magnitude vs log SNR) in the deep search; no regression model as such |
 | Logistic regression | **Used** | baseline (`models/train_baseline_classifier.py`, `docs/ml_basics.md`) |
 | Hypothesis, gradient descent, cost function | **Used** | from-scratch numpy network in `notebooks/neural_networks.ipynb` |
 | Normal equation | Not used | |
 | Regularisation | **Used** | L2 in logistic regression, dropout, early stopping, XGBoost subsampling, augmentation |
-| Neural networks: hypothesis, cost, backprop, activation | **Used** | `docs/neural_networks.md`, CNN |
+| Neural networks: hypothesis, cost, backprop, activation | Comparison only | `docs/neural_networks.md`; the CNN is kept as a comparison, the deployed model is classical |
 | Evaluating a hypothesis, train/val/test | **Used** | split by night; leakage audit |
 | Bias and variance curves | Partly | overfitting demo with train/validation loss; no formal learning-curve study |
 | Error analysis, metrics for skewed classes, precision/recall trade-off | **Used** | `docs/metrics_evaluation.md`, error analysis in the CNN and tracklet docs |
 | Decision trees, classification trees, trees vs linear models | **Used** | `docs/tracklet_classifier.md` (depth-3 tree vs linear) |
 | Regression trees | Not used | |
 | Bagging, random forests, boosting | **Used** | forest and XGBoost cross-validated |
-| SVM (maximal margin, SVC, multiclass, relation to logistic regression) | **Not used** | gap |
+| SVM (maximal margin, SVC, multiclass, relation to logistic regression) | **Used** | RBF SVM in the stage-1 model comparison (`scripts/compare_realbogus_models.py`) |
 | ROC curves | **Used** | ROC vs precision-recall |
-| PCA, clustering, k-means, hierarchical clustering | **Not used** | gap (CO4 asks for classification **and clustering**) |
+| PCA, clustering, k-means, hierarchical clustering | **Used** (not hierarchical) | PCA features in the deployed model; k-means on the junk blobs (`reports/junk_clusters.png`) |
 | Anomaly detection and large-scale ML | Partly | "unknown tracks" is an anomaly-style filter by catalogue lookup; GPU shift-and-stack, float16 stamps, streaming pipeline for scale |
 
-### How to close the gaps if your faculty expects them (small, honest extras, not required by the policy text)
-1. **SVM on the tracklet features** next to XGBoost (same cross-validation by night): covers SVM and its relation to logistic regression (CO3).
-2. **PCA, then k-means on the CNN's stamp embeddings** (or on raw normalised stamps) to explore the "bogus zoo" (dipoles, spikes, edges): covers PCA and clustering (CO4) and strengthens the exploration marks.
+### Gaps closed by the classical-ML version (v6)
+1. **SVM** compared with logistic regression, random forest and XGBoost as the stage-1 model (CO3).
+2. **PCA** as features of the deployed model and **k-means** on the junk blobs (the "bogus zoo": faint noise, star leftovers, bright stars, old-picture-only): classification **and** clustering (CO4).
 3. A **learning curve** (validation score vs number of training nights): covers bias/variance curves.
 Each is a day of work for one person and is a *new* experiment you must run and understand yourselves. Ask Advik if you want the starting code reviewed.
 
 ## 5. What we have done, in one paragraph (for the report's abstract)
-We implemented an end-to-end machine-learning pipeline for detecting moving objects in archival ZTF difference images. We built reproducible data acquisition split by night, generated labels by injection-recovery and catalogue matching and audited their quality, trained a convolutional real/bogus classifier (average precision 0.899 on validation, 0.938 on the test night, 4.6x fewer false alarms than a logistic-regression baseline), linked detections into tracks and scored them with gradient-boosted trees, and evaluated the whole system with a scoreboard on held-out nights using planted asteroids (depth of about 20.5 magnitudes for single frames, 21.4 after improving linking, 22.1 with a shift-and-stack deep search). We report negative results honestly (a multi-frame CNN tied XGBoost; three times more training data did not help) and make no discovery claim.
+We implemented an end-to-end machine-learning pipeline for detecting moving objects in archival ZTF difference images. We built reproducible data acquisition split by night, generated labels by injection-recovery and catalogue matching and audited their quality, trained a classical real/bogus classifier, XGBoost on 29 measured stamp features plus 20 PCA components (average precision 0.902 on validation, 0.938 on the test night, 5.1x fewer false alarms than a logistic-regression baseline), compared it with logistic regression, an SVM, a random forest and, as a reference, a CNN (which tied it), clustered the junk with k-means, linked detections into tracks and scored them with gradient-boosted trees, and evaluated the whole system with a scoreboard on held-out nights using planted asteroids (depth of about 20.5 magnitudes for single frames, 21.3 after improving linking, 22.1 with a shift-and-stack deep search). We report negative results honestly (deep learning did not beat classical ML; three times more training data did not help) and make no discovery claim.
 
 ## 6. Things to decide with your coordinator this week
 - [ ] Is a group of four acceptable, and how will individual contribution be assessed?
 - [ ] Is the topic approved (title, paper choice)? Get it in writing.
 - [ ] How should AI assistance be declared (see `07_AI_Use_and_Integrity.md`)?
 - [ ] Is a live demo allowed/expected? (The live viewer needs the data on a laptop.)
-- [ ] Will the missing syllabus topics (SVM, clustering) be expected?
+- [x] SVM, PCA and clustering are now covered (classical-ML version, v6).

@@ -3,15 +3,19 @@
  "frames": 5,
  "blobs": 41522,
  "blobs_real": 1348,
- "kept_by_cnn": 22058,
- "kept_real": 1336,
+ "kept_by_cnn": 18622,
+ "kept_real": 1331,
  "real_total": 1348,
- "tracklets": 273,
- "tracklets_known": 18,
- "tracklets_fake": 224,
+ "tracklets": 1033,
+ "tracklets_known": 38,
+ "tracklets_fake": 249,
+ "accepted": 271,
+ "accepted_known": 32,
+ "accepted_fake": 234,
+ "accepted_unexplained": 5,
  "fakes_planted": 300,
- "cnn_threshold": 0.008146009407937527,
- "tracklet_threshold": 0.6008815169334412,
+ "cnn_threshold": 0.005245261825621128,
+ "tracklet_threshold": 0.533173143863678,
  "scoreboard": [
   {
    "version": "v1",
@@ -89,6 +93,21 @@
    "unexplained_per_night": 0.3333333333333333
   },
   {
+   "version": "v6",
+   "split": "holdout",
+   "evaluated": "2026-10-22",
+   "code": "2e73797",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9059866545480716,
+   "detection_recall": 0.9871641791044776,
+   "bogus_kept_per_frame": 4708.0,
+   "tracklet_ap": 0.9973289213307566,
+   "mag_at_50_completeness": 20.476121979286535,
+   "known_recovered": "17/18",
+   "unexplained_per_night": 0.3333333333333333
+  },
+  {
    "version": "v1",
    "split": "test",
    "evaluated": "2026-10-14",
@@ -136,11 +155,11 @@
   {
    "version": "v4",
    "split": "test",
-   "evaluated": "2026-10-14",
-   "code": "bdfc2c4",
+   "evaluated": "2026-10-22",
+   "code": "2e73797",
    "nights": 3,
    "frames": 15,
-   "detection_ap": 0.9415254820266892,
+   "detection_ap": 0.9415254661014636,
    "detection_recall": 0.9923645320197044,
    "bogus_kept_per_frame": 4292.933333333333,
    "tracklet_ap": 0.993057648686566,
@@ -162,6 +181,21 @@
    "mag_at_50_completeness": 20.558286516853933,
    "known_recovered": "38/44",
    "unexplained_per_night": 0.3333333333333333
+  },
+  {
+   "version": "v6",
+   "split": "test",
+   "evaluated": "2026-10-22",
+   "code": "2e73797",
+   "nights": 3,
+   "frames": 15,
+   "detection_ap": 0.9335933915861688,
+   "detection_recall": 0.987192118226601,
+   "bogus_kept_per_frame": 3568.3333333333335,
+   "tracklet_ap": 0.9937176817567048,
+   "mag_at_50_completeness": 21.276079136690647,
+   "known_recovered": "40/44",
+   "unexplained_per_night": 6.333333333333333
   },
   {
    "version": "v1",
@@ -237,9 +271,67 @@
    "mag_at_50_completeness": 20.420816911501255,
    "known_recovered": "24/28",
    "unexplained_per_night": 0.0
+  },
+  {
+   "version": "v6",
+   "split": "validation",
+   "evaluated": "2026-10-22",
+   "code": "2e73797",
+   "nights": 6,
+   "frames": 30,
+   "detection_ap": 0.9209163915526248,
+   "detection_recall": 0.9908385093167702,
+   "bogus_kept_per_frame": 3717.266666666667,
+   "tracklet_ap": 0.9983608045650544,
+   "mag_at_50_completeness": 20.48179133858268,
+   "known_recovered": "24/28",
+   "unexplained_per_night": 0.0
   }
  ],
  "metrics": {
+  "average_precision": 0.9382942714327059,
+  "roc_auc": 0.986174680200475,
+  "always_bogus_accuracy": 0.967535282500843,
+  "deployed": {
+   "threshold": 0.005245261825621128,
+   "tp": 1331,
+   "fp": 17291,
+   "fn": 17,
+   "tn": 22883,
+   "recall": 0.9873887240356083,
+   "precision": 0.07147459993556009,
+   "f1": 0.1332999499248873,
+   "accuracy": 0.5831607340686865,
+   "false_alarms_per_photo": 3458.2
+  },
+  "at_recall": {
+   "0.90": {
+    "threshold": 0.793816864490509,
+    "tp": 1214,
+    "fp": 180,
+    "fn": 134,
+    "tn": 39994,
+    "recall": 0.900593471810089,
+    "precision": 0.8708751793400287,
+    "f1": 0.8854850474106492,
+    "accuracy": 0.9924377438466355,
+    "false_alarms_per_photo": 36.0
+   },
+   "0.95": {
+    "threshold": 0.05996086075901985,
+    "tp": 1281,
+    "fp": 1509,
+    "fn": 67,
+    "tn": 38665,
+    "recall": 0.9502967359050445,
+    "precision": 0.4591397849462366,
+    "f1": 0.6191396810053166,
+    "accuracy": 0.9620442175232407,
+    "false_alarms_per_photo": 301.8
+   }
+  }
+ },
+ "cnn_metrics": {
   "average_precision": 0.9436743855442505,
   "roc_auc": 0.9867535327408857,
   "always_bogus_accuracy": 0.967535282500843,
@@ -282,74 +374,450 @@
    }
   }
  },
+ "comparison": [
+  {
+   "model": "Logistic regression, 6 blob numbers (old baseline)",
+   "AP validation": 0.7830188410176906,
+   "AP test": 0.5083137905472145,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.1921458625525946,
+   "false alarms per photo @90% validation": 806.4,
+   "recall @90% test": 0.9421364985163204,
+   "precision @90% test": 0.1906620627533403,
+   "false alarms per photo @90% test": 1078.2,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.0781618072987063,
+   "false alarms per photo @95% validation": 2387.1,
+   "recall @95% test": 0.9747774480712166,
+   "precision @95% test": 0.0779590625927024,
+   "false alarms per photo @95% test": 3108.2
+  },
+  {
+   "model": "Logistic regression, 29 features",
+   "AP validation": 0.8871659439392856,
+   "AP test": 0.6545966550426974,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.4163229867592793,
+   "false alarms per photo @90% validation": 268.9,
+   "recall @90% test": 0.9525222551928784,
+   "precision @90% test": 0.2935528120713306,
+   "false alarms per photo @90% test": 618.0,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.1236936991994133,
+   "false alarms per photo @95% validation": 1433.9,
+   "recall @95% test": 0.978486646884273,
+   "precision @95% test": 0.1007100862793006,
+   "false alarms per photo @95% test": 2355.6
+  },
+  {
+   "model": "SVM (RBF kernel), 29 features",
+   "AP validation": 0.8856639081837326,
+   "AP test": 0.8768112268036697,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.408955223880597,
+   "false alarms per photo @90% validation": 277.2,
+   "recall @90% test": 0.9428783382789316,
+   "precision @90% test": 0.4045194143857415,
+   "false alarms per photo @90% test": 374.2,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.080940574262177,
+   "false alarms per photo @95% validation": 2298.2,
+   "recall @95% test": 0.9666172106824926,
+   "precision @95% test": 0.1364255051827033,
+   "false alarms per photo @95% test": 1649.6
+  },
+  {
+   "model": "Random forest, 29 features",
+   "AP validation": 0.8953777989017482,
+   "AP test": 0.9301072262389284,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.4488649660659958,
+   "false alarms per photo @90% validation": 235.5,
+   "recall @90% test": 0.9428783382789316,
+   "precision @90% test": 0.4783590515619119,
+   "false alarms per photo @90% test": 277.2,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.1364893114842538,
+   "false alarms per photo @95% validation": 1280.5,
+   "recall @95% test": 0.9681008902077152,
+   "precision @95% test": 0.1671148674606223,
+   "false alarms per photo @95% test": 1300.8
+  },
+  {
+   "model": "XGBoost, 29 features + 20 PCA (chosen, bundle v6)",
+   "AP validation": 0.902382628502472,
+   "AP test": 0.938294271432706,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.5483133218982276,
+   "false alarms per photo @90% validation": 158.0,
+   "recall @90% test": 0.9376854599406528,
+   "precision @90% test": 0.6121065375302663,
+   "false alarms per photo @90% test": 160.2,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.1443034364751176,
+   "false alarms per photo @95% validation": 1200.2,
+   "recall @95% test": 0.9658753709198812,
+   "precision @95% test": 0.2670221493027071,
+   "false alarms per photo @95% test": 714.8
+  },
+  {
+   "model": "CNN (deep learning, comparison only)",
+   "AP validation": 0.8983903997425795,
+   "AP test": 0.9436743855442504,
+   "recall @90% validation": 0.9004694835680751,
+   "precision @90% validation": 0.5143470099222311,
+   "false alarms per photo @90% validation": 181.1,
+   "recall @90% test": 0.951780415430267,
+   "precision @90% test": 0.5223941368078175,
+   "false alarms per photo @90% test": 234.6,
+   "recall @95% validation": 0.9502347417840376,
+   "precision @95% validation": 0.1394035401887182,
+   "false alarms per photo @95% validation": 1249.5,
+   "recall @95% test": 0.975519287833828,
+   "precision @95% test": 0.180656683610386,
+   "false alarms per photo @95% test": 1192.8
+  }
+ ],
+ "junk_clusters": [
+  {
+   "cluster": 0,
+   "blobs": 41224,
+   "snr": 2.112665,
+   "sci_centre": 0.85370326,
+   "ref_centre": -0.06245287,
+   "diff_centre": 0.9707126,
+   "diff_min": -2.5087397,
+   "diff_sharpness": 2.403789,
+   "diff_psf_match": 0.2620596,
+   "share": 0.9307744411831111
+  },
+  {
+   "cluster": 1,
+   "blobs": 955,
+   "snr": 2.143554,
+   "sci_centre": 26.917656,
+   "ref_centre": 30.16154,
+   "diff_centre": 2.5268767,
+   "diff_min": -10.0,
+   "diff_sharpness": 4.3920474,
+   "diff_psf_match": 0.30465382,
+   "share": 0.021562429442312
+  },
+  {
+   "cluster": 2,
+   "blobs": 653,
+   "snr": 2.1744907,
+   "sci_centre": 36.32922,
+   "ref_centre": 39.724934,
+   "diff_centre": 7.461426,
+   "diff_min": -10.0,
+   "diff_sharpness": 4.1272583,
+   "diff_psf_match": 0.34484532,
+   "share": 0.0147437344773086
+  },
+  {
+   "cluster": 3,
+   "blobs": 475,
+   "snr": 10.562726,
+   "sci_centre": 46.845516,
+   "ref_centre": 47.741955,
+   "diff_centre": 16.24299,
+   "diff_min": -10.0,
+   "diff_sharpness": 2.9188797,
+   "diff_psf_match": 0.45215708,
+   "share": 0.0107247685707834
+  },
+  {
+   "cluster": 4,
+   "blobs": 64,
+   "snr": 2.0502374,
+   "sci_centre": 0.5424476,
+   "ref_centre": 33.333332,
+   "diff_centre": 6.4640026,
+   "diff_min": -10.0,
+   "diff_sharpness": 3.75,
+   "diff_psf_match": 0.26728493,
+   "share": 0.0014450214495371
+  },
+  {
+   "cluster": 5,
+   "blobs": 919,
+   "snr": 2.2991197,
+   "sci_centre": 28.901964,
+   "ref_centre": 33.155144,
+   "diff_centre": 3.7484791,
+   "diff_min": -10.0,
+   "diff_sharpness": 3.991611,
+   "diff_psf_match": 0.33540985,
+   "share": 0.0207496048769473
+  }
+ ],
+ "stage1_importance": [
+  [
+   "diff_psf_match",
+   0.5096
+  ],
+  [
+   "snr",
+   0.1025
+  ],
+  [
+   "ref_centre",
+   0.0548
+  ],
+  [
+   "ref_to_sci",
+   0.0449
+  ],
+  [
+   "pca_3",
+   0.0267
+  ],
+  [
+   "diff_negative_fraction",
+   0.0227
+  ],
+  [
+   "sci_centre",
+   0.0175
+  ],
+  [
+   "diff_min",
+   0.0145
+  ],
+  [
+   "sci_peak",
+   0.0099
+  ],
+  [
+   "diff_peak",
+   0.0096
+  ],
+  [
+   "ref_psf_match",
+   0.0091
+  ],
+  [
+   "diff_bright_pixels",
+   0.0089
+  ],
+  [
+   "pca_4",
+   0.0087
+  ],
+  [
+   "ref_peak",
+   0.0078
+  ],
+  [
+   "diff_sharpness",
+   0.0078
+  ],
+  [
+   "peak",
+   0.0075
+  ],
+  [
+   "diff_to_sci",
+   0.0069
+  ],
+  [
+   "pca_2",
+   0.0066
+  ],
+  [
+   "pca_5",
+   0.0065
+  ],
+  [
+   "npix",
+   0.0064
+  ],
+  [
+   "flux",
+   0.0064
+  ],
+  [
+   "pca_1",
+   0.0059
+  ],
+  [
+   "diff_centre",
+   0.0056
+  ],
+  [
+   "b",
+   0.005
+  ],
+  [
+   "pca_18",
+   0.004
+  ],
+  [
+   "diff_dipole",
+   0.0039
+  ],
+  [
+   "pca_14",
+   0.0039
+  ],
+  [
+   "pca_15",
+   0.0039
+  ],
+  [
+   "diff_concentration",
+   0.0038
+  ],
+  [
+   "ref_annulus",
+   0.0037
+  ],
+  [
+   "pca_8",
+   0.0037
+  ],
+  [
+   "pca_10",
+   0.0037
+  ],
+  [
+   "pca_11",
+   0.0037
+  ],
+  [
+   "pca_16",
+   0.0037
+  ],
+  [
+   "diff_size",
+   0.0036
+  ],
+  [
+   "diff_roughness",
+   0.0036
+  ],
+  [
+   "a",
+   0.0035
+  ],
+  [
+   "pca_6",
+   0.0035
+  ],
+  [
+   "pca_7",
+   0.0034
+  ],
+  [
+   "pca_9",
+   0.0034
+  ],
+  [
+   "pca_12",
+   0.0034
+  ],
+  [
+   "pca_17",
+   0.0034
+  ],
+  [
+   "pca_19",
+   0.0034
+  ],
+  [
+   "diff_elongation",
+   0.0033
+  ],
+  [
+   "diff_annulus",
+   0.0032
+  ],
+  [
+   "diff_symmetry",
+   0.0032
+  ],
+  [
+   "pca_13",
+   0.0032
+  ],
+  [
+   "pca_20",
+   0.0032
+  ],
+  [
+   "diff_offset",
+   0.0031
+  ]
+ ],
  "feature_importance": [
   [
    "n_detections",
-   0.3887
+   0.5329
   ],
   [
    "score_mean",
-   0.37
-  ],
-  [
-   "stack_snr",
-   0.0815
-  ],
-  [
-   "forced_snr_min",
-   0.0421
-  ],
-  [
-   "static_neighbours_mean",
-   0.0172
+   0.2927
   ],
   [
    "score_min",
-   0.0146
+   0.0435
   ],
   [
-   "elongation_mean",
-   0.0142
+   "stack_snr",
+   0.0293
   ],
   [
-   "mag_std",
-   0.0111
+   "forced_snr_min",
+   0.0178
   ],
   [
-   "max_residual",
-   0.0094
+   "static_neighbours_mean",
+   0.0103
+  ],
+  [
+   "static_neighbours_max",
+   0.0085
   ],
   [
    "snr_mean",
-   0.0086
+   0.0082
+  ],
+  [
+   "max_residual",
+   0.0079
   ],
   [
    "forced_snr_std",
    0.0075
   ],
   [
-   "forced_snr_median",
+   "mag_mean",
    0.0073
   ],
   [
-   "mag_mean",
-   0.0065
+   "elongation_mean",
+   0.0067
   ],
   [
    "rate_arcsec_per_hour",
-   0.0064
+   0.006
+  ],
+  [
+   "mag_std",
+   0.0057
   ],
   [
    "npix_std",
-   0.0062
+   0.0055
   ],
   [
-   "snr_min",
+   "forced_snr_median",
    0.0054
   ],
   [
-   "static_neighbours_max",
-   0.0033
+   "snr_min",
+   0.0049
   ]
  ]
 }

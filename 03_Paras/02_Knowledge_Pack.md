@@ -1,5 +1,44 @@
 # Paras: knowledge pack
 
+## READ FIRST: the deployed model is classical ML (bundle v6)
+Our faculty asked for classical machine learning, so the stage-1 model is now **XGBoost on 49 numbers per blob**. Everything below
+about labels, stamps and the dataset is unchanged. The neural-network and CNN sections further down are now **background and the
+comparison**: be able to explain them, but present the classical model as yours. Full lesson: `project/docs/classical_realbogus.md`.
+
+**The 29 hand-made features** (`features/compute_stamp_features.py`), each a question a person would ask the three pictures:
+- 6 from the blob finder: `snr`, `peak`, `npix`, `a`, `b`, `flux`.
+- brightness at the centre and peak in science, reference and difference, and in a ring around the blob (8).
+- old vs new: `ref_to_sci` (was it already in the old picture?), `diff_to_sci` (how much of tonight's light is new?).
+- shape: `diff_psf_match` (correlation with a round star of ZTF's blur: the most important input), sharpness (cosmic rays are one hot pixel), concentration, size, elongation, offset from centre, symmetry, roughness.
+- bad subtraction: darkest pixel, share of very dark pixels, `diff_dipole` (dark hole next to the bright spot); `ref_psf_match` (a star in the old picture).
+
+**PCA** (`models/train_realbogus_trees.py`): the central 15 x 15 pixels of all three channels (675 numbers) projected onto the 20
+directions in which training stamps vary most; they keep 78% of the variance. Unsupervised: PCA never sees a label.
+
+**XGBoost** (600 trees, depth 4, learning rate 0.05, 80% of rows and columns per tree): each tree asks up to 4 yes/no questions such
+as "is `diff_psf_match` below 0.46?" and adds a small vote; the sum through a sigmoid is p(real). Boosting = each new tree is fitted
+to the errors of the trees so far. Settings chosen on the validation nights only (depth 4 beat 5 and 6).
+
+**The comparison** (same training set as the CNN; validation nights; test scored once):
+| model | AP validation | AP test | false alarms / photo @90% recall |
+|---|---|---|---|
+| logistic regression, 6 numbers (old baseline) | 0.783 | 0.508 | 806 |
+| logistic regression, 29 features | 0.887 | 0.655 | 269 |
+| SVM (RBF), 29 features | 0.886 | 0.877 | 277 |
+| random forest, 29 features | 0.895 | 0.930 | 236 |
+| **XGBoost, 29 features + 20 PCA (deployed)** | **0.902** | **0.938** | **158** |
+| CNN (deep learning, comparison only) | 0.898 | 0.944 | 181 |
+
+Why LR and SVM drop on the test night: it is sharper and deeper than the training nights (distribution shift); linear and kernel
+boundaries extrapolate badly, trees saturate gracefully. End to end (scoreboard), v6 finds the same known asteroids as the CNN
+version v4 on every split (test 40/44), depth 21.28 vs 21.34.
+
+**k-means on the junk** (`scripts/compare_realbogus_models.py`): 44,290 junk training stamps -> PCA -> 6 clusters: 93% faint noise,
+about 5% star leftovers (in science and reference, dark hole in the difference), 1% bright stars, and a small old-picture-only group.
+
+---
+
+
 ## 0. Read first (in this order)
 `00_Start_Here/01_Project_Overview` -> `02_Domain_Primer` (sections 3-6, 11) -> `03_ML_Primer` (sections A, B, C) -> then `project/docs/ml_basics.md` (logistic regression, features, labels), `injection_labelling.md`, `label_quality.md`, `dataset_building.md`, `neural_networks.md`, `realbogus_cnn.md`.
 

@@ -3,7 +3,7 @@
     python scripts/live_viewer.py            # then open http://127.0.0.1:8765  (it opens by itself)
 
 Pick a night, press Start. The page shows each stage as it finishes: the four files of an exposure, the noise, the blobs found, the
-CNN's verdicts, the tracks, the scores and the cross-match. "Step by step" pauses after every stage until you press Next.
+real/bogus model's verdicts, the tracks, the scores and the cross-match. "Step by step" pauses after every stage until you press Next.
 "fakes" paints that many fake asteroids into the images first, so you can watch them being found (or missed, when too faint).
 Runs the point-source search on nights whose images are on disk; the models are the live bundle in configs/live.yaml.
 """

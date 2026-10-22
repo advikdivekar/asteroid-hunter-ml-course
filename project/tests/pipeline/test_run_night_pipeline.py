@@ -3,9 +3,11 @@
 
 import numpy as np
 import pandas as pd
+import pytest
 from astropy.io import fits
 
 from asthunt.models.define_realbogus_cnn import define_realbogus_cnn
+from asthunt.models.train_realbogus_trees import train_realbogus_trees
 from asthunt.models.train_tracklet_classifier import train_tracklet_classifier
 from asthunt.features.compute_tracklet_features import FEATURE_COLUMNS
 from asthunt.pipeline.run_night_pipeline import run_night_pipeline
@@ -38,7 +40,8 @@ def write_frame(folder, fracday, obsjd, rng, shift):
     return f"ztf_{fracday}_000618_zr_c03_o_q4"
 
 
-def test_pipeline_finds_planted_asteroids_and_never_reports_them_as_candidates(tmp_path):
+@pytest.mark.parametrize("stage1", ["classical", "cnn"])
+def test_pipeline_finds_planted_asteroids_and_never_reports_them_as_candidates(tmp_path, stage1):
     rng = np.random.default_rng(0)
     paths = {name: tmp_path / name for name in ["raw", "interim", "processed", "reports"]}
     night_dir = paths["raw"] / "ztf" / NIGHT
@@ -52,9 +55,13 @@ def test_pipeline_finds_planted_asteroids_and_never_reports_them_as_candidates(t
         pd.DataFrame(columns=["name", "ra", "dec", "v_mag", "x", "y"]).to_csv(
             paths["interim"] / "known_asteroids" / f"known_asteroids__{name}.csv", index=False)
 
-    # A dummy bundle: untrained CNN, threshold 0 keeps every detection; a tracklet model that accepts everything
+    # A dummy bundle: an untrained CNN or a classical model fitted to noise (the deployed default since v6);
+    # threshold 0 keeps every detection; a tracklet model that accepts everything
     features = rng.uniform(size=(50, len(FEATURE_COLUMNS)))
-    bundle = {"realbogus_model": define_realbogus_cnn(),
+    noise = rng.normal(size=(40, 3, 31, 31)).astype(np.float32)
+    blobs = pd.DataFrame({c: rng.uniform(1, 2, 40) for c in ["snr", "peak", "npix", "a", "b", "flux"]})
+    stage1_model = define_realbogus_cnn() if stage1 == "cnn" else train_realbogus_trees(noise, blobs, np.arange(40) % 2)
+    bundle = {"realbogus_model": stage1_model,
               "tracklet_model": train_tracklet_classifier(features, np.arange(50) % 2),
               "thresholds": {"realbogus": 0.0, "tracklet": 0.0}, "info": {}}
 

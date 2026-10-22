@@ -4,6 +4,7 @@ import json
 import subprocess
 from datetime import date
 
+import numpy as np
 import torch
 
 
@@ -11,7 +12,9 @@ def save_model_bundle(models_dir, version, realbogus_model, tracklet_model, thre
     """Write a self-contained folder and return its path.
 
     models/<version>/
-        realbogus_cnn.pt          CNN weights
+        realbogus_trees.json      classical real/bogus model (v6 on): XGBoost trees
+        realbogus_pca.npz         ... and its PCA (mean and 20 directions)
+        realbogus_cnn.pt          or, for v1-v5, the CNN weights
         tracklet_classifier.json  XGBoost model
         thresholds.json           the operating thresholds chosen on validation data
         bundle.json               version, date, git commit, training nights, notes
@@ -24,7 +27,11 @@ def save_model_bundle(models_dir, version, realbogus_model, tracklet_model, thre
         raise FileExistsError(f"{folder} already exists: bundles are never overwritten, pick a new version name")
     folder.mkdir(parents=True)
 
-    torch.save(realbogus_model.state_dict(), folder / "realbogus_cnn.pt")
+    if isinstance(realbogus_model, dict):                  # classical: models/train_realbogus_trees.py
+        realbogus_model["xgb"].save_model(folder / "realbogus_trees.json")
+        np.savez(folder / "realbogus_pca.npz", mean=realbogus_model["pca_mean"], components=realbogus_model["pca_components"])
+    else:
+        torch.save(realbogus_model.state_dict(), folder / "realbogus_cnn.pt")
     tracklet_model.save_model(folder / "tracklet_classifier.json")
     (folder / "thresholds.json").write_text(json.dumps(thresholds, indent=1))
 

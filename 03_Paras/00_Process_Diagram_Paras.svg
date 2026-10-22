@@ -2,7 +2,7 @@
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0e0e10"/></marker></defs>
 <rect width="1560" height="712" fill="#f1efea"/>
 <text x="60" y="64" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="800" fill="#0e0e10" text-anchor="start" >Paras: how I did my part</text>
-<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Labels, dataset and the CNN · follow the arrows</text>
+<text x="60" y="96" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="400" fill="#6b6a66" text-anchor="start" >Labels, dataset and the ML model · follow the arrows</text>
 <rect x="60" y="140" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="60" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 01</text>
@@ -28,37 +28,37 @@
 <rect x="1170" y="140" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="176" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 04</text>
 <text x="1194" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Prepare the data</text>
-<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >normalise, flip/rotate, balance:</text>
-<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >53,178 stamps, 16.7% real</text>
+<text x="1194" y="234" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >normalise and balance: 53,178</text>
+<text x="1194" y="254" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >training stamps, 16.7% real</text>
 <text x="1194" y="292" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >dataset/assemble_stamp_dataset.py</text>
 <rect x="1170" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="1170" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="1194" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 05</text>
-<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Build + train the CNN</text>
-<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >72,145 weights, Adam lr 0.001, batch</text>
-<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >256, early stopping</text>
-<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/train_realbogus_cnn.py</text>
+<text x="1194" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Measure features + PCA</text>
+<text x="1194" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >29 numbers with a meaning per stamp,</text>
+<text x="1194" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >plus 20 PCA numbers</text>
+<text x="1194" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >features/compute_stamp_features.py</text>
 <rect x="800" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="800" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="824" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 06</text>
-<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Measure it</text>
-<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >AP 0.899 vs 0.780 baseline; 176 vs</text>
-<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >813 false alarms per frame</text>
-<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >docs/realbogus_cnn.md</text>
+<text x="824" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Compare 5 ML models</text>
+<text x="824" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >LR, SVM, forest, XGBoost; XGBoost +</text>
+<text x="824" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >PCA wins: AP 0.902</text>
+<text x="824" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/compare_realbogus_models.py</text>
 <rect x="430" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="430" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="454" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 07</text>
-<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Learn from mistakes</text>
-<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >confident errors were real asteroids:</text>
-<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >catalogue 2.9&quot; off -&gt; Horizons</text>
-<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >label/refine_known_positions.py</text>
+<text x="454" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Cluster the junk</text>
+<text x="454" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >k-means on PCA: 6 kinds of junk; CNN</text>
+<text x="454" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >only as a comparison</text>
+<text x="454" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/compare_realbogus_models.py</text>
 <rect x="60" y="364" width="330" height="168" fill="#fff" stroke="#c9c5bb"/>
 <rect x="60" y="364" width="6" height="168" fill="#ff5a1f"/>
 <text x="84" y="400" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">STEP 08</text>
 <text x="84" y="430" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#0e0e10" text-anchor="start" >Cross-fit the scores</text>
 <text x="84" y="458" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >each night scored by a model that</text>
 <text x="84" y="478" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="400" fill="#3d3d39" text-anchor="start" >never saw it</text>
-<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >models/cross_fit_realbogus_scores.py</text>
+<text x="84" y="516" font-family="'JetBrains Mono', Menlo, monospace" font-size="11.5" font-weight="500" fill="#6b6a66" text-anchor="start" >scripts/train_classical_bundle.py</text>
 <path d="M394 224.0 H426" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <path d="M764 224.0 H796" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <path d="M1134 224.0 H1166" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -68,5 +68,5 @@
 <path d="M434 448.0 H386" stroke="#0e0e10" stroke-width="1.5" marker-end="url(#arrow)"/>
 <rect x="60" y="572" width="1440" height="70" fill="#16202c"/>
 <text x="84" y="602" font-family="'JetBrains Mono', Menlo, monospace" font-size="12" font-weight="700" fill="#ff5a1f" text-anchor="start" letter-spacing="1.5">OUTPUT</text>
-<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Satvik every blob with a CNN score and a threshold</text>
+<text x="84" y="626" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" fill="#fff" text-anchor="start" >Hands Satvik every blob with a model score and the cut</text>
 </svg>

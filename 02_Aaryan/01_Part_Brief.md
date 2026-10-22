@@ -1,5 +1,8 @@
 # Aaryan: problem, domain, data and preprocessing
 
+> **Update: classical ML only (bundle v6).** Paras's stage-1 model is now XGBoost on 29 measured features + PCA (no neural network).
+> Your part is unchanged; the blob table you hand over now also feeds those features (`snr`, `peak`, `npix`, `a`, `b`, `flux` are 6 of the 29).
+
 **Marks this part carries:** Problem Understanding and Formulation (3), Data Preprocessing and Exploration (3, shared with Paras for the stamp-level preparation).
 **Why it matters:** if the data is wrong or leaks, every model and metric downstream is wrong. This is where the project learned its most expensive lessons (leakage, label and coordinate errors started here).
 

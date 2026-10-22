@@ -1,5 +1,11 @@
 # Advik: system architecture, evaluation, deep search, live viewer (LEAD)
 
+> **Update: classical ML only (bundle v6).** Our faculty asked for classical ML. The deployed system is now **v6**: the v4 design with
+> XGBoost on 29 features + 20 PCA numbers instead of the CNN in stage 1 (`project/docs/classical_realbogus.md`). You built and scored it:
+> `scripts/train_classical_bundle.py`, `scripts/evaluate_bundle.py`. On the scoreboard v6 ties v4 (test: 40/44 known asteroids for both,
+> depth 21.28 vs 21.34; validation and holdout equal), and re-running v4 the same day reproduced its stored row exactly. The live viewer
+> now uses v6 (`configs/live.yaml`). Wherever this folder says "CNN" for stage 1, read "the stage-1 model"; the CNN is the comparison.
+
 **Marks this part carries:** Model Evaluation and Performance (3), Documentation and Presentation (2), and the integration that makes the other parts one system.
 **Why it is the most important part:** every number the team quotes comes from the evaluation you own; it contains the main new method (the deep search); and it holds the pieces together. You also open and close the presentation.
 

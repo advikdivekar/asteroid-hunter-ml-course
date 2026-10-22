@@ -61,21 +61,21 @@ STAGE_PLAN = [
       ("teal / blue / grey ring", "teal = a fake we planted, blue = a real asteroid already in the catalogue, grey = not labelled (mostly junk)"),
       ("2 sigma", "the brightness cut for calling something a blob: 2 times the typical noise. Low on purpose, so nothing real is missed")]),
     ("stamps", "6. Cut a small picture around every blob",
-     "Each blob gets a small square picture (31 x 31 pixels) in three versions side by side: science, reference and difference. A real new object shows in science and difference but NOT in the reference. A badly subtracted star shows in science AND in the reference. These three pictures are what the neural network judges.",
+     "Each blob gets a small square picture (31 x 31 pixels) in three versions side by side: science, reference and difference. A real new object shows in science and difference but NOT in the reference. A badly subtracted star shows in science AND in the reference. These three pictures are what the machine-learning model judges.",
      [("stamp", "a small cut-out picture around one blob"),
       ("SNR", "signal-to-noise ratio: how strong the blob is compared with the noise")]),
-    ("cnn", "7. A neural network decides: real or bogus?",
-     "A neural network is a program that learned from thousands of labelled examples what real objects and junk look like. For each stamp it gives a score from 0 (certainly junk) to 1 (certainly a real moving object). The histogram counts blobs by score. Nearly all pile up near 0, which is right because most blobs are junk, while our fakes sit near 1. The yellow line is the cut: blobs above it continue, the rest are dropped.",
-     [("score / p(real)", "the network's probability that a blob is real, from 0 to 1"),
+    ("cnn", "7. A machine-learning model decides: real or bogus?",
+     "First the computer measures about 30 numbers from the three pictures of each blob: is it star-shaped, was it already in the old picture, is it a single hot pixel, is there a dark hole next to it, plus 20 PCA numbers that summarise the pixels. Then XGBoost (many small decision trees) that learned from thousands of labelled examples gives a score from 0 (certainly junk) to 1 (certainly a real moving object). (The older versions v1-v5 used a neural network here; it scored about the same.) The histogram counts blobs by score. Nearly all pile up near 0, which is right because most blobs are junk, while our fakes sit near 1. The yellow line is the cut: blobs above it continue, the rest are dropped.",
+     [("score / p(real)", "the model's probability that a blob is real, from 0 to 1"),
       ("bogus", "junk: not a real moving object"),
       ("histogram", "bars that count how many blobs have each score. The vertical axis is a log scale, so each step up means 10 times more blobs"),
-      ("cut / threshold", "the score above which a blob continues; chosen so about 95% of real objects survive")]),
+      ("cut / threshold", "the score above which a blob continues; set low on purpose, so about 99% of real objects survive (most junk is removed later)")]),
     ("link", "8. Join blobs into straight-line tracks",
      "An asteroid moves in a straight line at a steady speed. The program looks for blobs in the different photos that line up like that and joins them into a track. The big picture shows every track over the chip; each small picture is a close-up of one good track: one coloured dot per photo (the colour tells which photo) and a grey line fitted through them.",
      [("track / tracklet", "blobs from different photos that line up as one moving object"),
       ("common grid", "the telescope points slightly differently for each photo, so positions are first converted onto one shared sky map before joining")]),
     ("features", "9. Describe each track with numbers",
-     "To score a track the computer needs numbers. Each track gets 17: how fast, how straight, how steady the brightness, how sure the neural network was, and what the sky shows at the predicted spot in photos where the object was missed. The picture shows the same patch of sky along the best track, photo after photo.",
+     "To score a track the computer needs numbers. Each track gets 17: how fast, how straight, how steady the brightness, how sure the first model was, and what the sky shows at the predicted spot in photos where the object was missed. The picture shows the same patch of sky along the best track, photo after photo.",
      [("feature", "one number that describes something about a track"),
       ("forced photometry", "measuring brightness at the predicted spot even where no blob was found")]),
     ("classify", "10. A second model scores each track",
@@ -202,10 +202,10 @@ def run_traced_night(unit, state, configs, bundle, paths, n_fakes, seed, device)
         s.number("stamps cut", f"{len(stamps):,}")
         s.number("size of each", f"3 x {detect['stamp_size']} x {detect['stamp_size']} pixels")
         s.image("Each group of three = science | reference | difference for one blob. Top: planted fakes. Middle: known asteroids. Bottom: the brightest blobs (mostly leftovers of stars)", draw.draw_stamp_mosaic(stamps[pick].astype(np.float32), captions, "A few of the stamps (planted fakes, known asteroids, then the brightest blobs)"))
-        stamps = normalize_stamps(stamps)                  # each channel in units of its own noise, as the CNN was trained
+        stamps = normalize_stamps(stamps)                  # each channel in units of its own noise, as the model was trained
 
     with state.stage("cnn") as s:
-        detections["score"] = predict_realbogus(bundle["realbogus_model"], stamps, device)
+        detections["score"] = predict_realbogus(bundle["realbogus_model"], stamps, device, detections=detections)
         scores = detections["score"].to_numpy()
         cut = thresholds["realbogus"]
         kept_mask = scores >= cut

@@ -166,7 +166,7 @@ def draw_stamp_mosaic(stamps, captions, headline, columns=4):
 
 
 def draw_score_histogram(scores, threshold, groups=None):
-    """How the CNN scored every detection, with the cut that decides who goes on to linking."""
+    """How the real/bogus model scored every detection, with the cut that decides who goes on to linking."""
     figure, axis = plt.subplots(figsize=(7.5, 3.8))
     bins = np.linspace(0, 1, 51)
     axis.hist(scores, bins=bins, color=GREY, alpha=0.85, label=f"all detections ({len(scores):,})")
@@ -176,14 +176,14 @@ def draw_score_histogram(scores, threshold, groups=None):
     axis.axvline(threshold, color=AMBER, lw=1.6)
     axis.text(threshold, axis.get_ylim()[1], f" cut = {threshold:.3f}", color=AMBER, fontsize=8, va="top")
     axis.set_yscale("log")
-    _style(axis, "CNN score: probability that a detection is a real moving object")
+    _style(axis, "real/bogus score: probability that a detection is a real moving object")
     axis.set_xlabel("p(real)", color=FOREGROUND, fontsize=9)
     axis.legend(facecolor=BACKGROUND, edgecolor=GRID, labelcolor=FOREGROUND, fontsize=8)
     return png_from_figure(figure)
 
 
 def draw_tracklets(kept, members, tracklets, frame_count, headline):
-    """Left: every detection that passed the CNN on the common grid, with the tracklets over them. Right: close-ups of the best tracklets."""
+    """Left: every detection that passed the real/bogus cut on the common grid, with the tracklets over them. Right: close-ups of the best tracklets."""
     figure = plt.figure(figsize=(14, 5.4))
     grid = figure.add_gridspec(2, 5, width_ratios=[2.2, 1, 1, 1, 1], wspace=0.35, hspace=0.45)
     chip = figure.add_subplot(grid[:, 0])
@@ -192,7 +192,7 @@ def draw_tracklets(kept, members, tracklets, frame_count, headline):
         rows = members[members["tracklet_id"] == tracklet["tracklet_id"]]
         chip.scatter(kept.loc[rows["detection_id"], "x_common"], kept.loc[rows["detection_id"], "y_common"], s=4, color=TEAL)
     chip.set_aspect("equal")
-    _style(chip, f"{len(kept):,} detections kept by the CNN; {len(tracklets)} tracklets (teal)")
+    _style(chip, f"{len(kept):,} detections kept by the real/bogus model; {len(tracklets)} tracklets (teal)")
     best = tracklets.sort_values(["n_detections", "max_residual"], ascending=[False, True]).head(8)
     for k, (_, tracklet) in enumerate(best.iterrows()):
         axis = figure.add_subplot(grid[k // 4, 1 + k % 4])

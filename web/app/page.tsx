@@ -4,11 +4,12 @@ import SkyLoop from "@/components/SkyLoop";
 const TICKER = [
   "41,522 blobs on one night",
   "about 3% are real",
-  "CNN average precision 0.938 on the untouched test night",
-  "4.6x fewer false alarms than the baseline",
+  "classical ML: XGBoost on 49 measured numbers",
+  "average precision 0.938 on the untouched test night",
+  "5.1x fewer false alarms than the baseline",
   "depth 20.5 -> 21.4 -> 22.1 magnitude",
   "31 known asteroids recovered",
-  "72,145 learnable weights",
+  "600 decision trees, trained in seconds",
   "166 offline tests",
   "no discovery claimed",
 ];
@@ -17,7 +18,7 @@ const STAGES = [
   ["01", "Photos", "ZTF photographs the same patch of sky every few minutes. We take 5 photos of one night."],
   ["02", "Difference", "Tonight minus an old deep photo: stars cancel, only what changed is left."],
   ["03", "Blobs", "Every bright spot is circled. Thousands per photo, almost all junk."],
-  ["04", "CNN", "A neural network looks at each blob and says how likely it is to be real."],
+  ["04", "ML model", "The computer measures 49 numbers per blob and 600 decision trees (XGBoost) say how likely it is to be real."],
   ["05", "Tracks", "Real asteroids move in straight lines: we join blobs that line up across the photos."],
   ["06", "Known?", "A second model scores each track, then we check the asteroid catalogue."],
 ];
@@ -72,13 +73,13 @@ export default function Home() {
           <p className="lede">
             When you subtract an old photo of the sky from tonight&apos;s, the stars disappear and only things that changed remain. But
             most of what remains is junk: noise, leftovers of bright stars, cosmic-ray hits. On our test night one patch of sky gave
-            41,522 blobs and only about 3% were real. Writing rules by hand for every kind of junk does not work, so a neural
-            network learns what real looks like.
+            41,522 blobs and only about 3% were real. Writing one rule by hand for every kind of junk does not work, so we measure 49 numbers
+            per blob and a machine-learning model (XGBoost decision trees) learns from labelled examples which combinations mean real.
           </p>
           <div className="facts">
             {[
-              ["0.938", "Average precision of our CNN on a night it never saw (simple model: 0.780 on validation).", "CNN · test night"],
-              ["4.6x", "Fewer false alarms per photo than a simple model, at the same 90% of real objects found (176 vs 813).", "CNN vs baseline"],
+              ["0.938", "Average precision of our XGBoost model on a night it never saw (old baseline: 0.508 there).", "ML model · test night"],
+              ["5.1x", "Fewer false alarms per photo than the old baseline, at the same 90% of real objects found (158 vs 806).", "ML model vs baseline"],
               ["22.1", "Faintest magnitude where half the planted fakes are found, using our deep search. Bigger = fainter.", "Depth · deep search"],
               ["31", "Known asteroids found by the pipeline on its own on the test night, brightness 16.2 to 21.8.", "Real search"],
             ].map(([n, p, s], i) => (
@@ -103,7 +104,7 @@ export default function Home() {
               <div className="panel" key={n}>
                 <div className="panel-head">
                   <span>Step {n}</span>
-                  {t === "CNN" && <span className="ember">the ML model</span>}
+                  {t === "ML model" && <span className="ember">classical ML</span>}
                 </div>
                 <h3 style={{ fontSize: 24 }}>{t}</h3>
                 <p style={{ color: "var(--text-2)", fontSize: 14.5, marginBottom: 0 }}>{d}</p>

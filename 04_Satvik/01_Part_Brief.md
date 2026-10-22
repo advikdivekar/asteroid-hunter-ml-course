@@ -1,5 +1,10 @@
 # Satvik: linking, the tracklet classifier (trees) and metrics
 
+> **Update: classical ML only (bundle v6).** Stage 1 is now XGBoost on 29 stamp features + PCA instead of the CNN
+> (`project/docs/classical_realbogus.md`). Your part is unchanged: you consume its `score` column and threshold (v6: 0.0052, 99% recall
+> on validation); the tracklet model was retrained on those scores (v6 tracklet cut 0.533). Where this folder says "CNN score", read
+> "stage-1 score".
+
 **Marks this part carries:** Model Development (4, shared with Paras) and the evaluation-metrics foundation of Model Evaluation (3, shared with Advik).
 **Why it matters:** this is the classical-ML half of the project (logistic regression, trees, forests, boosting, cross-validation) and the metric thinking that every model in the project is judged by.
 

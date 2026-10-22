@@ -1,5 +1,25 @@
 # Paras: presentation guide
 
+> **Updated slide plan (classical ML only).** Keep slides 1, 2 and 5 below. Replace slides 3 and 4 with these two. The CNN appears
+> only as one row of the comparison table.
+
+### NEW Slide 3: "Measure, then let the trees vote" (1 min 30 s)
+**On the slide:** `00_Start_Here/00_How_Our_Model_Works.svg`.
+**Say:** "For every blob we measure 29 numbers that a person would look at: does the difference picture look like a star, was the spot
+already there in the old picture, is it one hot pixel like a cosmic ray, is there a dark hole next to it like a misaligned star. PCA adds
+20 more numbers that summarise the pixels without looking at any labels. Then XGBoost, 600 small decision trees, each fixing the errors
+of the ones before, turns those 49 numbers into one probability. The most useful number by far is 'looks like a star'."
+
+### NEW Slide 4: "Five classical models, one fair comparison" (1 min)
+**On the slide:** the comparison table from `project/docs/classical_realbogus.md` (or the web app's model page) and the junk clusters picture.
+**Say:** "We trained logistic regression, an SVM, a random forest and XGBoost on exactly the same nights, chose every setting on validation
+and scored the test night once. XGBoost with PCA wins: average precision 0.902, and at 90% recall it lets through 158 junk blobs per photo
+against 806 for the old baseline. We had also built a neural network first; it scored 0.898, a tie, so we deploy the simpler model whose
+every input we can explain. And k-means on the junk, with no labels, finds the kinds of junk by itself: mostly faint noise, then leftovers of stars."
+
+---
+
+
 **Your slot: 5 minutes, 5 slides.** (In the 12-minute plan: 3 minutes, slides 2, 3 and 5.) Pictures are in `07_Diagrams/`.
 
 ---
